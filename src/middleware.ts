@@ -14,7 +14,7 @@ const isPublicRoute = createRouteMatcher([
 ]);
 
 const isDashboardRoute = createRouteMatcher(["/(dashboard)(.*)"]);
-const isSuperAdminRoute = createRouteMatcher(["/(super-admin)(.*)"]);
+const isSuperAdminRoute = createRouteMatcher(["/super-admin(.*)"]);
 const isApiRoute = createRouteMatcher(["/api/v1(.*)"]);
 
 export default clerkMiddleware(async (auth, req) => {
