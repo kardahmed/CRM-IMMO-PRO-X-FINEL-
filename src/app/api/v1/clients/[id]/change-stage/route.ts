@@ -1,48 +1,28 @@
-import { currentUser } from "@clerk/nextjs/server";
-import { NextResponse } from "next/server";
+import { apiHandler, getBody, jsonOk } from "@/lib/api-handler";
+import { changeStageSchema } from "@/lib/validations/clients";
+import { changeClientStage } from "@/services/client.service";
+import type { PipelineStage } from "@prisma/client";
 
-export async function POST(
-  request: Request,
-  { params }: { params: { id: string } },
-) {
-  const user = await currentUser();
-  if (!user) {
-    return new NextResponse("Unauthorized", { status: 401 });
-  }
+/**
+ * POST /api/v1/clients/[id]/change-stage
+ *
+ * Change l'étape du pipeline d'un client.
+ * Génère automatiquement un token portail à RESERVED ou SIGNED.
+ * Retourne le client mis à jour + portalUrl si token généré.
+ */
+export const POST = apiHandler(
+  { module: "CLIENTS", action: "UPDATE", schema: changeStageSchema },
+  async (ctx) => {
+    const { stage } = getBody<{ stage: PipelineStage }>(ctx.req);
+    const clientId = ctx.params.id;
 
-  const { id } = params;
-  const body = await request.json();
-  const { stage, lossReason } = body;
+    const updated = await changeClientStage(ctx.user, clientId, stage);
 
-  if (!stage) {
-    return NextResponse.json({ error: "Stage is required" }, { status: 400 });
-  }
-
-  if (stage === "PERDUE" && !lossReason) {
-    return NextResponse.json(
-      { error: "Loss reason is required for stage PERDUE" },
-      { status: 400 },
-    );
-  }
-
-  // TODO: Prisma update when DB is connected
-  // await prisma.client.update({
-  //   where: { id },
-  //   data: {
-  //     pipelineStage: stage,
-  //     ...(lossReason ? { lossReason } : {}),
-  //     stageEnteredAt: new Date(),
-  //   },
-  // });
-
-  console.log(`[Pipeline] Client ${id} moved to stage ${stage}`, {
-    lossReason,
-    movedBy: user.id,
-  });
-
-  return NextResponse.json({
-    success: true,
-    clientId: id,
-    newStage: stage,
-  });
-}
+    return jsonOk({
+      ...updated,
+      portalUrl: updated.portalToken
+        ? `/portal/${updated.portalToken}`
+        : null,
+    });
+  },
+);

@@ -315,6 +315,129 @@ function PaymentsSection({ payments }: { payments: IPortalData["payments"] }) {
   );
 }
 
+function CreditSimulator({ propertyPrice }: { propertyPrice: number | null }) {
+  const defaultPrice = propertyPrice ?? 10_000_000;
+  const [totalPrice, setTotalPrice] = useState(defaultPrice);
+  const [downPayment, setDownPayment] = useState(Math.round(defaultPrice * 0.2));
+  const [rate, setRate] = useState(6.5); // Taux annuel %
+  const [duration, setDuration] = useState(20); // Années
+
+  // Formule mensualité crédit : M = P * [r(1+r)^n] / [(1+r)^n - 1]
+  const loanAmount = Math.max(totalPrice - downPayment, 0);
+  const monthlyRate = rate / 100 / 12;
+  const numberOfPayments = duration * 12;
+
+  let monthlyPayment = 0;
+  let totalCost = 0;
+  let totalInterest = 0;
+
+  if (loanAmount > 0 && monthlyRate > 0 && numberOfPayments > 0) {
+    const factor = Math.pow(1 + monthlyRate, numberOfPayments);
+    monthlyPayment = loanAmount * (monthlyRate * factor) / (factor - 1);
+    totalCost = monthlyPayment * numberOfPayments;
+    totalInterest = totalCost - loanAmount;
+  }
+
+  return (
+    <section className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+      <SectionTitle>Simulateur de crédit</SectionTitle>
+      <p className="mb-4 text-xs text-gray-400">
+        Simulation indicative. Consultez votre banque pour une offre personnalisée.
+      </p>
+
+      <div className="grid gap-4 sm:grid-cols-2">
+        {/* Prix total */}
+        <div>
+          <label className="mb-1 block text-sm text-gray-500">Prix du bien (DA)</label>
+          <input
+            type="number"
+            value={totalPrice}
+            onChange={(e) => setTotalPrice(Number(e.target.value))}
+            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+            min={0}
+            step={100000}
+          />
+        </div>
+
+        {/* Apport personnel */}
+        <div>
+          <label className="mb-1 block text-sm text-gray-500">Apport personnel (DA)</label>
+          <input
+            type="number"
+            value={downPayment}
+            onChange={(e) => setDownPayment(Number(e.target.value))}
+            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+            min={0}
+            max={totalPrice}
+            step={100000}
+          />
+          <p className="mt-1 text-xs text-gray-400">
+            {totalPrice > 0 ? Math.round((downPayment / totalPrice) * 100) : 0}% du prix
+          </p>
+        </div>
+
+        {/* Taux d'intérêt */}
+        <div>
+          <label className="mb-1 block text-sm text-gray-500">Taux annuel (%)</label>
+          <input
+            type="number"
+            value={rate}
+            onChange={(e) => setRate(Number(e.target.value))}
+            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+            min={0.1}
+            max={30}
+            step={0.1}
+          />
+        </div>
+
+        {/* Durée */}
+        <div>
+          <label className="mb-1 block text-sm text-gray-500">Durée (années)</label>
+          <input
+            type="number"
+            value={duration}
+            onChange={(e) => setDuration(Number(e.target.value))}
+            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+            min={1}
+            max={35}
+            step={1}
+          />
+        </div>
+      </div>
+
+      {/* Résultat */}
+      {loanAmount > 0 && (
+        <div className="mt-5 rounded-lg bg-blue-50 p-4">
+          <div className="grid gap-3 text-sm sm:grid-cols-3">
+            <div className="text-center">
+              <p className="text-gray-500">Mensualité</p>
+              <p className="text-xl font-bold text-blue-700">
+                {formatPrice(Math.round(monthlyPayment))}
+              </p>
+              <p className="text-xs text-gray-400">/mois</p>
+            </div>
+            <div className="text-center">
+              <p className="text-gray-500">Montant emprunté</p>
+              <p className="text-lg font-semibold text-gray-800">
+                {formatPrice(loanAmount)}
+              </p>
+            </div>
+            <div className="text-center">
+              <p className="text-gray-500">Coût total du crédit</p>
+              <p className="text-lg font-semibold text-gray-800">
+                {formatPrice(Math.round(totalCost))}
+              </p>
+              <p className="text-xs text-red-500">
+                dont {formatPrice(Math.round(totalInterest))} d&apos;intérêts
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+    </section>
+  );
+}
+
 function DocumentsSection({ documents }: { documents: string[] }) {
   if (!documents || documents.length === 0) return null;
 
@@ -451,6 +574,7 @@ export default function PortalPage({
         <PropertySection property={data.property} />
         <ProjectSection project={data.project} />
         <PaymentsSection payments={data.payments} />
+        <CreditSimulator propertyPrice={data.property?.price ?? null} />
         <DocumentsSection documents={documents} />
         <AgentSection agent={data.agent} />
       </main>

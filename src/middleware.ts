@@ -7,8 +7,8 @@ const isPublicRoute = createRouteMatcher([
   "/sign-up(.*)",
   "/api/webhooks(.*)",
   "/api/v1/automations/check-overdue",
-  "/portal(.*)",
-  "/api/v1/portal(.*)",
+  "/portal/(.*)",
+  "/api/v1/portal/:token",
 ]);
 
 const isDashboardRoute = createRouteMatcher(["/(dashboard)(.*)"]);
