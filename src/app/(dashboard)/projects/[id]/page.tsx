@@ -7,7 +7,9 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { UnitGrid, type ProjectUnit } from "@/components/projects/UnitGrid";
+import { CreditSimulator } from "@/components/shared/CreditSimulator";
 
 // MOCK DATA
 const MOCK_PROJECT = {
@@ -39,9 +41,12 @@ export default function ProjectDetailPage() {
   const soldUnits = project.units.filter((u) => u.status === "SOLD").length;
   const sellRatio = Math.round((soldUnits / totalUnits) * 100);
 
+  const [selectedUnit, setSelectedUnit] = useState<ProjectUnit | null>(null);
+  const [isUnitOpen, setIsUnitOpen] = useState(false);
+
   const handleUnitClick = (unit: ProjectUnit) => {
-    // Fiche Bien Modal logic here
-    alert(`Ouverture fiche bien: ${unit.name} (${unit.status})`);
+    setSelectedUnit(unit);
+    setIsUnitOpen(true);
   };
 
   return (
@@ -165,6 +170,26 @@ export default function ProjectDetailPage() {
           </TabsContent>
         </div>
       </Tabs>
+
+      {/* Unit Detail Simulator Modal */}
+      <Dialog open={isUnitOpen} onOpenChange={setIsUnitOpen}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader className="mb-4">
+            <DialogTitle className="text-2xl font-black uppercase flex items-center gap-2">
+              Unité {selectedUnit?.name} <Badge>{selectedUnit?.type}</Badge>
+            </DialogTitle>
+            <DialogDescription className="text-sm font-bold flex items-center gap-2 mt-1">
+              <span>Bloc {selectedUnit?.block}</span> • 
+              <span>Étage {selectedUnit?.floor === 0 ? "RDC" : selectedUnit?.floor}</span> • 
+              <span>{selectedUnit?.area} m²</span>
+            </DialogDescription>
+          </DialogHeader>
+          
+          {selectedUnit && (
+            <CreditSimulator initialPrixBien={selectedUnit.price} />
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
