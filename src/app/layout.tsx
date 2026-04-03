@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import {
   ClerkProvider,
-  Show,
+  SignedIn,
+  SignedOut,
   SignInButton,
   SignUpButton,
   UserButton,
@@ -38,13 +39,13 @@ export default function RootLayout({
       >
         <ClerkProvider localization={frFR}>
           <header className="flex items-center justify-end gap-2 p-4">
-            <Show when="signed-out">
+            <SignedOut>
               <SignInButton />
               <SignUpButton />
-            </Show>
-            <Show when="signed-in">
+            </SignedOut>
+            <SignedIn>
               <UserButton />
-            </Show>
+            </SignedIn>
           </header>
           {children}
         </ClerkProvider>
