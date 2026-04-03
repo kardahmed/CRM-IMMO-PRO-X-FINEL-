@@ -81,11 +81,12 @@ async function loadReportData(
     where: { ...visitWhere, status: "COMPLETED" },
   });
 
-  // Ventes = paiements de type RESERVATION complétés dans la période
+  // Ventes = paiements complétés dans la période
   const paymentWhere = {
     tenantId,
     createdAt: { gte: periodStart, lte: periodEnd },
     status: "COMPLETED" as const,
+    ...(agentId ? { client: { assignedAgentId: agentId } } : {}),
     ...(projectId ? { property: { projectId } } : {}),
   };
 
@@ -125,6 +126,7 @@ async function loadReportData(
       tenantId,
       createdAt: { gte: compareStart, lte: compareEnd },
       status: "COMPLETED" as const,
+      ...(agentId ? { client: { assignedAgentId: agentId } } : {}),
       ...(projectId ? { property: { projectId } } : {}),
     };
 
@@ -248,10 +250,10 @@ function buildReportHtml(data: IReportData): string {
   const { kpis, agentStats } = data;
 
   const kpiCards = [
-    { label: "Visites", value: String(kpis.totalVisits), prev: kpis.prevVisits },
-    { label: "Ventes", value: String(kpis.totalSales), prev: kpis.prevSales },
-    { label: "Chiffre d'affaires", value: formatPrice(kpis.totalRevenue), prev: kpis.prevRevenue },
-    { label: "Taux conversion", value: `${kpis.conversionRate}%`, prev: kpis.prevConversionRate },
+    { label: "Visites", display: String(kpis.totalVisits), raw: kpis.totalVisits, prev: kpis.prevVisits },
+    { label: "Ventes", display: String(kpis.totalSales), raw: kpis.totalSales, prev: kpis.prevSales },
+    { label: "Chiffre d'affaires", display: formatPrice(kpis.totalRevenue), raw: kpis.totalRevenue, prev: kpis.prevRevenue },
+    { label: "Taux conversion", display: `${kpis.conversionRate}%`, raw: kpis.conversionRate, prev: kpis.prevConversionRate },
   ];
 
   const kpiHtml = kpiCards
@@ -259,7 +261,7 @@ function buildReportHtml(data: IReportData): string {
       (k) => `
     <div style="flex:1;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:16px;text-align:center">
       <div style="font-size:12px;color:#64748b;text-transform:uppercase;letter-spacing:0.5px">${k.label}</div>
-      <div style="font-size:24px;font-weight:700;margin-top:4px;color:#1e293b">${k.value}${renderDelta(Number(k.value.replace(/[^0-9.-]/g, "")) || 0, k.prev)}</div>
+      <div style="font-size:24px;font-weight:700;margin-top:4px;color:#1e293b">${k.display}${renderDelta(k.raw, k.prev)}</div>
     </div>`,
     )
     .join("");
