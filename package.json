@@ -19,6 +19,7 @@
     "test:watch": "vitest"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.82.0",
     "@clerk/localizations": "^4.3.0",
     "@clerk/nextjs": "^6.39.1",
     "@prisma/client": "^7.6.0",
