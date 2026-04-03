@@ -2,13 +2,15 @@
 
 import { cn } from "@/lib/utils";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { 
-  BarChart, 
-  Building2, 
-  Sparkles, 
-  Users, 
-  Settings, 
+import { usePathname, useRouter } from "next/navigation";
+import { useUser } from "@clerk/nextjs";
+import { useEffect } from "react";
+import {
+  BarChart,
+  Building2,
+  Sparkles,
+  Users,
+  Settings,
   Rocket,
   ShieldAlert,
   LogOut
@@ -21,6 +23,25 @@ export default function SuperAdminLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const router = useRouter();
+  const { user, isLoaded } = useUser();
+
+  // Guard: seul SUPER_ADMIN ou ADMIN peut accéder
+  const role = user?.publicMetadata?.role as string | undefined;
+  const isAllowed = role === "SUPER_ADMIN" || role === "ADMIN";
+  useEffect(() => {
+    if (isLoaded && !isAllowed) {
+      router.replace("/");
+    }
+  }, [isLoaded, isAllowed, router]);
+
+  if (!isLoaded || !isAllowed) {
+    return (
+      <div className="flex h-screen items-center justify-center bg-neutral-950 text-neutral-50">
+        <p className="text-sm text-neutral-400">Vérification des accès...</p>
+      </div>
+    );
+  }
 
   const navItems = [
     { href: "/super-admin", icon: BarChart, label: "Dashboard" },
