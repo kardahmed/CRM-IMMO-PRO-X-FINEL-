@@ -5,6 +5,7 @@ const isPublicRoute = createRouteMatcher([
   "/",
   "/sign-in(.*)",
   "/sign-up(.*)",
+  "/demo(.*)",
   "/api/webhooks(.*)",
   "/api/v1/automations/check-overdue",
   "/portal/(.*)",
@@ -13,6 +14,7 @@ const isPublicRoute = createRouteMatcher([
 ]);
 
 const isDashboardRoute = createRouteMatcher(["/(dashboard)(.*)"]);
+const isSuperAdminRoute = createRouteMatcher(["/(super-admin)(.*)"]);
 const isApiRoute = createRouteMatcher(["/api/v1(.*)"]);
 
 export default clerkMiddleware(async (auth, req) => {
@@ -31,7 +33,7 @@ export default clerkMiddleware(async (auth, req) => {
     return;
   }
 
-  if (isDashboardRoute(req)) {
+  if (isDashboardRoute(req) || isSuperAdminRoute(req)) {
     await auth.protect();
   }
 });
