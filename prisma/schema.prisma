@@ -41,6 +41,7 @@ enum TenantStatus {
 }
 
 enum UserRole {
+  SUPER_ADMIN // Gère le SaaS global
   CEO
   SUPERVISOR
   AGENT
@@ -702,4 +703,23 @@ model AIGeneration {
   @@index([tenantId, userId])
   @@index([tenantId, type])
   @@map("ai_generations")
+}
+
+/// Lead de demande de démo depuis le portail public
+model DemoLead {
+  id          String   @id @default(uuid())
+  companyName String   @map("company_name")
+  firstName   String   @map("first_name")
+  lastName    String   @map("last_name")
+  email       String   @map("email")
+  phone       String   @map("phone")
+  jobTitle    String?  @map("job_title")
+  employees   String?  @map("employees")
+  message     String?  @map("message")
+  status      String   @default("NEW") @map("status") // NEW, CONTACTED, QUALIFIED, CLOSED
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@index([status])
+  @@map("demo_leads")
 }

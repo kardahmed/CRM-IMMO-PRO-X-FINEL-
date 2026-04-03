@@ -23,6 +23,15 @@ type RolePermissions = Partial<Record<ModuleId, ModulePermissions>>;
 
 /** Permissions par défaut pour chaque rôle si non spécifié dans la matrice */
 const DEFAULT_PERMISSIONS: Record<UserRole, ModulePermissions> = {
+  SUPER_ADMIN: {
+    CREATE: true,
+    READ: true,
+    READ_ALL: true,
+    UPDATE: true,
+    DELETE: true,
+    ASSIGN: true,
+    EXPORT: true,
+  },
   CEO: {
     CREATE: true,
     READ: true,
