@@ -11,6 +11,12 @@ import { TabPaiements } from "@/components/clients/TabPaiements";
 import { TabTaches } from "@/components/clients/TabTaches";
 import { TabHistorique } from "@/components/clients/TabHistorique";
 import { TabSuggestions } from "@/components/clients/TabSuggestions";
+import { TabReservation } from "@/components/clients/TabReservation";
+import { TabVente } from "@/components/clients/TabVente";
+import { TabEcheances } from "@/components/clients/TabEcheances";
+import { TabDocuments } from "@/components/clients/TabDocuments";
+import { TabCharges } from "@/components/clients/TabCharges";
+import { TabNotes } from "@/components/clients/TabNotes";
 import { CreditSimulator } from "@/components/shared/CreditSimulator";
 import { PipelineStepper } from "@/components/clients/PipelineStepper";
 import { ClientInfoPanel } from "@/components/clients/ClientInfoPanel";
@@ -28,6 +34,12 @@ import {
   MessageSquare,
   Mail,
   Phone,
+  FileCheck,
+  Scale,
+  CalendarDays,
+  FileText,
+  Receipt,
+  StickyNote,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -103,6 +115,33 @@ const MOCK_CLIENT = {
     { id: "h7", type: "NOTE", description: "Note ajoutée : Client très motivé, cherche un bien pour investissement", createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 3).toISOString(), userName: "Sophie Martin" },
     { id: "h8", type: "TASK_COMPLETED", description: "Tâche terminée : Appel de bienvenue", createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 2).toISOString(), userName: "Sophie Martin" },
   ],
+  reservation: {
+    contractId: "RES-2023-089",
+    date: new Date(Date.now() - 1000 * 60 * 60 * 24 * 4).toISOString(),
+    property: { id: "p2", name: "Villa Duplex - Horizon Bay", unit: "B-12" },
+    amount: 18_000_000,
+    deposit: 500_000,
+    status: "SIGNED",
+  },
+  vente: {
+    notary: "Me. Haddad",
+    promesseDate: new Date(Date.now() + 1000 * 60 * 60 * 24 * 10).toISOString(),
+    acteDate: null,
+    status: "EN_ATTENTE_PROMESSE",
+    percentCompleted: 40,
+  },
+  documents: [
+    { id: "doc1", title: "Pièce d'identité (CNI)", type: "IDENTITY", url: "#", uploadedAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 10).toISOString(), size: "1.2 MB" },
+    { id: "doc2", title: "Contrat de Réservation Signé", type: "CONTRACT", url: "#", uploadedAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 3).toISOString(), size: "2.5 MB" },
+  ],
+  charges: [
+    { id: "c1", label: "TMA - Ajout prise électrique", amount: 25_000, status: "UNPAID" },
+    { id: "c2", label: "Frais de dossier", amount: 15_000, status: "PAID" },
+  ],
+  notesLog: [
+    { id: "n1", content: "Le client exige une vue dégagée sur le jardin. Ne veut pas de RDC.", author: "Sophie Martin", date: new Date(Date.now() - 1000 * 60 * 60 * 24 * 10).toISOString() },
+    { id: "n2", content: "Validé le financement bancaire avec la banque CPA à 80%.", author: "Sophie Martin", date: new Date(Date.now() - 1000 * 60 * 60 * 24 * 5).toISOString() },
+  ]
 };
 
 export default function ClientDetailPage() {
@@ -212,12 +251,54 @@ export default function ClientDetailPage() {
             Visites
           </TabsTrigger>
           <TabsTrigger
+            value="reservation"
+            className="flex-shrink-0 gap-1.5 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none font-bold text-sm px-5 py-3"
+          >
+            <FileCheck className="h-4 w-4" />
+            Réservation
+          </TabsTrigger>
+          <TabsTrigger
+            value="vente"
+            className="flex-shrink-0 gap-1.5 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none font-bold text-sm px-5 py-3"
+          >
+            <Scale className="h-4 w-4" />
+            Vente
+          </TabsTrigger>
+          <TabsTrigger
+            value="echeances"
+            className="flex-shrink-0 gap-1.5 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none font-bold text-sm px-5 py-3"
+          >
+            <CalendarDays className="h-4 w-4" />
+            Échéances
+          </TabsTrigger>
+          <TabsTrigger
             value="paiements"
             className="flex-shrink-0 gap-1.5 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none font-bold text-sm px-5 py-3"
           >
             <DollarSign className="h-4 w-4" />
             Paiements
           </TabsTrigger>
+          <TabsTrigger
+             value="documents"
+             className="flex-shrink-0 gap-1.5 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none font-bold text-sm px-5 py-3"
+           >
+             <FileText className="h-4 w-4" />
+             Documents
+           </TabsTrigger>
+           <TabsTrigger
+             value="charges"
+             className="flex-shrink-0 gap-1.5 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none font-bold text-sm px-5 py-3"
+           >
+             <Receipt className="h-4 w-4" />
+             Charges
+           </TabsTrigger>
+           <TabsTrigger
+             value="notes"
+             className="flex-shrink-0 gap-1.5 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none font-bold text-sm px-5 py-3"
+           >
+             <StickyNote className="h-4 w-4" />
+             Notes
+           </TabsTrigger>
           <TabsTrigger
             value="taches"
             className="flex-shrink-0 gap-1.5 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none font-bold text-sm px-5 py-3"
@@ -253,12 +334,39 @@ export default function ClientDetailPage() {
             <TabVisites visits={client.visits || []} />
           </TabsContent>
 
+          <TabsContent value="reservation">
+            <TabReservation reservation={client.reservation} />
+          </TabsContent>
+
+          <TabsContent value="vente">
+            <TabVente vente={client.vente} />
+          </TabsContent>
+
+          <TabsContent value="echeances">
+            <TabEcheances
+              totalAmount={totalPayment}
+              paidAmount={paidAmount} 
+            />
+          </TabsContent>
+
           <TabsContent value="paiements">
             <TabPaiements
               payments={client.payments || []}
               totalAmount={totalPayment}
               paidAmount={paidAmount}
             />
+          </TabsContent>
+
+          <TabsContent value="documents">
+            <TabDocuments documents={client.documents || []} />
+          </TabsContent>
+
+          <TabsContent value="charges">
+            <TabCharges charges={client.charges || []} />
+          </TabsContent>
+
+          <TabsContent value="notes">
+            <TabNotes notes={client.notesLog || []} />
           </TabsContent>
 
           <TabsContent value="taches">
