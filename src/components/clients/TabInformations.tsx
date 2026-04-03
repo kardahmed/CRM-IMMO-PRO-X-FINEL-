@@ -84,7 +84,7 @@ export function TabInformations({ client }: TabInformationsProps) {
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-6xl">
       {/* Infos Personnelles */}
       <Card className="border-neutral-100 dark:border-neutral-800">
         <CardHeader className="pb-4">
