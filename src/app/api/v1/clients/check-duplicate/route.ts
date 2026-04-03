@@ -1,30 +1,26 @@
-import { NextRequest, NextResponse } from "next/server";
-import { withPermission } from "@/lib/check-permission";
+import { apiHandler, jsonOk } from "@/lib/api-handler";
 import { checkDuplicates, normalizePhone } from "@/services/client-dedup";
 
-/** GET /api/v1/clients/check-duplicate?phone=xxx&firstName=x&lastName=x */
-export async function GET(req: NextRequest) {
-  return withPermission(req, "CLIENTS", "READ", async (ctx) => {
-    const { searchParams } = new URL(req.url);
-    const phone = searchParams.get("phone");
-    const firstName = searchParams.get("firstName") ?? "";
-    const lastName = searchParams.get("lastName") ?? "";
-    const email = searchParams.get("email");
+/**
+ * GET /api/v1/clients/check-duplicate?phone=...&email=...&firstName=...&lastName=...
+ */
+export const GET = apiHandler(
+  { module: "CLIENTS", action: "READ" },
+  async (ctx) => {
+    const url = new URL(ctx.req.url);
+    const phone = url.searchParams.get("phone") || "";
+    const email = url.searchParams.get("email") || undefined;
+    const firstName = url.searchParams.get("firstName") || "";
+    const lastName = url.searchParams.get("lastName") || "";
 
-    if (!phone) {
-      return NextResponse.json(
-        { success: false, error: "Paramètre phone requis" },
-        { status: 400 },
-      );
-    }
-
+    const normalizedPhone = normalizePhone(phone);
     const result = await checkDuplicates(ctx.tenantId, {
-      phone: normalizePhone(phone),
+      phone: normalizedPhone,
       email,
       firstName,
       lastName,
     });
 
-    return NextResponse.json({ success: true, data: result });
-  });
-}
+    return jsonOk(result);
+  },
+);
