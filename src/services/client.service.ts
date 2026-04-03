@@ -1,3 +1,4 @@
+import { randomUUID } from "crypto";
 import { createTenantPrisma } from "@/lib/prisma-tenant";
 import { prisma } from "@/lib/prisma";
 import type { ICurrentUser } from "@/lib/auth";
@@ -235,9 +236,19 @@ export async function changeClientStage(
 
   const previousStage = client.pipelineStage;
 
+  // Générer un token portail si passage à RESERVED ou SIGNED (et pas déjà généré)
+  const portalStages: PipelineStage[] = ["RESERVED", "SIGNED"];
+  const portalToken =
+    portalStages.includes(newStage) && !client.portalToken
+      ? randomUUID()
+      : undefined;
+
   const updated = await db.client.update({
     where: { id: clientId },
-    data: { pipelineStage: newStage },
+    data: {
+      pipelineStage: newStage,
+      ...(portalToken ? { portalToken } : {}),
+    },
   });
 
   // Log
@@ -252,6 +263,7 @@ export async function changeClientStage(
         clientName: `${client.firstName} ${client.lastName}`,
         previousStage,
         newStage,
+        ...(portalToken ? { portalToken } : {}),
       },
     },
   });

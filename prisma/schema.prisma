@@ -403,6 +403,9 @@ model Client {
   pipelineStage PipelineStage @default(NEW) @map("pipeline_stage")
   lostReason    String?       @map("lost_reason")
 
+  // Portail client (token unique généré à RESERVED/SIGNED)
+  portalToken String? @unique @map("portal_token")
+
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
