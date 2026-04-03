@@ -1,10 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
-import { checkOverdueTasks } from "@/services/automation-engine";
+import {
+  checkOverdueTasks,
+  checkUpcomingVisits,
+  checkOverduePayments,
+} from "@/services/automation-engine";
 
 /**
  * POST /api/v1/automations/check-overdue
  *
- * Endpoint CRON — vérifie les tâches en retard et escalade si > 24h.
+ * Endpoint CRON — vérifie les tâches en retard, rappels de visites, paiements en retard.
  * Protégé par un secret en header (pas par Clerk — appelé par un cron externe).
  *
  * Vercel Cron / Supabase Edge Function appellent cette route toutes les heures.
@@ -23,10 +27,19 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
   }
 
   try {
-    const result = await checkOverdueTasks();
+    const [taskResult, visitReminders, paymentOverdue] = await Promise.all([
+      checkOverdueTasks(),
+      checkUpcomingVisits(),
+      checkOverduePayments(),
+    ]);
+
     return NextResponse.json({
       success: true,
-      data: result,
+      data: {
+        ...taskResult,
+        visitReminders,
+        paymentOverdue,
+      },
     });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Erreur interne";

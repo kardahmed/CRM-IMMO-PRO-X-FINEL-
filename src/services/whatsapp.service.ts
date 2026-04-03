@@ -1,6 +1,10 @@
 import { prisma } from "@/lib/prisma";
 import { createTenantPrisma } from "@/lib/prisma-tenant";
 import { normalizePhone } from "@/services/client-dedup";
+import {
+  createNotification,
+  createNotificationBulk,
+} from "@/services/notification.service";
 
 // ============================================================================
 // Types
@@ -158,17 +162,15 @@ export async function receiveMessage(
     });
 
     if (supervisors.length > 0) {
-      await prisma.notification.createMany({
-        data: supervisors.map((s) => ({
+      await createNotificationBulk(
+        supervisors.map((s) => ({
           tenantId,
           userId: s.id,
           title: "Nouveau contact inconnu (WhatsApp)",
           message: `Message reçu de ${normalizedPhone} : "${incoming.body.substring(0, 100)}${incoming.body.length > 100 ? "..." : ""}"`,
-          type: "WHATSAPP_UNKNOWN",
-          isRead: false,
-          link: null,
+          type: "WHATSAPP_UNKNOWN" as const,
         })),
-      });
+      );
 
       // Log le message avec un superviseur valide comme userId
       await prisma.activityLog.create({
@@ -235,16 +237,13 @@ export async function receiveMessage(
   // Notifier l'agent assigné, ou le superviseur si pas d'agent
   const notifyUserId = agentId ?? interactionUserId;
   if (notifyUserId) {
-    await prisma.notification.create({
-      data: {
-        tenantId,
-        userId: notifyUserId,
-        title: agentId ? "Message WhatsApp reçu" : "Message WhatsApp (client non assigné)",
-        message: `${client.firstName} ${client.lastName} : "${incoming.body.substring(0, 80)}${incoming.body.length > 80 ? "..." : ""}"`,
-        type: "WHATSAPP_IN",
-        isRead: false,
-        link: `/clients/${client.id}`,
-      },
+    await createNotification({
+      tenantId,
+      userId: notifyUserId,
+      title: agentId ? "Message WhatsApp reçu" : "Message WhatsApp (client non assigné)",
+      message: `${client.firstName} ${client.lastName} : "${incoming.body.substring(0, 80)}${incoming.body.length > 80 ? "..." : ""}"`,
+      type: "WHATSAPP_IN",
+      link: `/clients/${client.id}`,
     });
   }
 

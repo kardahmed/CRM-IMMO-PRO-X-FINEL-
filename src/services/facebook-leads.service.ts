@@ -4,6 +4,7 @@ import {
   checkDuplicates,
   normalizePhone,
 } from "@/services/client-dedup";
+import { createNotificationBulk } from "@/services/notification.service";
 import type { Client } from "@prisma/client";
 
 // ============================================================================
@@ -104,17 +105,16 @@ export async function processFacebookLead(
   });
 
   if (managers.length > 0) {
-    await prisma.notification.createMany({
-      data: managers.map((m) => ({
+    await createNotificationBulk(
+      managers.map((m) => ({
         tenantId,
         userId: m.id,
         title: "Nouveau lead Facebook",
         message: `${payload.firstName} ${payload.lastName} — ${normalizedPhone}${payload.formName ? ` (formulaire: ${payload.formName})` : ""}`,
-        type: "FACEBOOK_LEAD",
-        isRead: false,
+        type: "FACEBOOK_LEAD" as const,
         link: `/leads/unassigned`,
       })),
-    });
+    );
   }
 
   // 4. Log

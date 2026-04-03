@@ -1,10 +1,10 @@
 "use client";
 
 import { UserButton, useUser } from "@clerk/nextjs";
-import { Bell, Search, Settings } from "lucide-react";
+import { Search, Settings } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { NotificationBell } from "@/components/layout/NotificationBell";
 
 export function Header() {
   const { user } = useUser();
@@ -15,8 +15,8 @@ export function Header() {
       <div className="flex items-center gap-4 flex-1">
         <div className="relative w-full max-w-xl lg:max-w-2xl">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input 
-            placeholder="Rechercher (clients, biens, tâches...)" 
+          <Input
+            placeholder="Rechercher (clients, biens, tâches...)"
             className="pl-9 bg-accent/20 border-accent/30 focus-visible:ring-primary/50 shadow-inner rounded-xl h-10"
           />
         </div>
@@ -29,23 +29,7 @@ export function Header() {
         </div>
 
         {/* Notifications */}
-        <DropdownMenu>
-          <DropdownMenuTrigger render={<Button variant="ghost" size="icon" className="relative hover:bg-accent/50 outline-none" />}>
-            <Bell className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
-            <span className="absolute top-2.5 right-2.5 h-2 w-2 bg-red-500 rounded-full border-2 border-background animate-pulse" />
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-80">
-            <DropdownMenuLabel>Notifications</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <div className="p-4 text-sm text-muted-foreground text-center">
-              Aucune nouvelle notification
-            </div>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem className="justify-center text-primary font-medium">
-              Voir tout
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <NotificationBell />
 
         <Button variant="ghost" size="icon" className="hover:bg-accent/50">
           <Settings className="h-5 w-5 text-muted-foreground" />
@@ -55,7 +39,7 @@ export function Header() {
 
         {/* Avatar Clerk */}
         <div className="pl-1">
-          <UserButton 
+          <UserButton
             afterSignOutUrl="/sign-in"
             appearance={{
               elements: {

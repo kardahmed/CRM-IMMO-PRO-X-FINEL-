@@ -9,6 +9,10 @@ import {
   type IDeduplicationResult,
 } from "@/services/client-dedup";
 import { triggerAutomations } from "@/services/automation-engine";
+import {
+  createNotification,
+  createNotificationBulk,
+} from "@/services/notification.service";
 
 // ============================================================================
 // Types
@@ -116,6 +120,26 @@ export async function createClient(
     },
   });
 
+  // 5. Notification — informer les superviseurs d'un nouveau client
+  const supervisors = await db.user.findMany({
+    where: { role: { in: ["SUPERVISOR", "CEO"] }, isActive: true },
+    select: { id: true },
+  });
+  if (supervisors.length > 0) {
+    await createNotificationBulk(
+      supervisors
+        .filter((s) => s.id !== user.userId) // ne pas notifier l'auteur
+        .map((s) => ({
+          tenantId: user.tenantId,
+          userId: s.id,
+          title: "Nouveau client",
+          message: `${input.firstName} ${input.lastName} ajouté par ${user.firstName} ${user.lastName}`,
+          type: "NEW_CLIENT" as const,
+          link: `/clients/${client.id}`,
+        })),
+    );
+  }
+
   return { client, dedup };
 }
 
@@ -185,29 +209,29 @@ export async function reassignClient(
   });
 
   // Notifications
-  const notificationData = [];
+  const notifInputs = [];
 
   if (previousAgentId) {
-    notificationData.push({
+    notifInputs.push({
       tenantId: user.tenantId,
       userId: previousAgentId,
       title: "Client réassigné",
       message: `${client.firstName} ${client.lastName} a été réassigné à un autre agent`,
-      type: "REASSIGNMENT",
-      isRead: false,
+      type: "REASSIGNMENT" as const,
+      link: `/clients/${clientId}`,
     });
   }
 
-  notificationData.push({
+  notifInputs.push({
     tenantId: user.tenantId,
     userId: newAgentId,
     title: "Nouveau client assigné",
     message: `${client.firstName} ${client.lastName} vous a été assigné`,
-    type: "REASSIGNMENT",
-    isRead: false,
+    type: "REASSIGNMENT" as const,
+    link: `/clients/${clientId}`,
   });
 
-  await prisma.notification.createMany({ data: notificationData });
+  await createNotificationBulk(notifInputs);
 
   return { client: updated, previousAgentId, newAgentId };
 }
@@ -267,6 +291,52 @@ export async function changeClientStage(
       },
     },
   });
+
+  // Notifications — changement d'étape
+  const stageLabels: Record<string, string> = {
+    NEW: "Nouveau lead",
+    CONTACTED: "Contacté",
+    QUALIFIED: "Qualifié",
+    VISIT_SCHEDULED: "Visite programmée",
+    VISITED: "Visité",
+    NEGOTIATION: "Négociation",
+    RESERVED: "Réservé",
+    SIGNED: "Signé",
+    CLOSED: "Finalisé",
+  };
+
+  // Notifier l'agent assigné (s'il n'est pas l'auteur)
+  if (client.assignedAgentId && client.assignedAgentId !== user.userId) {
+    await createNotification({
+      tenantId: user.tenantId,
+      userId: client.assignedAgentId,
+      title: "Changement d'étape",
+      message: `${client.firstName} ${client.lastName} → ${stageLabels[newStage] ?? newStage}`,
+      type: "STAGE_CHANGED",
+      link: `/clients/${clientId}`,
+    });
+  }
+
+  // Notifier les superviseurs pour les étapes critiques
+  const criticalStages: PipelineStage[] = ["NEGOTIATION", "RESERVED", "SIGNED", "CLOSED"];
+  if (criticalStages.includes(newStage)) {
+    const supervisors = await db.user.findMany({
+      where: { role: { in: ["SUPERVISOR", "CEO"] }, isActive: true, id: { not: user.userId } },
+      select: { id: true },
+    });
+    if (supervisors.length > 0) {
+      await createNotificationBulk(
+        supervisors.map((s) => ({
+          tenantId: user.tenantId,
+          userId: s.id,
+          title: `Pipeline : ${stageLabels[newStage] ?? newStage}`,
+          message: `${client.firstName} ${client.lastName} est passé en ${stageLabels[newStage] ?? newStage}`,
+          type: "STAGE_CHANGED" as const,
+          link: `/clients/${clientId}`,
+        })),
+      );
+    }
+  }
 
   // Déclencher les automatisations configurées pour cette étape (non-bloquant)
   triggerAutomations(user.tenantId, clientId, newStage).catch((err) => {

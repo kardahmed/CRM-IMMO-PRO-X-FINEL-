@@ -2,6 +2,7 @@ import { apiHandler, getBody, jsonOk, jsonError } from "@/lib/api-handler";
 import { assignLeadSchema } from "@/lib/validations/facebook-leads";
 import { prisma } from "@/lib/prisma";
 import { triggerAutomations } from "@/services/automation-engine";
+import { createNotification } from "@/services/notification.service";
 
 /**
  * POST /api/v1/leads/[id]/assign
@@ -58,16 +59,13 @@ export const POST = apiHandler(
     });
 
     // Notification pour l'agent
-    await prisma.notification.create({
-      data: {
-        tenantId: ctx.tenantId,
-        userId: agentId,
-        title: "Nouveau lead assigné",
-        message: `${client.firstName} ${client.lastName} vous a été assigné (source: ${client.source})`,
-        type: "LEAD_ASSIGNED",
-        isRead: false,
-        link: `/clients/${clientId}`,
-      },
+    await createNotification({
+      tenantId: ctx.tenantId,
+      userId: agentId,
+      title: "Nouveau lead assigné",
+      message: `${client.firstName} ${client.lastName} vous a été assigné (source: ${client.source})`,
+      type: "LEAD_ASSIGNED",
+      link: `/clients/${clientId}`,
     });
 
     // Log

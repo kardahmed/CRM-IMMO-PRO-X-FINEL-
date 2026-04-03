@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { createTenantPrisma } from "@/lib/prisma-tenant";
 import type { PipelineStage, TaskType } from "@prisma/client";
+import { createNotification } from "@/services/notification.service";
 
 // ============================================================================
 // Types
@@ -204,4 +205,139 @@ export async function checkOverdueTasks(): Promise<{
     markedOverdue: overdueTasks.length,
     escalated: escalationTasks.length,
   };
+}
+
+// ============================================================================
+// Visit reminder — à appeler périodiquement (CRON toutes les 15 min)
+// ============================================================================
+
+/**
+ * Envoie un rappel 1h avant chaque visite programmée.
+ * Ne notifie qu'une seule fois (vérifie via notes "[REMINDED]").
+ */
+export async function checkUpcomingVisits(): Promise<number> {
+  const now = new Date();
+  const oneHourLater = new Date(now.getTime() + 60 * 60 * 1000);
+
+  // Visites programmées dans la prochaine heure, pas encore rappelées
+  const visits = await prisma.visit.findMany({
+    where: {
+      status: "SCHEDULED",
+      scheduledAt: { gte: now, lte: oneHourLater },
+      NOT: { feedback: { contains: "[REMINDED]" } },
+    },
+    include: {
+      agent: { select: { id: true, firstName: true, lastName: true, tenantId: true } },
+      client: { select: { id: true, firstName: true, lastName: true } },
+      property: { select: { name: true } },
+    },
+  });
+
+  let reminded = 0;
+
+  for (const visit of visits) {
+    if (!visit.agent) continue;
+
+    const time = visit.scheduledAt.toLocaleTimeString("fr-FR", {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+
+    await createNotification({
+      tenantId: visit.agent.tenantId,
+      userId: visit.agent.id,
+      title: "Visite dans 1h",
+      message: `${visit.client?.firstName ?? ""} ${visit.client?.lastName ?? ""} — ${visit.property?.name ?? "Bien"} à ${time}`,
+      type: "VISIT_REMINDER",
+      link: `/clients/${visit.clientId}`,
+    });
+
+    // Marquer comme rappelé
+    await prisma.visit.update({
+      where: { id: visit.id },
+      data: {
+        feedback: visit.feedback
+          ? `${visit.feedback}\n[REMINDED]`
+          : "[REMINDED]",
+      },
+    });
+
+    reminded++;
+  }
+
+  return reminded;
+}
+
+// ============================================================================
+// Payment overdue — à appeler périodiquement (CRON quotidien)
+// ============================================================================
+
+/**
+ * Vérifie les paiements PENDING depuis plus de 30 jours.
+ * Notifie l'agent assigné et le superviseur.
+ */
+export async function checkOverduePayments(): Promise<number> {
+  const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+
+  const overduePayments = await prisma.payment.findMany({
+    where: {
+      status: "PENDING",
+      createdAt: { lt: thirtyDaysAgo },
+    },
+    select: {
+      id: true,
+      amount: true,
+      type: true,
+      clientId: true,
+      tenantId: true,
+    },
+  });
+
+  let notified = 0;
+
+  for (const payment of overduePayments) {
+    // Charger le client séparément
+    const client = await prisma.client.findFirst({
+      where: { id: payment.clientId, tenantId: payment.tenantId },
+      select: { id: true, firstName: true, lastName: true, assignedAgentId: true },
+    });
+    if (!client) continue;
+
+    const tenantId = payment.tenantId;
+    const amountStr = new Intl.NumberFormat("fr-DZ", { maximumFractionDigits: 0 }).format(Number(payment.amount));
+    const msg = `${client.firstName} ${client.lastName} — ${amountStr} DA (${payment.type})`;
+
+    // Notifier l'agent assigné
+    if (client.assignedAgentId) {
+      await createNotification({
+        tenantId,
+        userId: client.assignedAgentId,
+        title: "Paiement en retard",
+        message: msg,
+        type: "PAYMENT_OVERDUE",
+        link: `/clients/${client.id}`,
+      });
+    }
+
+    // Notifier les superviseurs
+    const supervisors = await prisma.user.findMany({
+      where: { tenantId, role: { in: ["SUPERVISOR", "CEO"] }, isActive: true },
+      select: { id: true },
+    });
+
+    for (const s of supervisors) {
+      await createNotification({
+        tenantId,
+        userId: s.id,
+        title: "Paiement en retard",
+        message: msg,
+        type: "PAYMENT_OVERDUE",
+        link: `/clients/${client.id}`,
+      });
+    }
+
+    notified++;
+  }
+
+  return notified;
 }
