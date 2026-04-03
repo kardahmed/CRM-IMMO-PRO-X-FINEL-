@@ -11,12 +11,6 @@ export interface ITenantContext {
   tenantId: string;
 }
 
-// Store le contexte pour la requête en cours (AsyncLocalStorage serait idéal,
-// mais Next.js App Router ne l'expose pas facilement — on utilise un header interne)
-const TENANT_HEADER = "x-tenant-id";
-const USER_HEADER = "x-user-id";
-const ROLE_HEADER = "x-user-role";
-
 /**
  * Middleware d'isolation tenant pour les routes /api/v1/*.
  * - Extrait le tenantId du user authentifié

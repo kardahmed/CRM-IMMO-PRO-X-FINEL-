@@ -106,7 +106,7 @@ export async function PATCH(
       );
     }
 
-    const updated = await (db.client.update as Function)({
+    const updated = await (db.client.update as unknown as (...args: unknown[]) => Promise<unknown>)({
       where: { id },
       data: parsed.data,
     });

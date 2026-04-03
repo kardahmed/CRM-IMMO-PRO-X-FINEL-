@@ -1,16 +1,13 @@
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 import { Webhook } from "svix";
-import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import type { UserRole } from "@prisma/client";
 
-const webhookEventSchema = z.object({
-  data: z.record(z.string(), z.unknown()),
-  type: z.string(),
-});
-
-type WebhookEvent = z.infer<typeof webhookEventSchema>;
+interface WebhookEvent {
+  data: Record<string, unknown>;
+  type: string;
+}
 
 const VALID_ROLES: UserRole[] = [
   "CEO",

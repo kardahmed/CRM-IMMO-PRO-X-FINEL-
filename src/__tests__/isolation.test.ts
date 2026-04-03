@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 
 // ============================================================================
 // Mocks
@@ -112,7 +112,7 @@ describe("createTenantPrisma", () => {
 
   it("injecte tenantId dans findMany", async () => {
     const dbA = createTenantPrisma(TENANT_A);
-    const result = await (dbA as unknown as Record<string, Record<string, Function>>).client.findMany({});
+    const result = await (dbA as unknown as Record<string, Record<string, (...args: unknown[]) => Promise<unknown>>>).client.findMany({});
     const args = getArgs(result);
 
     expect(args.where).toEqual(
@@ -122,7 +122,7 @@ describe("createTenantPrisma", () => {
 
   it("injecte tenantId dans findFirst", async () => {
     const dbA = createTenantPrisma(TENANT_A);
-    const result = await (dbA as unknown as Record<string, Record<string, Function>>).client.findFirst({
+    const result = await (dbA as unknown as Record<string, Record<string, (...args: unknown[]) => Promise<unknown>>>).client.findFirst({
       where: { id: "some-id" },
     });
     const args = getArgs(result);
@@ -134,7 +134,7 @@ describe("createTenantPrisma", () => {
 
   it("injecte tenantId dans create (data)", async () => {
     const dbA = createTenantPrisma(TENANT_A);
-    const result = await (dbA as unknown as Record<string, Record<string, Function>>).client.create({
+    const result = await (dbA as unknown as Record<string, Record<string, (...args: unknown[]) => Promise<unknown>>>).client.create({
       data: { firstName: "Test", lastName: "User", phone: "+213555000000" },
     });
     const args = getArgs(result);
@@ -146,7 +146,7 @@ describe("createTenantPrisma", () => {
 
   it("injecte tenantId dans update (where)", async () => {
     const dbA = createTenantPrisma(TENANT_A);
-    const result = await (dbA as unknown as Record<string, Record<string, Function>>).client.update({
+    const result = await (dbA as unknown as Record<string, Record<string, (...args: unknown[]) => Promise<unknown>>>).client.update({
       where: { id: "client-1" },
       data: { firstName: "Updated" },
     });
@@ -159,7 +159,7 @@ describe("createTenantPrisma", () => {
 
   it("injecte tenantId dans delete (where)", async () => {
     const dbA = createTenantPrisma(TENANT_A);
-    const result = await (dbA as unknown as Record<string, Record<string, Function>>).client.delete({
+    const result = await (dbA as unknown as Record<string, Record<string, (...args: unknown[]) => Promise<unknown>>>).client.delete({
       where: { id: "client-1" },
     });
     const args = getArgs(result);
@@ -171,7 +171,7 @@ describe("createTenantPrisma", () => {
 
   it("injecte tenantId dans upsert (where + create)", async () => {
     const dbA = createTenantPrisma(TENANT_A);
-    const result = await (dbA as unknown as Record<string, Record<string, Function>>).client.upsert({
+    const result = await (dbA as unknown as Record<string, Record<string, (...args: unknown[]) => Promise<unknown>>>).client.upsert({
       where: { id: "client-1" },
       create: { firstName: "New", lastName: "User", phone: "+213555000001" },
       update: { firstName: "Existing" },
@@ -188,7 +188,7 @@ describe("createTenantPrisma", () => {
 
   it("injecte tenantId dans createMany (array)", async () => {
     const dbA = createTenantPrisma(TENANT_A);
-    const result = await (dbA as unknown as Record<string, Record<string, Function>>).client.createMany({
+    const result = await (dbA as unknown as Record<string, Record<string, (...args: unknown[]) => Promise<unknown>>>).client.createMany({
       data: [
         { firstName: "A", lastName: "One", phone: "+213555000001" },
         { firstName: "B", lastName: "Two", phone: "+213555000002" },
@@ -206,8 +206,8 @@ describe("createTenantPrisma", () => {
     const dbA = createTenantPrisma(TENANT_A);
     const dbB = createTenantPrisma(TENANT_B);
 
-    const resultA = await (dbA as unknown as Record<string, Record<string, Function>>).client.findMany({});
-    const resultB = await (dbB as unknown as Record<string, Record<string, Function>>).client.findMany({});
+    const resultA = await (dbA as unknown as Record<string, Record<string, (...args: unknown[]) => Promise<unknown>>>).client.findMany({});
+    const resultB = await (dbB as unknown as Record<string, Record<string, (...args: unknown[]) => Promise<unknown>>>).client.findMany({});
 
     const whereA = getArgs(resultA).where as Record<string, unknown>;
     const whereB = getArgs(resultB).where as Record<string, unknown>;
@@ -220,7 +220,7 @@ describe("createTenantPrisma", () => {
   it("Tenant A ne peut PAS modifier les données de Tenant B", async () => {
     const dbA = createTenantPrisma(TENANT_A);
 
-    const result = await (dbA as unknown as Record<string, Record<string, Function>>).client.update({
+    const result = await (dbA as unknown as Record<string, Record<string, (...args: unknown[]) => Promise<unknown>>>).client.update({
       where: { id: "client-from-b" },
       data: { firstName: "Hacked" },
     });
@@ -232,7 +232,7 @@ describe("createTenantPrisma", () => {
 
   it("n'injecte PAS tenantId sur le modèle Tenant", async () => {
     const dbA = createTenantPrisma(TENANT_A);
-    const result = await (dbA as unknown as Record<string, Record<string, Function>>).tenant.findMany({});
+    const result = await (dbA as unknown as Record<string, Record<string, (...args: unknown[]) => Promise<unknown>>>).tenant.findMany({});
     const args = getArgs(result);
 
     // Le modèle Tenant est exclu : where ne contient pas tenantId

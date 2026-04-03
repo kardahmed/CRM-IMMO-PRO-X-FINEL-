@@ -77,7 +77,7 @@ export async function createClient(
   // 3. Créer le client
   const db = createTenantPrisma(user.tenantId);
   // tenantId est auto-injecté par createTenantPrisma via $extends
-  const client = await (db.client.create as Function)({
+  const client = await (db.client.create as unknown as (...args: unknown[]) => Promise<unknown>)({
     data: {
       firstName: input.firstName,
       lastName: input.lastName,

@@ -1,4 +1,3 @@
-import { PrismaClient } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 
 // Modèles qui n'ont PAS de tenantId — exclus de l'injection automatique

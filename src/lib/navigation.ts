@@ -3,7 +3,6 @@ import {
   type ModuleId,
   getAvailableModules,
   canAccessModule,
-  MODULE_REGISTRY,
 } from "@/lib/modules";
 
 // ============================================================================
