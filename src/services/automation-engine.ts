@@ -131,11 +131,13 @@ export async function checkOverdueTasks(): Promise<{
   }
 
   // 2. Trouver les tâches IN_PROGRESS dont dueAt est > 24h (escalade)
+  //    Exclure celles déjà escaladées (notes contient "[ESCALATED]") pour éviter les doublons
   const escalationTasks = await prisma.task.findMany({
     where: {
       status: "IN_PROGRESS",
       isAutomated: true,
       dueAt: { lt: twentyFourHoursAgo },
+      NOT: { notes: { contains: "[ESCALATED]" } },
     },
     include: {
       assignedTo: { select: { id: true, firstName: true, lastName: true, tenantId: true } },
@@ -182,6 +184,20 @@ export async function checkOverdueTasks(): Promise<{
 
   if (notifications.length > 0) {
     await prisma.notification.createMany({ data: notifications });
+  }
+
+  // 4. Marquer les tâches escaladées pour ne pas re-notifier
+  if (escalationTasks.length > 0) {
+    for (const task of escalationTasks) {
+      await prisma.task.update({
+        where: { id: task.id },
+        data: {
+          notes: task.notes
+            ? `${task.notes}\n[ESCALATED]`
+            : "[ESCALATED]",
+        },
+      });
+    }
   }
 
   return {
