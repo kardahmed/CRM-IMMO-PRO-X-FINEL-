@@ -1,14 +1,8 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
-import {
-  ClerkProvider,
-  SignedIn,
-  SignedOut,
-  SignInButton,
-  SignUpButton,
-  UserButton,
-} from "@clerk/nextjs";
+import { ClerkProvider } from "@clerk/nextjs";
 import { frFR } from "@clerk/localizations";
+import { AuthHeader } from "@/components/shared/auth-header";
 import "./globals.css";
 
 const geistSans = localFont({
@@ -38,15 +32,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <ClerkProvider localization={frFR}>
-          <header className="flex items-center justify-end gap-2 p-4">
-            <SignedOut>
-              <SignInButton />
-              <SignUpButton />
-            </SignedOut>
-            <SignedIn>
-              <UserButton />
-            </SignedIn>
-          </header>
+          <AuthHeader />
           {children}
         </ClerkProvider>
       </body>
