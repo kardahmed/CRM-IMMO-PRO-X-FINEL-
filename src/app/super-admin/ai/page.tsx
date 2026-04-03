@@ -21,7 +21,7 @@ export default function SuperAdminAI() {
       <div>
         <h1 className="text-2xl font-black text-white tracking-tight flex items-center gap-2">
           <Sparkles className="h-6 w-6 text-amber-400" />
-          Moteur IA Antigravity
+          Moteur IA IMMO PRO-X
         </h1>
         <p className="text-sm text-neutral-400 mt-1">Supervisez la consommation globale des API LLM (Anthropic/OpenAI) par vos locataires.</p>
       </div>

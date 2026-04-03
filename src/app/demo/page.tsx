@@ -62,7 +62,7 @@ export default function DemoPage() {
           <div className="h-8 w-8 rounded bg-indigo-500 flex items-center justify-center">
             <Rocket className="h-4 w-4 text-white" />
           </div>
-          <span className="font-black text-xl tracking-tight">ANTIGRAVITY</span>
+          <span className="font-black text-xl tracking-tight">IMMO PRO-X</span>
         </div>
         
         <h1 className="text-4xl md:text-5xl lg:text-7xl font-black tracking-tighter leading-[1.1] mb-6">

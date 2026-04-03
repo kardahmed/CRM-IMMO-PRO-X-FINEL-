@@ -58,7 +58,7 @@ export default function SuperAdminLayout({
         <div className="h-16 flex items-center px-6 border-b border-neutral-800">
           <div className="flex items-center gap-2 text-indigo-400">
             <Rocket className="h-5 w-5" />
-            <span className="font-black tracking-tight text-white">ANTIGRAVITY</span>
+            <span className="font-black tracking-tight text-white">IMMO PRO-X</span>
           </div>
         </div>
 

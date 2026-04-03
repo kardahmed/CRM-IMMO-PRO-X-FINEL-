@@ -48,7 +48,7 @@ export default function SuperAdminDashboard() {
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
       <div>
-        <h1 className="text-3xl font-black text-white tracking-tight">Antigravity HQ</h1>
+        <h1 className="text-3xl font-black text-white tracking-tight">IMMO PRO-X HQ</h1>
         <p className="text-neutral-400 mt-1">Vue globale de la performance du CRM SaaS.</p>
       </div>
 

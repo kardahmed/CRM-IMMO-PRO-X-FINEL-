@@ -46,7 +46,7 @@ export default function SuperAdminWorkspaces() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-black text-white tracking-tight">Workspaces (Entreprises)</h1>
-          <p className="text-sm text-neutral-400 mt-1">Gérez tous les locataires de la plateforme Antigravity.</p>
+          <p className="text-sm text-neutral-400 mt-1">Gérez tous les locataires de la plateforme IMMO PRO-X.</p>
         </div>
         <Button className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold h-10 px-6 rounded-lg">
           + Nouveau Workspace
