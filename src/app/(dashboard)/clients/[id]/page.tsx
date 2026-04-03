@@ -12,6 +12,8 @@ import { TabTaches } from "@/components/clients/TabTaches";
 import { TabHistorique } from "@/components/clients/TabHistorique";
 import { TabSuggestions } from "@/components/clients/TabSuggestions";
 import { CreditSimulator } from "@/components/shared/CreditSimulator";
+import { PipelineStepper } from "@/components/clients/PipelineStepper";
+import { ClientInfoPanel } from "@/components/clients/ClientInfoPanel";
 import {
   AlertCircle,
   RefreshCw,
@@ -22,6 +24,10 @@ import {
   History,
   Sparkles,
   Calculator,
+  MessageCircle,
+  MessageSquare,
+  Mail,
+  Phone,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -166,15 +172,44 @@ export default function ClientDetailPage() {
       {/* Header */}
       <ClientHeader client={client} />
 
+      {/* Accordion Infos (Read-Only) */}
+      <ClientInfoPanel client={client} />
+
+      {/* Barre d'Actions Rapides (Horizontal Pills) */}
+      <div className="flex flex-wrap items-center gap-3">
+        <Button className="rounded-full bg-blue-600 hover:bg-blue-700 text-white font-bold h-9 gap-2 px-5">
+          <Phone className="h-4 w-4" fill="currentColor" /> Appeler
+        </Button>
+        <Button className="rounded-full bg-[#25D366] hover:bg-[#25D366]/90 text-white font-bold h-9 gap-2 px-5 shadow-sm">
+          <MessageCircle className="h-4 w-4" fill="currentColor" /> Appel WhatsApp
+        </Button>
+        <Button className="rounded-full bg-[#128C7E] hover:bg-[#128C7E]/90 text-white font-bold h-9 gap-2 px-5 shadow-sm">
+          <MessageCircle className="h-4 w-4" /> Message WA
+        </Button>
+        <Button variant="outline" className="rounded-full font-bold h-9 gap-2 px-5 border-neutral-300">
+          <MessageSquare className="h-4 w-4 text-purple-600" fill="currentColor" /> SMS
+        </Button>
+        <Button variant="outline" className="rounded-full font-bold h-9 gap-2 px-5 border-neutral-300">
+          <Mail className="h-4 w-4 text-rose-500" fill="currentColor" /> Email
+        </Button>
+        <div className="w-px h-6 bg-border mx-2" />
+        <Button className="rounded-full bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-500 hover:to-orange-600 text-white font-black h-9 gap-2 px-5 shadow-sm">
+          <Sparkles className="h-4 w-4" fill="currentColor" /> Suggestions AI
+        </Button>
+      </div>
+
+      {/* Pipeline Stepper (Visual Flow) */}
+      <PipelineStepper currentStage={client.pipelineStage} />
+
       {/* Tabs */}
-      <Tabs defaultValue="informations" className="w-full">
+      <Tabs defaultValue="visites" className="w-full mt-4">
         <TabsList className="flex w-full justify-start overflow-x-auto border-b bg-transparent h-auto p-0 rounded-none gap-0 no-scrollbar">
           <TabsTrigger
-            value="informations"
+            value="edition"
             className="flex-shrink-0 gap-1.5 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none font-bold text-sm px-5 py-3"
           >
             <User className="h-4 w-4" />
-            Informations
+            Édition
           </TabsTrigger>
           <TabsTrigger
             value="visites"
@@ -220,8 +255,8 @@ export default function ClientDetailPage() {
           </TabsTrigger>
         </TabsList>
 
-        <div className="mt-6">
-          <TabsContent value="informations">
+        <div className="mt-4">
+          <TabsContent value="edition">
             <TabInformations client={client} />
           </TabsContent>
 
