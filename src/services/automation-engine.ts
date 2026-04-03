@@ -275,6 +275,8 @@ export async function checkUpcomingVisits(): Promise<number> {
 /**
  * Vérifie les paiements PENDING depuis plus de 30 jours.
  * Notifie l'agent assigné et le superviseur.
+ * Évite les doublons : ne notifie qu'une fois en vérifiant si une notification
+ * PAYMENT_OVERDUE existe déjà pour ce paiement (via ActivityLog marker).
  */
 export async function checkOverduePayments(): Promise<number> {
   const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
@@ -296,7 +298,18 @@ export async function checkOverduePayments(): Promise<number> {
   let notified = 0;
 
   for (const payment of overduePayments) {
-    // Charger le client séparément
+    // Vérifier si déjà notifié via ActivityLog
+    const alreadyNotified = await prisma.activityLog.findFirst({
+      where: {
+        tenantId: payment.tenantId,
+        action: "PAYMENT_OVERDUE_NOTIFIED",
+        entityId: payment.id,
+      },
+      select: { id: true },
+    });
+    if (alreadyNotified) continue;
+
+    // Charger le client
     const client = await prisma.client.findFirst({
       where: { id: payment.clientId, tenantId: payment.tenantId },
       select: { id: true, firstName: true, lastName: true, assignedAgentId: true },
@@ -335,6 +348,17 @@ export async function checkOverduePayments(): Promise<number> {
         link: `/clients/${client.id}`,
       });
     }
+
+    // Marquer comme notifié pour éviter les doublons
+    await prisma.activityLog.create({
+      data: {
+        tenantId,
+        action: "PAYMENT_OVERDUE_NOTIFIED",
+        entity: "Payment",
+        entityId: payment.id,
+        metadata: { clientId: client.id, amount: Number(payment.amount) },
+      },
+    });
 
     notified++;
   }

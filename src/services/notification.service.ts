@@ -137,13 +137,15 @@ export async function getUnreadCount(
 
 /**
  * Marque une notification comme lue.
+ * Filtre par tenantId ET userId pour empêcher un user de marquer les notifs d'un autre.
  */
 export async function markAsRead(
   tenantId: string,
   notificationId: string,
+  userId: string,
 ): Promise<void> {
   await prisma.notification.updateMany({
-    where: { id: notificationId, tenantId },
+    where: { id: notificationId, tenantId, userId },
     data: { isRead: true },
   });
 }
