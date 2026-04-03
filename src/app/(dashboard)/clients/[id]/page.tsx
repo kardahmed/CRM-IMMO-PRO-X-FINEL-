@@ -11,6 +11,7 @@ import { TabPaiements } from "@/components/clients/TabPaiements";
 import { TabTaches } from "@/components/clients/TabTaches";
 import { TabHistorique } from "@/components/clients/TabHistorique";
 import { TabSuggestions } from "@/components/clients/TabSuggestions";
+import { CreditSimulator } from "@/components/shared/CreditSimulator";
 import {
   AlertCircle,
   RefreshCw,
@@ -20,6 +21,7 @@ import {
   CheckSquare,
   History,
   Sparkles,
+  Calculator,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -209,6 +211,13 @@ export default function ClientDetailPage() {
             <Sparkles className="h-4 w-4" />
             Suggestions
           </TabsTrigger>
+          <TabsTrigger
+            value="simulateur"
+            className="gap-1.5 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none font-bold text-sm px-5 py-3 text-purple-600 data-[state=active]:text-purple-600"
+          >
+            <Calculator className="h-4 w-4" />
+            Simulateur
+          </TabsTrigger>
         </TabsList>
 
         <div className="mt-6">
@@ -248,6 +257,10 @@ export default function ClientDetailPage() {
                 minRooms: client.minRooms,
               }}
             />
+          </TabsContent>
+
+          <TabsContent value="simulateur">
+            <CreditSimulator initialPrixBien={client.budgetMax ? client.budgetMax : client.budget} />
           </TabsContent>
         </div>
       </Tabs>
