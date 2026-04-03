@@ -161,8 +161,10 @@ async function fetchLeadData(
   created_time: string;
 } | null> {
   try {
-    const url = `https://graph.facebook.com/v21.0/${leadgenId}?access_token=${accessToken}`;
-    const response = await fetch(url);
+    const url = `https://graph.facebook.com/v21.0/${leadgenId}`;
+    const response = await fetch(url, {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
 
     if (!response.ok) {
       console.error(

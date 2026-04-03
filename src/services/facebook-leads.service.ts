@@ -4,7 +4,6 @@ import {
   checkDuplicates,
   normalizePhone,
 } from "@/services/client-dedup";
-import { triggerAutomations } from "@/services/automation-engine";
 import type { Client } from "@prisma/client";
 
 // ============================================================================
@@ -140,10 +139,9 @@ export async function processFacebookLead(
     },
   });
 
-  // 5. Déclencher les automatisations pour l'étape NEW (non-bloquant)
-  triggerAutomations(tenantId, client.id, "NEW").catch((err) => {
-    console.error("[Facebook Lead automation error]", err);
-  });
+  // 5. Ne PAS déclencher les automatisations ici — le lead n'a pas d'agent assigné.
+  // Les automatisations seront déclenchées à l'assignation via POST /leads/[id]/assign.
+  // triggerAutomations sans agent assigné créerait des tâches orphelines.
 
   return {
     action: "CREATED",

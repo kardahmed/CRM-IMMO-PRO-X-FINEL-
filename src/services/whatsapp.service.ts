@@ -151,7 +151,7 @@ export async function receiveMessage(
   });
 
   if (!client) {
-    // Contact inconnu → notifier tous les Superviseurs
+    // Contact inconnu → notifier tous les Superviseurs + CEO
     const supervisors = await db.user.findMany({
       where: { role: { in: ["SUPERVISOR", "CEO"] }, isActive: true },
       select: { id: true },
@@ -169,22 +169,22 @@ export async function receiveMessage(
           link: null,
         })),
       });
-    }
 
-    // Log le message même sans client identifié
-    await prisma.activityLog.create({
-      data: {
-        tenantId,
-        userId: supervisors[0]?.id ?? "SYSTEM",
-        action: "WHATSAPP_UNKNOWN_CONTACT",
-        entity: "WhatsApp",
-        entityId: incoming.messageId,
-        metadata: {
-          phone: normalizedPhone,
-          messagePreview: incoming.body.substring(0, 200),
+      // Log le message avec un superviseur valide comme userId
+      await prisma.activityLog.create({
+        data: {
+          tenantId,
+          userId: supervisors[0].id,
+          action: "WHATSAPP_UNKNOWN_CONTACT",
+          entity: "WhatsApp",
+          entityId: incoming.messageId,
+          metadata: {
+            phone: normalizedPhone,
+            messagePreview: incoming.body.substring(0, 200),
+          },
         },
-      },
-    });
+      });
+    }
 
     return {
       clientId: null,
@@ -207,6 +207,15 @@ export async function receiveMessage(
     interactionUserId = supervisor?.id ?? null;
   }
 
+  // Fallback : utiliser le CEO si aucun superviseur
+  if (!interactionUserId) {
+    const ceo = await db.user.findFirst({
+      where: { role: "CEO", isActive: true },
+      select: { id: true },
+    });
+    interactionUserId = ceo?.id ?? null;
+  }
+
   let interactionId: string | null = null;
 
   if (interactionUserId) {
@@ -223,13 +232,14 @@ export async function receiveMessage(
     interactionId = interaction.id;
   }
 
-  // Notifier l'agent assigné
-  if (agentId) {
+  // Notifier l'agent assigné, ou le superviseur si pas d'agent
+  const notifyUserId = agentId ?? interactionUserId;
+  if (notifyUserId) {
     await prisma.notification.create({
       data: {
         tenantId,
-        userId: agentId,
-        title: "Message WhatsApp reçu",
+        userId: notifyUserId,
+        title: agentId ? "Message WhatsApp reçu" : "Message WhatsApp (client non assigné)",
         message: `${client.firstName} ${client.lastName} : "${incoming.body.substring(0, 80)}${incoming.body.length > 80 ? "..." : ""}"`,
         type: "WHATSAPP_IN",
         isRead: false,
