@@ -1,13 +1,702 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
+// ============================================================================
+// CRM IMMO PRO X — Schema Prisma complet
+// Multi-tenant : chaque table (sauf Tenant) porte un tenantId
+// Conventions : @map snake_case sur chaque champ/table
+// ============================================================================
 
 generator client {
-  provider = "prisma-client"
-  output   = "../src/generated/prisma"
+  provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "postgresql"
+}
+
+// ============================================================================
+// ENUMS
+// ============================================================================
+
+enum WorkspaceType {
+  PROMOTION
+  AGENCY
+
+  @@map("workspace_type")
+}
+
+enum PlanType {
+  STARTER
+  PRO
+  BUSINESS
+  ENTERPRISE
+
+  @@map("plan_type")
+}
+
+enum TenantStatus {
+  ACTIVE
+  DEMO
+  SUSPENDED
+
+  @@map("tenant_status")
+}
+
+enum UserRole {
+  CEO
+  SUPERVISOR
+  AGENT
+  ASSISTANT
+  ADMIN
+
+  @@map("user_role")
+}
+
+enum ProjectStatus {
+  PLANNING
+  IN_PROGRESS
+  DELIVERED
+  CANCELLED
+
+  @@map("project_status")
+}
+
+enum PropertyType {
+  APARTMENT
+  STUDIO
+  DUPLEX
+  PENTHOUSE
+  VILLA
+  COMMERCIAL
+  PARKING
+  CAVE
+  TERRAIN
+
+  @@map("property_type")
+}
+
+enum PropertyStatus {
+  AVAILABLE
+  RESERVED
+  SOLD
+  RENTED
+  BLOCKED
+
+  @@map("property_status")
+}
+
+enum TransactionType {
+  SALE
+  RENT
+
+  @@map("transaction_type")
+}
+
+enum PipelineStage {
+  NEW
+  CONTACTED
+  QUALIFIED
+  VISIT_SCHEDULED
+  VISITED
+  NEGOTIATION
+  RESERVED
+  SIGNED
+  CLOSED
+
+  @@map("pipeline_stage")
+}
+
+enum ClientSource {
+  FACEBOOK
+  WEBSITE
+  REFERRAL
+  WALK_IN
+  PHONE
+  OTHER
+
+  @@map("client_source")
+}
+
+enum TaskType {
+  CALL
+  EMAIL
+  VISIT
+  FOLLOW_UP
+  DOCUMENT
+  MEETING
+  OTHER
+
+  @@map("task_type")
+}
+
+enum TaskStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+
+  @@map("task_status")
+}
+
+enum VisitStatus {
+  SCHEDULED
+  COMPLETED
+  CANCELLED
+  NO_SHOW
+
+  @@map("visit_status")
+}
+
+enum InteractionType {
+  CALL
+  EMAIL
+  SMS
+  WHATSAPP
+  MEETING
+  NOTE
+
+  @@map("interaction_type")
+}
+
+enum InteractionDirection {
+  IN
+  OUT
+
+  @@map("interaction_direction")
+}
+
+enum PaymentType {
+  RESERVATION
+  INSTALLMENT
+  FINAL
+  COMMISSION
+  REFUND
+
+  @@map("payment_type")
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
+
+  @@map("payment_status")
+}
+
+enum ObjectiveType {
+  SALES
+  VISITS
+  CALLS
+  REVENUE
+  CLIENTS
+
+  @@map("objective_type")
+}
+
+enum ObjectivePeriod {
+  DAILY
+  WEEKLY
+  MONTHLY
+  QUARTERLY
+  YEARLY
+
+  @@map("objective_period")
+}
+
+enum MandateType {
+  EXCLUSIVE
+  SIMPLE
+  SEMI_EXCLUSIVE
+
+  @@map("mandate_type")
+}
+
+enum MandateStatus {
+  ACTIVE
+  EXPIRED
+  CANCELLED
+  COMPLETED
+
+  @@map("mandate_status")
+}
+
+enum AIGenerationType {
+  CLIENT_SUMMARY
+  PROPERTY_DESCRIPTION
+  EMAIL_DRAFT
+  SMS_DRAFT
+  SCORING
+  RECOMMENDATION
+
+  @@map("ai_generation_type")
+}
+
+enum AIChannel {
+  EMAIL
+  SMS
+  WHATSAPP
+  INTERNAL
+
+  @@map("ai_channel")
+}
+
+// ============================================================================
+// MODELS
+// ============================================================================
+
+/// Workspace / Organisation — racine du multi-tenant
+model Tenant {
+  id        String       @id @default(uuid())
+  name      String       @map("name")
+  type      WorkspaceType @map("type")
+  plan      PlanType     @default(STARTER) @map("plan")
+  status    TenantStatus @default(ACTIVE) @map("status")
+  settings  Json         @default("{}") @map("settings")
+  createdAt DateTime     @default(now()) @map("created_at")
+  updatedAt DateTime     @updatedAt @map("updated_at")
+
+  // Relations
+  users             User[]
+  projects          Project[]
+  properties        Property[]
+  clients           Client[]
+  tasks             Task[]
+  visits            Visit[]
+  interactions      Interaction[]
+  payments          Payment[]
+  objectives        Objective[]
+  activityLogs      ActivityLog[]
+  notifications     Notification[]
+  ownerMandates     OwnerMandate[]
+  mandates          Mandate[]
+  cadastralData     CadastralData[]
+  automationConfigs AutomationConfig[]
+  aiGenerations     AIGeneration[]
+
+  @@map("tenants")
+}
+
+/// Utilisateur lié à Clerk et à un tenant
+model User {
+  id        String   @id @default(uuid())
+  clerkId   String   @unique @map("clerk_id")
+  tenantId  String   @map("tenant_id")
+  firstName String   @map("first_name")
+  lastName  String   @map("last_name")
+  email     String   @map("email")
+  phone     String?  @map("phone")
+  role      UserRole @map("role")
+  isActive  Boolean  @default(true) @map("is_active")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  tenant              Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  assignedClients     Client[]       @relation("AgentClients")
+  assignedTasks       Task[]         @relation("TaskAssignee")
+  visits              Visit[]        @relation("AgentVisits")
+  interactions        Interaction[]
+  createdObjectives   Objective[]    @relation("ObjectiveCreator")
+  assignedObjectives  Objective[]    @relation("ObjectiveAssignee")
+  activityLogs        ActivityLog[]
+  notifications       Notification[]
+  aiGenerations       AIGeneration[]
+  verifiedCadastral   CadastralData[] @relation("CadastralVerifier")
+
+  @@index([tenantId])
+  @@index([clerkId])
+  @@index([tenantId, role])
+  @@map("users")
+}
+
+/// Programme immobilier (surtout PROMOTION)
+model Project {
+  id                   String        @id @default(uuid())
+  tenantId             String        @map("tenant_id")
+  name                 String        @map("name")
+  address              String?       @map("address")
+  wilaya               String?       @map("wilaya")
+  commune              String?       @map("commune")
+  latitude             Float?        @map("latitude")
+  longitude            Float?        @map("longitude")
+  deliveryDate         DateTime?     @map("delivery_date")
+  progressPercentage   Float         @default(0) @map("progress_percentage")
+  status               ProjectStatus @default(PLANNING) @map("status")
+  createdAt            DateTime      @default(now()) @map("created_at")
+  updatedAt            DateTime      @updatedAt @map("updated_at")
+
+  // Relations
+  tenant     Tenant     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  properties Property[]
+
+  @@index([tenantId])
+  @@index([tenantId, status])
+  @@map("projects")
+}
+
+/// Bien immobilier
+model Property {
+  id              String          @id @default(uuid())
+  tenantId        String          @map("tenant_id")
+  projectId       String?         @map("project_id")
+  type            PropertyType    @map("type")
+  name            String          @map("name")
+  floor           Int?            @map("floor")
+  rooms           Int?            @map("rooms")
+  surface         Float?          @map("surface")
+  price           Decimal?        @map("price") @db.Decimal(15, 2)
+  status          PropertyStatus  @default(AVAILABLE) @map("status")
+  transactionType TransactionType @default(SALE) @map("transaction_type")
+
+  // Champs cadastraux
+  cadastralRef    String?  @map("cadastral_ref")
+  lotNumber       String?  @map("lot_number")
+  titleDeedNumber String?  @map("title_deed_number")
+
+  // Media (JSON arrays)
+  images          Json     @default("[]") @map("images")
+  plans           Json     @default("[]") @map("plans")
+  documents       Json     @default("[]") @map("documents")
+
+  // Géolocalisation
+  latitude        Float?   @map("latitude")
+  longitude       Float?   @map("longitude")
+
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  tenant        Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  project       Project?        @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  tasks         Task[]
+  visits        Visit[]
+  payments      Payment[]
+  mandates      Mandate[]
+  cadastralData CadastralData[]
+
+  @@index([tenantId])
+  @@index([tenantId, status])
+  @@index([tenantId, type])
+  @@index([tenantId, projectId])
+  @@map("properties")
+}
+
+/// Client / Lead — 1 client = 1 agent, doublon détecté par téléphone
+model Client {
+  id              String        @id @default(uuid())
+  tenantId        String        @map("tenant_id")
+  assignedAgentId String?       @map("assigned_agent_id")
+  firstName       String        @map("first_name")
+  lastName        String        @map("last_name")
+  phone           String        @map("phone")
+  email           String?       @map("email")
+  source          ClientSource  @default(OTHER) @map("source")
+  budgetMin       Decimal?      @map("budget_min") @db.Decimal(15, 2)
+  budgetMax       Decimal?      @map("budget_max") @db.Decimal(15, 2)
+
+  // Critères de recherche souhaités
+  desiredType     PropertyType? @map("desired_type")
+  desiredWilaya   String?       @map("desired_wilaya")
+  desiredRooms    Int?          @map("desired_rooms")
+  desiredSurface  Float?        @map("desired_surface")
+
+  // Pipeline
+  pipelineStage   PipelineStage @default(NEW) @map("pipeline_stage")
+  lostReason      String?       @map("lost_reason")
+
+  createdAt       DateTime      @default(now()) @map("created_at")
+  updatedAt       DateTime      @updatedAt @map("updated_at")
+
+  // Relations
+  tenant        Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  assignedAgent User?         @relation("AgentClients", fields: [assignedAgentId], references: [id], onDelete: SetNull)
+  tasks         Task[]
+  visits        Visit[]
+  interactions  Interaction[]
+  payments      Payment[]
+  aiGenerations AIGeneration[]
+
+  @@unique([tenantId, phone])
+  @@index([tenantId])
+  @@index([tenantId, pipelineStage])
+  @@index([tenantId, assignedAgentId])
+  @@map("clients")
+}
+
+/// Tâche (manuelle ou automatisée)
+model Task {
+  id            String        @id @default(uuid())
+  tenantId      String        @map("tenant_id")
+  clientId      String?       @map("client_id")
+  assignedToId  String?       @map("assigned_to_id")
+  propertyId    String?       @map("property_id")
+  title         String        @map("title")
+  type          TaskType      @default(OTHER) @map("type")
+  dueAt         DateTime?     @map("due_at")
+  status        TaskStatus    @default(PENDING) @map("status")
+  isAutomated   Boolean       @default(false) @map("is_automated")
+  pipelineStage PipelineStage? @map("pipeline_stage")
+  notes         String?       @map("notes")
+  createdAt     DateTime      @default(now()) @map("created_at")
+  updatedAt     DateTime      @updatedAt @map("updated_at")
+
+  // Relations
+  tenant     Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  client     Client?   @relation(fields: [clientId], references: [id], onDelete: SetNull)
+  assignedTo User?     @relation("TaskAssignee", fields: [assignedToId], references: [id], onDelete: SetNull)
+  property   Property? @relation(fields: [propertyId], references: [id], onDelete: SetNull)
+
+  @@index([tenantId])
+  @@index([tenantId, status])
+  @@index([tenantId, assignedToId])
+  @@index([tenantId, dueAt])
+  @@map("tasks")
+}
+
+/// Visite d'un bien par un client avec un agent
+model Visit {
+  id          String      @id @default(uuid())
+  tenantId    String      @map("tenant_id")
+  clientId    String      @map("client_id")
+  propertyId  String      @map("property_id")
+  agentId     String      @map("agent_id")
+  scheduledAt DateTime    @map("scheduled_at")
+  status      VisitStatus @default(SCHEDULED) @map("status")
+  feedback    String?     @map("feedback")
+  createdAt   DateTime    @default(now()) @map("created_at")
+  updatedAt   DateTime    @updatedAt @map("updated_at")
+
+  // Relations
+  tenant   Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  client   Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  agent    User     @relation("AgentVisits", fields: [agentId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([tenantId, agentId])
+  @@index([tenantId, scheduledAt])
+  @@map("visits")
+}
+
+/// Interaction / échange avec un client
+model Interaction {
+  id        String               @id @default(uuid())
+  tenantId  String               @map("tenant_id")
+  clientId  String               @map("client_id")
+  userId    String               @map("user_id")
+  type      InteractionType      @map("type")
+  content   String?              @map("content")
+  direction InteractionDirection @map("direction")
+  createdAt DateTime             @default(now()) @map("created_at")
+
+  // Relations
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  client Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([tenantId, clientId])
+  @@map("interactions")
+}
+
+/// Paiement lié à un client et un bien
+model Payment {
+  id         String        @id @default(uuid())
+  tenantId   String        @map("tenant_id")
+  clientId   String        @map("client_id")
+  propertyId String?       @map("property_id")
+  type       PaymentType   @map("type")
+  amount     Decimal       @map("amount") @db.Decimal(15, 2)
+  status     PaymentStatus @default(PENDING) @map("status")
+  createdAt  DateTime      @default(now()) @map("created_at")
+  updatedAt  DateTime      @updatedAt @map("updated_at")
+
+  // Relations
+  tenant   Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  client   Client    @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  property Property? @relation(fields: [propertyId], references: [id], onDelete: SetNull)
+
+  @@index([tenantId])
+  @@index([tenantId, clientId])
+  @@index([tenantId, status])
+  @@map("payments")
+}
+
+/// Objectif (KPI) assigné à un utilisateur
+model Objective {
+  id           String          @id @default(uuid())
+  tenantId     String          @map("tenant_id")
+  createdById  String          @map("created_by_id")
+  assignedToId String          @map("assigned_to_id")
+  type         ObjectiveType   @map("type")
+  targetValue  Float           @map("target_value")
+  currentValue Float           @default(0) @map("current_value")
+  period       ObjectivePeriod @map("period")
+  startDate    DateTime        @map("start_date")
+  endDate      DateTime        @map("end_date")
+  createdAt    DateTime        @default(now()) @map("created_at")
+  updatedAt    DateTime        @updatedAt @map("updated_at")
+
+  // Relations
+  tenant     Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  createdBy  User   @relation("ObjectiveCreator", fields: [createdById], references: [id], onDelete: Cascade)
+  assignedTo User   @relation("ObjectiveAssignee", fields: [assignedToId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([tenantId, assignedToId])
+  @@map("objectives")
+}
+
+/// Journal d'activité (audit trail)
+model ActivityLog {
+  id        String   @id @default(uuid())
+  tenantId  String   @map("tenant_id")
+  userId    String?  @map("user_id")
+  action    String   @map("action")
+  entity    String   @map("entity")
+  entityId  String   @map("entity_id")
+  metadata  Json     @default("{}") @map("metadata")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // Relations
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user   User?  @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([tenantId])
+  @@index([tenantId, entity, entityId])
+  @@index([tenantId, userId])
+  @@index([createdAt])
+  @@map("activity_logs")
+}
+
+/// Notification utilisateur
+model Notification {
+  id        String   @id @default(uuid())
+  tenantId  String   @map("tenant_id")
+  userId    String   @map("user_id")
+  title     String   @map("title")
+  message   String   @map("message")
+  type      String   @map("type")
+  isRead    Boolean  @default(false) @map("is_read")
+  link      String?  @map("link")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // Relations
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([tenantId, userId, isRead])
+  @@map("notifications")
+}
+
+/// Propriétaire de biens (mode AGENCY)
+model OwnerMandate {
+  id        String   @id @default(uuid())
+  tenantId  String   @map("tenant_id")
+  firstName String   @map("first_name")
+  lastName  String   @map("last_name")
+  phone     String   @map("phone")
+  email     String?  @map("email")
+  address   String?  @map("address")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  tenant   Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  mandates Mandate[]
+
+  @@index([tenantId])
+  @@unique([tenantId, phone])
+  @@map("owner_mandates")
+}
+
+/// Mandat de vente/location (mode AGENCY)
+model Mandate {
+  id           String        @id @default(uuid())
+  tenantId     String        @map("tenant_id")
+  ownerId      String        @map("owner_id")
+  propertyId   String        @map("property_id")
+  type         MandateType   @map("type")
+  commission   Decimal?      @map("commission") @db.Decimal(5, 2)
+  startDate    DateTime      @map("start_date")
+  endDate      DateTime      @map("end_date")
+  status       MandateStatus @default(ACTIVE) @map("status")
+  createdAt    DateTime      @default(now()) @map("created_at")
+  updatedAt    DateTime      @updatedAt @map("updated_at")
+
+  // Relations
+  tenant   Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  owner    OwnerMandate @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  property Property     @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([tenantId, status])
+  @@map("mandates")
+}
+
+/// Données cadastrales détaillées
+model CadastralData {
+  id            String   @id @default(uuid())
+  tenantId      String   @map("tenant_id")
+  propertyId    String   @map("property_id")
+  lotNumber     String   @map("lot_number")
+  section       String?  @map("section")
+  commune       String?  @map("commune")
+  titleType     String?  @map("title_type")
+  documents     Json     @default("[]") @map("documents")
+  verifiedById  String?  @map("verified_by_id")
+  verifiedAt    DateTime? @map("verified_at")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  tenant     Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  property   Property  @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  verifiedBy User?     @relation("CadastralVerifier", fields: [verifiedById], references: [id], onDelete: SetNull)
+
+  @@index([tenantId])
+  @@index([tenantId, propertyId])
+  @@map("cadastral_data")
+}
+
+/// Configuration des automatisations par étape du pipeline
+model AutomationConfig {
+  id            String        @id @default(uuid())
+  tenantId      String        @map("tenant_id")
+  pipelineStage PipelineStage @map("pipeline_stage")
+  isActive      Boolean       @default(true) @map("is_active")
+  tasks         Json          @default("[]") @map("tasks")
+  createdAt     DateTime      @default(now()) @map("created_at")
+  updatedAt     DateTime      @updatedAt @map("updated_at")
+
+  // Relations
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, pipelineStage])
+  @@index([tenantId])
+  @@map("automation_configs")
+}
+
+/// Génération IA (suggestions, brouillons) — validation humaine obligatoire
+model AIGeneration {
+  id        String           @id @default(uuid())
+  tenantId  String           @map("tenant_id")
+  userId    String           @map("user_id")
+  clientId  String?          @map("client_id")
+  prompt    String           @map("prompt")
+  response  String           @map("response")
+  type      AIGenerationType @map("type")
+  channel   AIChannel?       @map("channel")
+  wasUsed   Boolean          @default(false) @map("was_used")
+  createdAt DateTime         @default(now()) @map("created_at")
+
+  // Relations
+  tenant Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  client Client? @relation(fields: [clientId], references: [id], onDelete: SetNull)
+
+  @@index([tenantId])
+  @@index([tenantId, userId])
+  @@index([tenantId, type])
+  @@map("ai_generations")
 }
