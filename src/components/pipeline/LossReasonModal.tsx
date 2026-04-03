@@ -82,7 +82,7 @@ export function LossReasonModal({
             <label className="text-sm font-bold">
               Raison de la perte <span className="text-red-500">*</span>
             </label>
-            <Select value={reason} onValueChange={setReason}>
+            <Select value={reason} onValueChange={(v: string | null) => setReason(v ?? "")}>
               <SelectTrigger className="border-neutral-200 dark:border-neutral-800">
                 <SelectValue placeholder="Sélectionner une raison" />
               </SelectTrigger>

@@ -58,7 +58,7 @@ export function PipelineFilters({
         <SlidersHorizontal className="h-4 w-4 text-muted-foreground shrink-0 hidden sm:block" />
 
         {/* Agent Filter */}
-        <Select value={agent} onValueChange={onAgentChange}>
+        <Select value={agent} onValueChange={(v: string | null) => onAgentChange(v ?? "")}>
           <SelectTrigger className="w-[180px] bg-white dark:bg-neutral-900 border-neutral-200 dark:border-neutral-800">
             <SelectValue placeholder="Agent" />
           </SelectTrigger>
@@ -72,7 +72,7 @@ export function PipelineFilters({
         </Select>
 
         {/* Project Filter */}
-        <Select value={project} onValueChange={onProjectChange}>
+        <Select value={project} onValueChange={(v: string | null) => onProjectChange(v ?? "")}>
           <SelectTrigger className="w-[180px] bg-white dark:bg-neutral-900 border-neutral-200 dark:border-neutral-800">
             <SelectValue placeholder="Projet" />
           </SelectTrigger>

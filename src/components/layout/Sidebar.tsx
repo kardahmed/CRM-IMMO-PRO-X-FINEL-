@@ -73,7 +73,7 @@ export function Sidebar() {
   const toggleSidebar = () => setIsCollapsed(!isCollapsed);
 
   return (
-    <TooltipProvider delayDuration={0}>
+    <TooltipProvider delay={0}>
       <aside
         className={cn(
           "relative flex flex-col h-screen border-r bg-card transition-all duration-300 ease-in-out",
@@ -122,7 +122,7 @@ export function Sidebar() {
               if (isCollapsed) {
                 return (
                   <Tooltip key={mId}>
-                    <TooltipTrigger asChild>{content}</TooltipTrigger>
+                    <TooltipTrigger>{content}</TooltipTrigger>
                     <TooltipContent side="right">{module.label}</TooltipContent>
                   </Tooltip>
                 );
