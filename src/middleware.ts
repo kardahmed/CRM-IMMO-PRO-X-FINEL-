@@ -9,6 +9,7 @@ const isPublicRoute = createRouteMatcher([
   "/api/v1/automations/check-overdue",
   "/portal/(.*)",
   "/api/v1/portal/:token",
+  "/api/v1/webhooks/(.*)",
 ]);
 
 const isDashboardRoute = createRouteMatcher(["/(dashboard)(.*)"]);
