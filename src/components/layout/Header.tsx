@@ -30,11 +30,9 @@ export function Header() {
 
         {/* Notifications */}
         <DropdownMenu>
-          <DropdownMenuTrigger className="outline-none">
-            <Button variant="ghost" size="icon" className="relative hover:bg-accent/50">
-              <Bell className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
-              <span className="absolute top-2.5 right-2.5 h-2 w-2 bg-red-500 rounded-full border-2 border-background animate-pulse" />
-            </Button>
+          <DropdownMenuTrigger render={<Button variant="ghost" size="icon" className="relative hover:bg-accent/50 outline-none" />}>
+            <Bell className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
+            <span className="absolute top-2.5 right-2.5 h-2 w-2 bg-red-500 rounded-full border-2 border-background animate-pulse" />
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-80">
             <DropdownMenuLabel>Notifications</DropdownMenuLabel>

@@ -54,10 +54,8 @@ export default function ObjectivesPage() {
         </div>
 
         <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-          <DialogTrigger>
-            <Button className="bg-purple-600 hover:bg-purple-700 text-white font-bold shadow-md">
-              <Plus className="h-4 w-4 mr-1.5" /> Créer un objectif
-            </Button>
+          <DialogTrigger render={<Button className="bg-purple-600 hover:bg-purple-700 text-white font-bold shadow-md" />}>
+            <Plus className="h-4 w-4 mr-1.5" /> Créer un objectif
           </DialogTrigger>
           <DialogContent className="sm:max-w-md">
             <DialogHeader>
