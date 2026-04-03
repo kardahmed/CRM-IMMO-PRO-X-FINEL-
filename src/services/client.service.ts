@@ -239,7 +239,7 @@ export async function changeClientStage(
   // Générer un token portail si passage à RESERVED ou SIGNED (et pas déjà généré)
   const portalStages: PipelineStage[] = ["RESERVED", "SIGNED"];
   const portalToken =
-    portalStages.includes(newStage) && !client.portalToken
+    portalStages.includes(newStage) && !(client as any).portalToken
       ? randomUUID()
       : undefined;
 
@@ -248,7 +248,7 @@ export async function changeClientStage(
     data: {
       pipelineStage: newStage,
       ...(portalToken ? { portalToken } : {}),
-    },
+    } as any,
   });
 
   // Log

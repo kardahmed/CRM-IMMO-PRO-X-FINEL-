@@ -13,11 +13,11 @@ export function Header() {
   return (
     <header className="h-16 border-b bg-background flex items-center justify-between px-6 sticky top-0 z-30 shadow-sm border-neutral-100 dark:border-neutral-800">
       <div className="flex items-center gap-4 flex-1">
-        <div className="relative w-full max-w-sm">
+        <div className="relative w-full max-w-xl lg:max-w-2xl">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input 
             placeholder="Rechercher (clients, biens, tâches...)" 
-            className="pl-9 bg-accent/20 border-accent/30 focus-visible:ring-primary/50"
+            className="pl-9 bg-accent/20 border-accent/30 focus-visible:ring-primary/50 shadow-inner rounded-xl h-10"
           />
         </div>
       </div>
