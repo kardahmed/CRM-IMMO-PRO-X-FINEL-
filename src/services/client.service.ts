@@ -7,6 +7,7 @@ import {
   normalizePhone,
   type IDeduplicationResult,
 } from "@/services/client-dedup";
+import { triggerAutomations } from "@/services/automation-engine";
 
 // ============================================================================
 // Types
@@ -255,8 +256,10 @@ export async function changeClientStage(
     },
   });
 
-  // TODO: Déclencher les automatisations configurées pour cette étape
-  // await triggerAutomations(user.tenantId, newStage, clientId);
+  // Déclencher les automatisations configurées pour cette étape (non-bloquant)
+  triggerAutomations(user.tenantId, clientId, newStage).catch((err) => {
+    console.error("[Automation trigger error]", err);
+  });
 
   return updated;
 }

@@ -6,6 +6,7 @@ const isPublicRoute = createRouteMatcher([
   "/sign-in(.*)",
   "/sign-up(.*)",
   "/api/webhooks(.*)",
+  "/api/v1/automations/check-overdue",
 ]);
 
 const isDashboardRoute = createRouteMatcher(["/(dashboard)(.*)"]);
