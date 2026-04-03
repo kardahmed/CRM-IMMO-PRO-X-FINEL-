@@ -37,6 +37,7 @@ interface IInteractionContext {
 }
 
 export interface IPromptContext {
+  clientId: string;
   client: IClientContext;
   taskTitle: string;
   taskType: string;

@@ -23,9 +23,10 @@ export interface IGenerateMessageInput {
 export interface IGenerateMessageResult {
   generationId: string;
   message: string;
-  prompt: string;
   channel: AIChannel;
   language: AILanguage;
+  clientName: string;
+  pipelineStage: string;
   warning: string;
 }
 
@@ -44,14 +45,18 @@ const AI_MONTHLY_LIMITS: Record<PlanType, number> = {
 // Anthropic client (singleton)
 // ============================================================================
 
+let _anthropicClient: Anthropic | null = null;
+
 function getAnthropicClient(): Anthropic {
+  if (_anthropicClient) return _anthropicClient;
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) {
     throw new Error(
       "ANTHROPIC_API_KEY non configurée. Contactez le Super Admin.",
     );
   }
-  return new Anthropic({ apiKey });
+  _anthropicClient = new Anthropic({ apiKey });
+  return _anthropicClient;
 }
 
 // ============================================================================
@@ -166,6 +171,7 @@ async function loadContext(
 
   // 3. Construire le contexte
   return {
+    clientId: task.client.id,
     client: {
       firstName: task.client.firstName,
       lastName: task.client.lastName,
@@ -288,14 +294,7 @@ export async function generateMessage(
     data: {
       tenantId: user.tenantId,
       userId: user.userId,
-      clientId: promptContext.client
-        ? (
-            await createTenantPrisma(user.tenantId).task.findFirst({
-              where: { id: input.taskId },
-              select: { clientId: true },
-            })
-          )?.clientId ?? null
-        : null,
+      clientId: promptContext.clientId,
       prompt,
       response: responseText,
       type: generationType as "EMAIL_DRAFT" | "SMS_DRAFT" | "CLIENT_SUMMARY",
@@ -325,9 +324,10 @@ export async function generateMessage(
   return {
     generationId: generation.id,
     message: responseText,
-    prompt,
     channel: input.channel,
     language: input.language,
+    clientName: `${promptContext.client.firstName} ${promptContext.client.lastName}`,
+    pipelineStage: promptContext.client.pipelineStage,
     warning:
       "Ce message a été généré par l'IA. Veuillez le relire et le valider avant envoi.",
   };
