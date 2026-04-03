@@ -17,6 +17,8 @@ import {
 import { useRouter } from "next/navigation";
 import { formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { TabInformations } from "@/components/clients/TabInformations";
 
 const STAGE_COLORS: Record<string, string> = {
   ACCUEIL: "bg-blue-100 text-blue-700 border-blue-200",
@@ -112,10 +114,20 @@ export function ClientHeader({ client }: ClientHeaderProps) {
 
       {/* Right: Edit Profile */}
       <div className="flex items-center shrink-0">
-        <Button variant="outline" size="sm" className="gap-2 font-bold hover:bg-accent/50 text-xs h-8">
-          <User className="h-3.5 w-3.5" />
-          Modifier la fiche
-        </Button>
+        <Dialog>
+          <DialogTrigger render={<Button variant="outline" size="sm" className="gap-2 font-bold hover:bg-accent/50 text-xs h-8" />}>
+            <User className="h-3.5 w-3.5" />
+            Modifier la fiche
+          </DialogTrigger>
+          <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto w-full p-6">
+            <DialogHeader>
+              <DialogTitle>Édition du client</DialogTitle>
+            </DialogHeader>
+            <div className="mt-4">
+              <TabInformations client={client as any} />
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );

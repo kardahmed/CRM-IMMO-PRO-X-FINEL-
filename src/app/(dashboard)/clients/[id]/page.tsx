@@ -205,13 +205,6 @@ export default function ClientDetailPage() {
       <Tabs defaultValue="visites" className="w-full mt-4">
         <TabsList className="flex w-full justify-start overflow-x-auto border-b bg-transparent h-auto p-0 rounded-none gap-0 no-scrollbar">
           <TabsTrigger
-            value="edition"
-            className="flex-shrink-0 gap-1.5 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none font-bold text-sm px-5 py-3"
-          >
-            <User className="h-4 w-4" />
-            Édition
-          </TabsTrigger>
-          <TabsTrigger
             value="visites"
             className="flex-shrink-0 gap-1.5 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none font-bold text-sm px-5 py-3"
           >
@@ -256,10 +249,6 @@ export default function ClientDetailPage() {
         </TabsList>
 
         <div className="mt-4">
-          <TabsContent value="edition">
-            <TabInformations client={client} />
-          </TabsContent>
-
           <TabsContent value="visites">
             <TabVisites visits={client.visits || []} />
           </TabsContent>
