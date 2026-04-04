@@ -1,0 +1,170 @@
+import { NextRequest, NextResponse } from "next/server";
+import { currentUser, clerkClient } from "@clerk/nextjs/server";
+import { prisma } from "@/lib/prisma";
+import { rateLimit, getClientIp, RATE_LIMITS } from "@/lib/rate-limit";
+import { z } from "zod";
+import type { UserRole, TenantStatus, PlanType } from "@prisma/client";
+
+const updateTenantSchema = z.object({
+  status: z.enum(["ACTIVE", "DEMO", "SUSPENDED"]).optional(),
+  plan: z.enum(["STARTER", "PRO", "BUSINESS", "ENTERPRISE"]).optional(),
+  name: z.string().min(1).max(200).optional(),
+  demoExpiresAt: z.string().datetime().nullable().optional(),
+  settings: z.record(z.string(), z.unknown()).optional(),
+});
+
+/**
+ * GET /api/v1/admin/tenants/[id]
+ */
+export async function GET(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
+): Promise<NextResponse> {
+  const ip = getClientIp(req);
+  const rl = await rateLimit(`admin:tenant:${ip}`, RATE_LIMITS.authenticated);
+  if (!rl.allowed) {
+    return NextResponse.json({ success: false, error: "Trop de requetes" }, { status: 429 });
+  }
+
+  const user = await currentUser();
+  if (!user) {
+    return NextResponse.json({ success: false, error: "Non authentifie" }, { status: 401 });
+  }
+
+  const role = user.publicMetadata?.role as UserRole | undefined;
+  if (role !== "SUPER_ADMIN" && role !== "ADMIN") {
+    return NextResponse.json({ success: false, error: "Acces refuse" }, { status: 403 });
+  }
+
+  const { id } = await params;
+
+  try {
+    const tenant = await prisma.tenant.findUnique({
+      where: { id },
+      include: {
+        users: {
+          select: { id: true, firstName: true, lastName: true, email: true, role: true, isActive: true },
+        },
+        _count: { select: { clients: true, properties: true, projects: true } },
+      },
+    });
+
+    if (!tenant) {
+      return NextResponse.json({ success: false, error: "Tenant introuvable" }, { status: 404 });
+    }
+
+    return NextResponse.json({ success: true, data: tenant });
+  } catch (err) {
+    console.error("[Admin Tenant Detail]", err);
+    return NextResponse.json({ success: false, error: "Erreur interne" }, { status: 500 });
+  }
+}
+
+/**
+ * PUT /api/v1/admin/tenants/[id]
+ *
+ * Update tenant status, plan, name, etc.
+ * When changing status from DEMO to ACTIVE, also updates Clerk metadata for all users.
+ */
+export async function PUT(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
+): Promise<NextResponse> {
+  const ip = getClientIp(req);
+  const rl = await rateLimit(`admin:tenant:${ip}`, RATE_LIMITS.authenticated);
+  if (!rl.allowed) {
+    return NextResponse.json({ success: false, error: "Trop de requetes" }, { status: 429 });
+  }
+
+  const user = await currentUser();
+  if (!user) {
+    return NextResponse.json({ success: false, error: "Non authentifie" }, { status: 401 });
+  }
+
+  const role = user.publicMetadata?.role as UserRole | undefined;
+  if (role !== "SUPER_ADMIN" && role !== "ADMIN") {
+    return NextResponse.json({ success: false, error: "Acces refuse" }, { status: 403 });
+  }
+
+  const { id } = await params;
+
+  try {
+    const body = await req.json().catch(() => null);
+    if (!body) {
+      return NextResponse.json({ success: false, error: "Corps invalide" }, { status: 400 });
+    }
+
+    const parsed = updateTenantSchema.safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json(
+        { success: false, error: parsed.error.issues[0]?.message || "Donnees invalides" },
+        { status: 422 },
+      );
+    }
+
+    const data = parsed.data;
+
+    const existing = await prisma.tenant.findUnique({
+      where: { id },
+      select: { status: true, plan: true },
+    });
+    if (!existing) {
+      return NextResponse.json({ success: false, error: "Tenant introuvable" }, { status: 404 });
+    }
+
+    // Build update payload
+    const updateData: Record<string, unknown> = {};
+    if (data.status) updateData.status = data.status;
+    if (data.plan) updateData.plan = data.plan;
+    if (data.name) updateData.name = data.name;
+    if (data.settings) {
+      const currentSettings = await prisma.tenant.findUnique({
+        where: { id },
+        select: { settings: true },
+      });
+      const merged = {
+        ...(typeof currentSettings?.settings === "object" && currentSettings.settings !== null
+          ? currentSettings.settings
+          : {}),
+        ...data.settings,
+      };
+      updateData.settings = merged;
+    }
+    if (data.demoExpiresAt !== undefined) {
+      updateData.demoExpiresAt = data.demoExpiresAt ? new Date(data.demoExpiresAt) : null;
+    }
+
+    // When activating (DEMO → ACTIVE), clear demo fields
+    if (data.status === "ACTIVE" && existing.status === "DEMO") {
+      updateData.demoExpiresAt = null;
+      updateData.demoLimits = null;
+    }
+
+    const updated = await prisma.tenant.update({
+      where: { id },
+      data: updateData,
+    });
+
+    // If plan changed, update Clerk metadata for all tenant users
+    if (data.plan && data.plan !== existing.plan) {
+      const tenantUsers = await prisma.user.findMany({
+        where: { tenantId: id, isActive: true },
+        select: { clerkId: true },
+      });
+
+      const clerk = await clerkClient();
+      await Promise.allSettled(
+        tenantUsers.map((u) =>
+          clerk.users.updateUserMetadata(u.clerkId, {
+            publicMetadata: { plan: data.plan },
+          }),
+        ),
+      );
+    }
+
+    return NextResponse.json({ success: true, data: updated });
+  } catch (err) {
+    console.error("[Admin Tenant Update]", err);
+    return NextResponse.json({ success: false, error: "Erreur interne" }, { status: 500 });
+  }
+}

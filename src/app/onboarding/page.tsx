@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { createWorkspace } from "./actions";
-import { Building2, Home, Loader2, AlertCircle } from "lucide-react";
+import { Building2, Home, Loader2, AlertCircle, Clock, Users, Briefcase } from "lucide-react";
 import { useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -23,15 +23,14 @@ export default function OnboardingPage() {
         const res = await createWorkspace(formData);
 
         if (res.success) {
-          toast.success("Espace cree avec succes !");
+          toast.success("Votre espace demo est pret !");
 
-          // Recharger les metadata Clerk pour que le middleware laisse passer
           if (user) {
             await user.reload();
           }
 
           router.refresh();
-          router.push("/");
+          router.push("/dashboard");
         } else {
           setError(res.error);
           toast.error(res.error);
@@ -47,7 +46,6 @@ export default function OnboardingPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#0a0a0a] text-white p-4">
       <div className="relative w-full max-w-md">
-        {/* Decorative blur elements */}
         <div className="absolute top-[-20%] left-[-10%] w-72 h-72 bg-blue-600/30 rounded-full blur-[100px] pointer-events-none" />
         <div className="absolute bottom-[-20%] right-[-10%] w-72 h-72 bg-violet-600/30 rounded-full blur-[100px] pointer-events-none" />
 
@@ -59,16 +57,34 @@ export default function OnboardingPage() {
               <Building2 className="w-8 h-8 text-white" />
             </div>
             <h1 className="text-3xl font-bold tracking-tight text-white mb-2">
-              Creer votre Espace
+              Bienvenue sur IMMO PRO-X
             </h1>
             <p className="text-zinc-400">
-              Configurez votre plateforme CRM pour commencer a gerer vos biens.
+              Creez votre espace de travail pour demarrer votre essai gratuit de 14 jours.
             </p>
+          </div>
+
+          {/* Demo info */}
+          <div className="relative z-10 grid grid-cols-3 gap-2 mb-6">
+            <div className="text-center p-2.5 rounded-xl bg-white/5 border border-white/10">
+              <Clock className="h-4 w-4 text-amber-400 mx-auto mb-1" />
+              <p className="text-[10px] text-zinc-500">Duree</p>
+              <p className="text-xs font-bold text-white">14 jours</p>
+            </div>
+            <div className="text-center p-2.5 rounded-xl bg-white/5 border border-white/10">
+              <Users className="h-4 w-4 text-cyan-400 mx-auto mb-1" />
+              <p className="text-[10px] text-zinc-500">Clients</p>
+              <p className="text-xs font-bold text-white">5 max</p>
+            </div>
+            <div className="text-center p-2.5 rounded-xl bg-white/5 border border-white/10">
+              <Briefcase className="h-4 w-4 text-indigo-400 mx-auto mb-1" />
+              <p className="text-[10px] text-zinc-500">Biens</p>
+              <p className="text-xs font-bold text-white">3 max</p>
+            </div>
           </div>
 
           <form onSubmit={handleSubmit} className="relative z-10 space-y-6">
             <div className="space-y-4">
-              {/* Error banner */}
               {error && (
                 <div className="flex items-center gap-2 p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
                   <AlertCircle className="h-4 w-4 shrink-0" />
@@ -78,7 +94,7 @@ export default function OnboardingPage() {
 
               <div className="space-y-2">
                 <label htmlFor="name" className="text-sm font-medium text-zinc-300">
-                  Nom de l&apos;entreprise
+                  Nom de l'entreprise
                 </label>
                 <input
                   id="name"
@@ -95,7 +111,7 @@ export default function OnboardingPage() {
 
               <div className="space-y-3">
                 <label className="text-sm font-medium text-zinc-300">
-                  Type d&apos;activite
+                  Type d'activite
                 </label>
                 <div className="grid grid-cols-2 gap-3">
                   <label className="relative flex flex-col items-center justify-center gap-2 p-4 rounded-xl border border-white/10 bg-black/50 cursor-pointer hover:bg-white/5 transition-all group has-[:checked]:border-blue-500 has-[:checked]:bg-blue-500/10">
@@ -141,9 +157,13 @@ export default function OnboardingPage() {
                   Creation en cours...
                 </>
               ) : (
-                "Lancer le CRM"
+                "Demarrer mon essai gratuit"
               )}
             </button>
+
+            <p className="text-center text-[11px] text-zinc-600">
+              Aucune carte bancaire requise. Essai gratuit de 14 jours.
+            </p>
           </form>
         </div>
       </div>
