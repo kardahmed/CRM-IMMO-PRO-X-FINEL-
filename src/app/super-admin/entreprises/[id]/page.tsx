@@ -25,8 +25,6 @@ interface ITenantDetail {
   type: string;
   plan: string;
   status: string;
-  demoExpiresAt: string | null;
-  demoLimits: { maxClients?: number; maxProperties?: number; maxUsers?: number } | null;
   settings: Record<string, unknown>;
   createdAt: string;
   users: Array<{
@@ -206,8 +204,8 @@ export default function WorkspaceDetailPanel() {
           <h1 className="text-3xl font-black text-white tracking-tight">{tenant.name}</h1>
           <p className="text-sm text-neutral-400 mt-1">
             Cree le {format(new Date(tenant.createdAt), "dd MMMM yyyy", { locale: fr })}
-            {tenant.demoExpiresAt && (
-              <> — Demo expire le {format(new Date(tenant.demoExpiresAt), "dd MMMM yyyy", { locale: fr })}</>
+            {tenant.settings?.demoExpiresAt && (
+              <> — Demo expire le {format(new Date(tenant.settings.demoExpiresAt as string), "dd MMMM yyyy", { locale: fr })}</>
             )}
           </p>
         </div>
@@ -365,13 +363,13 @@ export default function WorkspaceDetailPanel() {
                 <span className="text-lg font-black text-white">{tenant.users.length}</span>
               </div>
 
-              {tenant.demoLimits && (
+              {tenant.settings?.demoLimits && (
                 <div className="mt-4 p-3 rounded-lg bg-amber-500/5 border border-amber-500/20">
                   <p className="text-xs font-bold text-amber-400 uppercase mb-2">Limites Demo</p>
                   <div className="space-y-1 text-xs text-neutral-400">
-                    <p>Max clients: {tenant.demoLimits.maxClients ?? "—"}</p>
-                    <p>Max biens: {tenant.demoLimits.maxProperties ?? "—"}</p>
-                    <p>Max users: {tenant.demoLimits.maxUsers ?? "—"}</p>
+                    <p>Max clients: {(tenant.settings.demoLimits as Record<string, number>)?.maxClients ?? "—"}</p>
+                    <p>Max biens: {(tenant.settings.demoLimits as Record<string, number>)?.maxProperties ?? "—"}</p>
+                    <p>Max users: {(tenant.settings.demoLimits as Record<string, number>)?.maxUsers ?? "—"}</p>
                   </div>
                 </div>
               )}

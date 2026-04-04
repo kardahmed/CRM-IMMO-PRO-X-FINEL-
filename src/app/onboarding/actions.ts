@@ -29,7 +29,8 @@ const createWorkspaceSchema = z.object({
  * Every new user gets a DEMO workspace (14 days, limited features).
  * After the trial, the super admin converts them to a paid plan.
  *
- * Also creates a DemoLead record for super admin tracking.
+ * Demo info (expiresAt, limits) is stored in the `settings` JSON field
+ * to avoid dependency on DB columns that may not have been migrated yet.
  */
 export async function createWorkspace(formData: FormData) {
   const { userId: clerkId } = await auth();
@@ -67,21 +68,21 @@ export async function createWorkspace(formData: FormData) {
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + DEMO_DURATION_DAYS);
 
+    // 1. Create tenant + user in a transaction
     const result = await prisma.$transaction(async (tx) => {
-      // 1. Create DEMO tenant
       const tenant = await tx.tenant.create({
         data: {
           name,
           type,
           plan: "STARTER",
           status: "DEMO",
-          demoExpiresAt: expiresAt,
-          demoLimits: DEMO_LIMITS,
-          settings: {},
+          settings: {
+            demoExpiresAt: expiresAt.toISOString(),
+            demoLimits: DEMO_LIMITS,
+          },
         },
       });
 
-      // 2. Create CEO user
       await tx.user.create({
         data: {
           clerkId,
@@ -95,8 +96,12 @@ export async function createWorkspace(formData: FormData) {
         },
       });
 
-      // 3. Create DemoLead for super admin tracking
-      await tx.demoLead.create({
+      return { tenant };
+    });
+
+    // 2. Create DemoLead for super admin tracking (non-critical)
+    try {
+      await prisma.demoLead.create({
         data: {
           companyName: name,
           companyType: type,
@@ -104,15 +109,15 @@ export async function createWorkspace(formData: FormData) {
           lastName: clerkUser.lastName || "",
           email,
           phone: phone || "",
-          tenantId: tenant.id,
+          tenantId: result.tenant.id,
           status: "NEW",
         },
       });
+    } catch {
+      console.warn("[createWorkspace] DemoLead creation skipped (table may not exist)");
+    }
 
-      return { tenant };
-    });
-
-    // Update Clerk metadata — unlocks dashboard access
+    // 3. Update Clerk metadata — unlocks dashboard access
     const client = await clerkClient();
     await client.users.updateUserMetadata(clerkId, {
       publicMetadata: {

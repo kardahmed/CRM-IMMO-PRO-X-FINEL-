@@ -9,7 +9,6 @@ const updateTenantSchema = z.object({
   status: z.enum(["ACTIVE", "DEMO", "SUSPENDED"]).optional(),
   plan: z.enum(["STARTER", "PRO", "BUSINESS", "ENTERPRISE"]).optional(),
   name: z.string().min(1).max(200).optional(),
-  demoExpiresAt: z.string().datetime().nullable().optional(),
   settings: z.record(z.string(), z.unknown()).optional(),
 });
 
@@ -130,14 +129,19 @@ export async function PUT(
       };
       updateData.settings = merged;
     }
-    if (data.demoExpiresAt !== undefined) {
-      updateData.demoExpiresAt = data.demoExpiresAt ? new Date(data.demoExpiresAt) : null;
-    }
-
-    // When activating (DEMO → ACTIVE), clear demo fields
+    // When activating (DEMO → ACTIVE), clear demo fields from settings
     if (data.status === "ACTIVE" && existing.status === "DEMO") {
-      updateData.demoExpiresAt = null;
-      updateData.demoLimits = null;
+      const currentSettings = await prisma.tenant.findUnique({
+        where: { id },
+        select: { settings: true },
+      });
+      const settingsObj =
+        typeof currentSettings?.settings === "object" && currentSettings.settings !== null
+          ? { ...(currentSettings.settings as Record<string, unknown>) }
+          : {};
+      delete settingsObj.demoExpiresAt;
+      delete settingsObj.demoLimits;
+      updateData.settings = settingsObj;
     }
 
     const updated = await prisma.tenant.update({

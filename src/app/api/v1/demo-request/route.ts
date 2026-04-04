@@ -101,9 +101,10 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
           type: data.companyType === "PROMOTION" ? "PROMOTION" : "AGENCY",
           plan: "STARTER",
           status: "DEMO",
-          demoExpiresAt: expiresAt,
-          demoLimits: DEMO_LIMITS,
-          settings: {},
+          settings: {
+            demoExpiresAt: expiresAt.toISOString(),
+            demoLimits: DEMO_LIMITS,
+          },
         },
       });
 

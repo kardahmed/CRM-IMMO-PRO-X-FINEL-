@@ -17,7 +17,7 @@ interface ITenant {
   type: string;
   plan: string;
   status: string;
-  demoExpiresAt: string | null;
+  settings: Record<string, unknown>;
   createdAt: string;
   _count: {
     users: number;

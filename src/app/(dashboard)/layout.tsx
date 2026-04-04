@@ -27,19 +27,26 @@ async function getTenantInfo(): Promise<ITenantInfo | null> {
 
     const tenant = await prisma.tenant.findUnique({
       where: { id: user.tenantId },
-      select: { status: true, demoExpiresAt: true },
+      select: { status: true, settings: true },
     });
     if (!tenant) return null;
 
     const isDemo = tenant.status === "DEMO";
+
+    // Demo expiry can be in settings JSON (always available) or dedicated column
+    const settings = (typeof tenant.settings === "object" && tenant.settings !== null)
+      ? (tenant.settings as Record<string, unknown>)
+      : {};
+    const demoExpiresAt = settings.demoExpiresAt as string | undefined;
+
     const isDemoExpired =
-      isDemo && tenant.demoExpiresAt != null && new Date() > tenant.demoExpiresAt;
+      isDemo && demoExpiresAt != null && new Date() > new Date(demoExpiresAt);
 
     return {
       isDemo,
       isSuspended: tenant.status === "SUSPENDED",
       isDemoExpired,
-      expiresAt: tenant.demoExpiresAt?.toISOString() ?? null,
+      expiresAt: demoExpiresAt ?? null,
     };
   } catch {
     return null;

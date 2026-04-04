@@ -252,8 +252,8 @@ model Tenant {
   plan           PlanType      @default(STARTER) @map("plan")
   status         TenantStatus  @default(ACTIVE) @map("status")
   settings       Json          @default("{}") @map("settings")
-  demoExpiresAt  DateTime?     @map("demo_expires_at")
-  demoLimits     Json?         @map("demo_limits") // { maxClients: 5, maxProperties: 3, maxUsers: 1 }
+  // Demo info (demoExpiresAt, demoLimits) is stored inside settings JSON
+  // to avoid requiring a DB migration. Access via settings.demoExpiresAt
   createdAt      DateTime      @default(now()) @map("created_at")
   updatedAt      DateTime      @updatedAt @map("updated_at")
 
