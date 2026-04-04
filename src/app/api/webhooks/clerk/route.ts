@@ -129,10 +129,31 @@ export async function POST(req: Request) {
     case "user.deleted": {
       const clerkId = data.id as string;
       if (clerkId) {
+        // Find the user before deactivating to get tenantId
+        const deletedUser = await prisma.user.findFirst({
+          where: { clerkId },
+          select: { id: true, tenantId: true },
+        });
+
+        // Soft-delete the user
         await prisma.user.updateMany({
           where: { clerkId },
           data: { isActive: false },
         });
+
+        // If this was the last active user in the tenant, suspend the workspace
+        if (deletedUser?.tenantId) {
+          const remainingActive = await prisma.user.count({
+            where: { tenantId: deletedUser.tenantId, isActive: true },
+          });
+          if (remainingActive === 0) {
+            await prisma.tenant.update({
+              where: { id: deletedUser.tenantId },
+              data: { status: "SUSPENDED" },
+            });
+            console.log(`[Clerk Webhook] Tenant ${deletedUser.tenantId} suspended — no active users remain`);
+          }
+        }
       }
       break;
     }

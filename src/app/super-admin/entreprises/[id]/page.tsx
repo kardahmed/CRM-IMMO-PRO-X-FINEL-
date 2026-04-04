@@ -5,7 +5,14 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Building2, Save, Ban, CheckCircle2, Users, Activity, Loader2, AlertCircle, ArrowLeft, Briefcase } from "lucide-react";
+import { Building2, Save, Ban, CheckCircle2, Users, Activity, Loader2, AlertCircle, ArrowLeft, Briefcase, Trash2, UserMinus } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { toast } from "sonner";
@@ -46,6 +53,9 @@ export default function WorkspaceDetailPanel() {
   const [saving, setSaving] = useState(false);
   const [newStatus, setNewStatus] = useState("");
   const [newPlan, setNewPlan] = useState("");
+  const [deleting, setDeleting] = useState(false);
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [togglingUser, setTogglingUser] = useState<string | null>(null);
 
   async function fetchTenant() {
     setLoading(true);
@@ -99,6 +109,50 @@ export default function WorkspaceDetailPanel() {
       toast.error("Erreur lors de la sauvegarde");
     } finally {
       setSaving(false);
+    }
+  }
+
+  async function handleDeleteWorkspace() {
+    setDeleting(true);
+    try {
+      const res = await fetch(`/api/v1/admin/tenants/${id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("Erreur");
+      const json = await res.json();
+      if (json.success) {
+        toast.success(`Workspace supprime (${json.data.usersCleared} utilisateurs nettoyes dans Clerk)`);
+        // Redirect back to list
+        window.location.href = "/super-admin/entreprises";
+      } else {
+        toast.error(json.error || "Erreur");
+      }
+    } catch {
+      toast.error("Erreur lors de la suppression");
+    } finally {
+      setDeleting(false);
+      setIsDeleteOpen(false);
+    }
+  }
+
+  async function handleToggleUser(userId: string, isActive: boolean) {
+    setTogglingUser(userId);
+    try {
+      const res = await fetch(`/api/v1/admin/tenants/${id}/users/${userId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ isActive }),
+      });
+      if (!res.ok) throw new Error("Erreur");
+      const json = await res.json();
+      if (json.success) {
+        toast.success(`Utilisateur ${isActive ? "reactive" : "desactive"} (Clerk synchronise)`);
+        fetchTenant();
+      } else {
+        toast.error(json.error || "Erreur");
+      }
+    } catch {
+      toast.error("Erreur lors de la modification");
+    } finally {
+      setTogglingUser(null);
     }
   }
 
@@ -158,6 +212,14 @@ export default function WorkspaceDetailPanel() {
           </p>
         </div>
         <div className="flex items-center gap-3">
+          <Button
+            variant="outline"
+            onClick={() => setIsDeleteOpen(true)}
+            className="border-rose-800 text-rose-400 hover:bg-rose-500/10 font-bold gap-2"
+          >
+            <Trash2 className="h-4 w-4" />
+            Supprimer
+          </Button>
           <Button
             onClick={handleSave}
             disabled={saving}
@@ -242,8 +304,28 @@ export default function WorkspaceDetailPanel() {
                       <Badge className={`text-[10px] uppercase font-bold ${u.isActive ? "bg-emerald-500/10 text-emerald-400" : "bg-neutral-800 text-neutral-500"} border-none`}>
                         {u.role}
                       </Badge>
-                      {!u.isActive && (
-                        <Badge className="bg-rose-500/10 text-rose-400 border-none text-[10px]">Inactif</Badge>
+                      {u.isActive ? (
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="h-7 text-[10px] text-rose-400 hover:bg-rose-500/10 font-bold gap-1"
+                          disabled={togglingUser === u.id}
+                          onClick={() => handleToggleUser(u.id, false)}
+                        >
+                          {togglingUser === u.id ? <Loader2 className="h-3 w-3 animate-spin" /> : <UserMinus className="h-3 w-3" />}
+                          Desactiver
+                        </Button>
+                      ) : (
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="h-7 text-[10px] text-emerald-400 hover:bg-emerald-500/10 font-bold gap-1"
+                          disabled={togglingUser === u.id}
+                          onClick={() => handleToggleUser(u.id, true)}
+                        >
+                          {togglingUser === u.id ? <Loader2 className="h-3 w-3 animate-spin" /> : <CheckCircle2 className="h-3 w-3" />}
+                          Reactiver
+                        </Button>
                       )}
                     </div>
                   </div>
@@ -297,6 +379,37 @@ export default function WorkspaceDetailPanel() {
           </Card>
         </div>
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
+        <DialogContent className="sm:max-w-md bg-neutral-900 border-neutral-800">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-black text-white flex items-center gap-2">
+              <Trash2 className="h-5 w-5 text-rose-500" /> Supprimer le workspace
+            </DialogTitle>
+            <DialogDescription className="text-neutral-400">
+              Cette action est irreversible. Le workspace <strong className="text-white">{tenant.name}</strong> sera supprime avec toutes ses donnees (clients, biens, projets). Les comptes Clerk des {tenant.users.length} utilisateur(s) seront nettoyes.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex gap-3 mt-4">
+            <Button
+              variant="outline"
+              className="flex-1 border-neutral-700 text-white"
+              onClick={() => setIsDeleteOpen(false)}
+            >
+              Annuler
+            </Button>
+            <Button
+              className="flex-1 bg-rose-600 hover:bg-rose-700 text-white font-bold gap-2"
+              onClick={handleDeleteWorkspace}
+              disabled={deleting}
+            >
+              {deleting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+              Confirmer la suppression
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

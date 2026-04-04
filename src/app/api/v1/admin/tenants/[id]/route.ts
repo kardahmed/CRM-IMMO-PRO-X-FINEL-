@@ -3,7 +3,7 @@ import { currentUser, clerkClient } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
 import { rateLimit, getClientIp, RATE_LIMITS } from "@/lib/rate-limit";
 import { z } from "zod";
-import type { UserRole, TenantStatus, PlanType } from "@prisma/client";
+import type { UserRole } from "@prisma/client";
 
 const updateTenantSchema = z.object({
   status: z.enum(["ACTIVE", "DEMO", "SUSPENDED"]).optional(),
@@ -165,6 +165,74 @@ export async function PUT(
     return NextResponse.json({ success: true, data: updated });
   } catch (err) {
     console.error("[Admin Tenant Update]", err);
+    return NextResponse.json({ success: false, error: "Erreur interne" }, { status: 500 });
+  }
+}
+
+/**
+ * DELETE /api/v1/admin/tenants/[id]
+ *
+ * Delete a workspace: deactivate all users, clear Clerk metadata, then delete the tenant.
+ * Cascading deletes in Prisma schema handle clients, properties, projects, etc.
+ */
+export async function DELETE(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
+): Promise<NextResponse> {
+  const ip = getClientIp(req);
+  const rl = await rateLimit(`admin:tenant:${ip}`, RATE_LIMITS.authenticated);
+  if (!rl.allowed) {
+    return NextResponse.json({ success: false, error: "Trop de requetes" }, { status: 429 });
+  }
+
+  const user = await currentUser();
+  if (!user) {
+    return NextResponse.json({ success: false, error: "Non authentifie" }, { status: 401 });
+  }
+
+  const role = user.publicMetadata?.role as UserRole | undefined;
+  if (role !== "SUPER_ADMIN") {
+    return NextResponse.json({ success: false, error: "Acces refuse — SUPER_ADMIN requis" }, { status: 403 });
+  }
+
+  const { id } = await params;
+
+  try {
+    // 1. Get all users of this tenant
+    const tenantUsers = await prisma.user.findMany({
+      where: { tenantId: id },
+      select: { id: true, clerkId: true },
+    });
+
+    // 2. Clear Clerk metadata for all users (remove tenantId, role, plan)
+    const clerk = await clerkClient();
+    await Promise.allSettled(
+      tenantUsers.map((u) =>
+        clerk.users.updateUserMetadata(u.clerkId, {
+          publicMetadata: {
+            tenantId: null,
+            role: null,
+            workspaceType: null,
+            plan: null,
+          },
+        }),
+      ),
+    );
+
+    // 3. Deactivate all users in DB
+    await prisma.user.updateMany({
+      where: { tenantId: id },
+      data: { isActive: false },
+    });
+
+    // 4. Delete the tenant (cascade removes related data)
+    await prisma.tenant.delete({
+      where: { id },
+    });
+
+    return NextResponse.json({ success: true, data: { deleted: true, usersCleared: tenantUsers.length } });
+  } catch (err) {
+    console.error("[Admin Tenant Delete]", err);
     return NextResponse.json({ success: false, error: "Erreur interne" }, { status: 500 });
   }
 }
