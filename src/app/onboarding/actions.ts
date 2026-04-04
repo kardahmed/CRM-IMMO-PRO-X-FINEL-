@@ -21,6 +21,8 @@ const createWorkspaceSchema = z.object({
   type: z.enum(["AGENCY", "PROMOTION"], {
     error: "Type d'activite invalide",
   }),
+  wilaya: z.string().max(100).optional(),
+  phone: z.string().max(30).optional(),
 });
 
 /**
@@ -41,6 +43,8 @@ export async function createWorkspace(formData: FormData) {
   const parsed = createWorkspaceSchema.safeParse({
     name: formData.get("name"),
     type: formData.get("type"),
+    wilaya: formData.get("wilaya") || undefined,
+    phone: formData.get("phone") || undefined,
   });
 
   if (!parsed.success) {
@@ -48,7 +52,7 @@ export async function createWorkspace(formData: FormData) {
     return { success: false as const, error: firstError };
   }
 
-  const { name, type } = parsed.data;
+  const { name, type, wilaya, phone: workspacePhone } = parsed.data;
 
   const clerkUser = await currentUser();
   if (!clerkUser) {
@@ -79,6 +83,8 @@ export async function createWorkspace(formData: FormData) {
           settings: {
             demoExpiresAt: expiresAt.toISOString(),
             demoLimits: DEMO_LIMITS,
+            ...(wilaya ? { wilaya } : {}),
+            ...(workspacePhone ? { phone: workspacePhone } : {}),
           },
         },
       });

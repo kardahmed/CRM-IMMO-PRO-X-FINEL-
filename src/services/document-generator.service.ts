@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { htmlToPdf } from "@/lib/puppeteer";
+import { htmlToPdf } from "@/lib/pdf-renderer";
 
 // ============================================================================
 // Types
@@ -9,7 +9,10 @@ export type DocumentType =
   | "BON_RESERVATION"
   | "RECU_PAIEMENT"
   | "FICHE_VISITE"
-  | "COMPROMIS_VENTE";
+  | "COMPROMIS_VENTE"
+  | "BON_COMMANDE"
+  | "ETAT_DES_LIEUX"
+  | "CONTRAT_LOCATION";
 
 export interface IDocumentInput {
   type: DocumentType;
@@ -515,6 +518,294 @@ async function buildCompromisVente(
 }
 
 // ============================================================================
+// BON DE COMMANDE
+// ============================================================================
+
+async function buildBonCommande(
+  tenantId: string,
+  clientId: string,
+  propertyId?: string,
+): Promise<string> {
+  const tenant = await prisma.tenant.findUnique({
+    where: { id: tenantId },
+    select: { name: true },
+  });
+
+  const client = await prisma.client.findFirst({
+    where: { id: clientId, tenantId },
+    select: { firstName: true, lastName: true, phone: true, email: true },
+  });
+  if (!client) throw new Error("Client introuvable");
+
+  const property = propertyId
+    ? await prisma.property.findFirst({
+        where: { id: propertyId, tenantId },
+        select: {
+          name: true,
+          type: true,
+          surface: true,
+          rooms: true,
+          floor: true,
+          price: true,
+          project: { select: { name: true, address: true } },
+        },
+      })
+    : null;
+
+  const tenantName = tenant?.name ?? "CRM IMMO PRO X";
+
+  return `<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><style>${baseStyles()}</style></head><body>
+    ${docHeader(tenantName, "Bon de Commande", new Date())}
+
+    <div class="section">
+      <div class="section-title">Commanditaire</div>
+      <div class="row"><span class="label">Nom complet</span><span class="value">${client.firstName} ${client.lastName}</span></div>
+      <div class="row"><span class="label">Téléphone</span><span class="value">${client.phone}</span></div>
+      ${client.email ? `<div class="row"><span class="label">Email</span><span class="value">${client.email}</span></div>` : ""}
+    </div>
+
+    ${
+      property
+        ? `<div class="section">
+      <div class="section-title">Bien commandé</div>
+      <div class="row"><span class="label">Désignation</span><span class="value">${property.name}</span></div>
+      <div class="row"><span class="label">Type</span><span class="value">${property.type}</span></div>
+      ${property.surface ? `<div class="row"><span class="label">Surface</span><span class="value">${property.surface} m²</span></div>` : ""}
+      ${property.rooms ? `<div class="row"><span class="label">Pièces</span><span class="value">${property.rooms}</span></div>` : ""}
+      ${property.floor !== null && property.floor !== undefined ? `<div class="row"><span class="label">Étage</span><span class="value">${property.floor}</span></div>` : ""}
+      ${property.price ? `<div class="row"><span class="label">Prix</span><span class="value">${formatPrice(Number(property.price))}</span></div>` : ""}
+      ${property.project ? `<div class="row"><span class="label">Projet</span><span class="value">${property.project.name}${property.project.address ? ` — ${property.project.address}` : ""}</span></div>` : ""}
+    </div>`
+        : ""
+    }
+
+    <div class="section">
+      <div class="section-title">Options et personnalisations</div>
+      <div style="border:1px solid #e2e8f0;border-radius:6px;padding:12px;min-height:80px;font-size:13px;color:#64748b">
+        À compléter selon les choix du client...
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Conditions</div>
+      <p style="font-size:12px;color:#64748b">Ce bon de commande engage le commanditaire à l'acquisition du bien désigné ci-dessus aux conditions convenues. Tout acompte versé sera déduit du prix total.</p>
+    </div>
+
+    <div class="signature-block">
+      <div class="signature-box"><div class="signature-line">Le commanditaire</div></div>
+      <div class="signature-box"><div class="signature-line">Le vendeur</div></div>
+    </div>
+
+    ${docFooter(tenantName)}
+  </body></html>`;
+}
+
+// ============================================================================
+// ÉTAT DES LIEUX
+// ============================================================================
+
+async function buildEtatDesLieux(
+  tenantId: string,
+  clientId: string,
+  propertyId?: string,
+): Promise<string> {
+  const tenant = await prisma.tenant.findUnique({
+    where: { id: tenantId },
+    select: { name: true },
+  });
+
+  const client = await prisma.client.findFirst({
+    where: { id: clientId, tenantId },
+    select: { firstName: true, lastName: true, phone: true },
+  });
+  if (!client) throw new Error("Client introuvable");
+
+  const property = propertyId
+    ? await prisma.property.findFirst({
+        where: { id: propertyId, tenantId },
+        select: {
+          name: true,
+          type: true,
+          surface: true,
+          rooms: true,
+          floor: true,
+          project: { select: { name: true, address: true } },
+        },
+      })
+    : null;
+
+  const rooms = property?.rooms ?? 3;
+  const roomRows = Array.from({ length: rooms }, (_, i) => {
+    const label = i === 0 ? "Entrée / Séjour" : i === rooms - 1 ? "Cuisine / SDB" : `Pièce ${i + 1}`;
+    return `<tr>
+      <td>${label}</td>
+      <td style="text-align:center">☐ Bon ☐ Moyen ☐ Mauvais</td>
+      <td style="text-align:center">☐ Bon ☐ Moyen ☐ Mauvais</td>
+      <td></td>
+    </tr>`;
+  }).join("");
+
+  const tenantName = tenant?.name ?? "CRM IMMO PRO X";
+
+  return `<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><style>${baseStyles()}</style></head><body>
+    ${docHeader(tenantName, "État des Lieux", new Date())}
+
+    <div class="section">
+      <div class="section-title">Locataire / Acquéreur</div>
+      <div class="row"><span class="label">Nom complet</span><span class="value">${client.firstName} ${client.lastName}</span></div>
+      <div class="row"><span class="label">Téléphone</span><span class="value">${client.phone}</span></div>
+    </div>
+
+    ${
+      property
+        ? `<div class="section">
+      <div class="section-title">Bien concerné</div>
+      <div class="row"><span class="label">Désignation</span><span class="value">${property.name}</span></div>
+      <div class="row"><span class="label">Type</span><span class="value">${property.type}</span></div>
+      ${property.surface ? `<div class="row"><span class="label">Surface</span><span class="value">${property.surface} m²</span></div>` : ""}
+      ${property.rooms ? `<div class="row"><span class="label">Pièces</span><span class="value">${property.rooms}</span></div>` : ""}
+      ${property.floor !== null && property.floor !== undefined ? `<div class="row"><span class="label">Étage</span><span class="value">${property.floor}</span></div>` : ""}
+      ${property.project ? `<div class="row"><span class="label">Adresse</span><span class="value">${property.project.name}${property.project.address ? ` — ${property.project.address}` : ""}</span></div>` : ""}
+    </div>`
+        : ""
+    }
+
+    <div class="section">
+      <div class="section-title">Constat par pièce</div>
+      <table>
+        <thead>
+          <tr><th>Pièce</th><th style="text-align:center">Murs / Sol</th><th style="text-align:center">Plomberie / Élec.</th><th>Observations</th></tr>
+        </thead>
+        <tbody>${roomRows}</tbody>
+      </table>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Relevés compteurs</div>
+      <div class="row"><span class="label">Électricité</span><span class="value">_______________</span></div>
+      <div class="row"><span class="label">Gaz</span><span class="value">_______________</span></div>
+      <div class="row"><span class="label">Eau</span><span class="value">_______________</span></div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Observations générales</div>
+      <div style="border:1px solid #e2e8f0;border-radius:6px;padding:12px;min-height:80px;font-size:13px;color:#64748b">
+        À compléter...
+      </div>
+    </div>
+
+    <div class="signature-block">
+      <div class="signature-box"><div class="signature-line">Le locataire / acquéreur</div></div>
+      <div class="signature-box"><div class="signature-line">Le bailleur / vendeur</div></div>
+    </div>
+
+    ${docFooter(tenantName)}
+  </body></html>`;
+}
+
+// ============================================================================
+// CONTRAT DE LOCATION
+// ============================================================================
+
+async function buildContratLocation(
+  tenantId: string,
+  clientId: string,
+  propertyId?: string,
+): Promise<string> {
+  const tenant = await prisma.tenant.findUnique({
+    where: { id: tenantId },
+    select: { name: true },
+  });
+
+  const client = await prisma.client.findFirst({
+    where: { id: clientId, tenantId },
+    select: { firstName: true, lastName: true, phone: true, email: true },
+  });
+  if (!client) throw new Error("Client introuvable");
+
+  const property = propertyId
+    ? await prisma.property.findFirst({
+        where: { id: propertyId, tenantId },
+        select: {
+          name: true,
+          type: true,
+          surface: true,
+          rooms: true,
+          floor: true,
+          price: true,
+          project: { select: { name: true, address: true, wilaya: true } },
+        },
+      })
+    : null;
+
+  const monthlyRent = property?.price ? formatPrice(Number(property.price)) : "_______________";
+  const tenantName = tenant?.name ?? "CRM IMMO PRO X";
+
+  return `<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><style>${baseStyles()}</style></head><body>
+    ${docHeader(tenantName, "Contrat de Location", new Date())}
+
+    <div class="section">
+      <div class="section-title">Le bailleur</div>
+      <div class="row"><span class="label">Société / Nom</span><span class="value">${tenantName}</span></div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Le locataire</div>
+      <div class="row"><span class="label">Nom complet</span><span class="value">${client.firstName} ${client.lastName}</span></div>
+      <div class="row"><span class="label">Téléphone</span><span class="value">${client.phone}</span></div>
+      ${client.email ? `<div class="row"><span class="label">Email</span><span class="value">${client.email}</span></div>` : ""}
+    </div>
+
+    ${
+      property
+        ? `<div class="section">
+      <div class="section-title">Objet de la location</div>
+      <div class="row"><span class="label">Désignation</span><span class="value">${property.name}</span></div>
+      <div class="row"><span class="label">Type</span><span class="value">${property.type}</span></div>
+      ${property.surface ? `<div class="row"><span class="label">Surface</span><span class="value">${property.surface} m²</span></div>` : ""}
+      ${property.rooms ? `<div class="row"><span class="label">Pièces</span><span class="value">${property.rooms}</span></div>` : ""}
+      ${property.floor !== null && property.floor !== undefined ? `<div class="row"><span class="label">Étage</span><span class="value">${property.floor}</span></div>` : ""}
+      ${property.project ? `<div class="row"><span class="label">Adresse</span><span class="value">${property.project.name}${property.project.address ? ` — ${property.project.address}` : ""}${property.project.wilaya ? `, ${property.project.wilaya}` : ""}</span></div>` : ""}
+    </div>`
+        : ""
+    }
+
+    <div class="section">
+      <div class="section-title">Conditions financières</div>
+      <div class="row"><span class="label">Loyer mensuel</span><span class="value" style="font-size:16px">${monthlyRent}</span></div>
+      <div class="row"><span class="label">Caution</span><span class="value">_______________</span></div>
+      <div class="row"><span class="label">Charges</span><span class="value">☐ Incluses ☐ En sus</span></div>
+      <div class="row"><span class="label">Paiement le</span><span class="value">______ de chaque mois</span></div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Durée</div>
+      <div class="row"><span class="label">Date de début</span><span class="value">_______________</span></div>
+      <div class="row"><span class="label">Durée</span><span class="value">☐ 1 an ☐ 2 ans ☐ 3 ans ☐ Autre : ___</span></div>
+      <div class="row"><span class="label">Renouvellement</span><span class="value">☐ Tacite reconduction ☐ Non renouvelable</span></div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Clauses particulières</div>
+      <div style="border:1px solid #e2e8f0;border-radius:6px;padding:12px;min-height:80px;font-size:13px;color:#64748b">
+        À compléter...
+      </div>
+    </div>
+
+    <p style="font-size:12px;color:#64748b;margin:20px 0">
+      Fait en deux exemplaires originaux, à ________________, le ${formatDate(new Date())}.
+    </p>
+
+    <div class="signature-block">
+      <div class="signature-box"><div class="signature-line">Le locataire</div></div>
+      <div class="signature-box"><div class="signature-line">Le bailleur</div></div>
+    </div>
+
+    ${docFooter(tenantName)}
+  </body></html>`;
+}
+
+// ============================================================================
 // API publique
 // ============================================================================
 
@@ -537,6 +828,15 @@ export async function generateDocument(input: IDocumentInput): Promise<Buffer> {
       break;
     case "COMPROMIS_VENTE":
       html = await buildCompromisVente(input.tenantId, input.clientId, input.propertyId);
+      break;
+    case "BON_COMMANDE":
+      html = await buildBonCommande(input.tenantId, input.clientId, input.propertyId);
+      break;
+    case "ETAT_DES_LIEUX":
+      html = await buildEtatDesLieux(input.tenantId, input.clientId, input.propertyId);
+      break;
+    case "CONTRAT_LOCATION":
+      html = await buildContratLocation(input.tenantId, input.clientId, input.propertyId);
       break;
     default:
       throw new Error(`Type de document inconnu : ${input.type}`);

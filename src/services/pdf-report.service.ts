@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { htmlToPdf } from "@/lib/puppeteer";
+import { htmlToPdf } from "@/lib/pdf-renderer";
 
 // ============================================================================
 // Types
