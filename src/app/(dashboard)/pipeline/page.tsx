@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useEffect } from "react";
 import {
   DragDropContext,
   type DropResult,
@@ -9,165 +9,87 @@ import { KanbanColumn, PIPELINE_STAGES } from "@/components/pipeline/KanbanColum
 import { PipelineFilters } from "@/components/pipeline/PipelineFilters";
 import { LossReasonModal } from "@/components/pipeline/LossReasonModal";
 import type { PipelineClient } from "@/components/pipeline/KanbanCard";
-import { Kanban } from "lucide-react";
+import { Kanban, Loader2, AlertCircle } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 // ============================================================================
-// Mock data – will be replaced by API calls
+// Map API client data to PipelineClient shape
 // ============================================================================
-const MOCK_CLIENTS: PipelineClient[] = [
-  {
-    id: "c1",
-    name: "Karim Benmohamed",
-    phone: "0555 12 34 56",
-    budget: 12_500_000,
-    property: "Appt F3 - Résidence Riviera",
-    agentName: "Sophie Martin",
-    agentAvatar: "https://i.pravatar.cc/150?u=sophie",
-    daysInStage: 3,
-    lastInteraction: new Date(Date.now() - 1000 * 60 * 60 * 5),
+interface ApiClient {
+  id: string;
+  firstName: string;
+  lastName: string;
+  phone: string;
+  budgetMin: string | number | null;
+  budgetMax: string | number | null;
+  pipelineStage: string;
+  desiredType: string | null;
+  desiredWilaya: string | null;
+  createdAt: string;
+  updatedAt: string;
+  assignedAgent: {
+    id: string;
+    firstName: string;
+    lastName: string;
+  } | null;
+}
+
+function mapApiClientToPipeline(c: ApiClient): PipelineClient {
+  const budget = c.budgetMax ? Number(c.budgetMax) : c.budgetMin ? Number(c.budgetMin) : 0;
+  const agentName = c.assignedAgent
+    ? `${c.assignedAgent.firstName} ${c.assignedAgent.lastName}`
+    : "Non assigné";
+
+  const updatedAt = new Date(c.updatedAt);
+  const now = new Date();
+  const daysInStage = Math.max(0, Math.floor((now.getTime() - updatedAt.getTime()) / (1000 * 60 * 60 * 24)));
+
+  return {
+    id: c.id,
+    name: `${c.firstName} ${c.lastName}`,
+    phone: c.phone,
+    budget,
+    property: [c.desiredType, c.desiredWilaya].filter(Boolean).join(" - ") || "Non renseigné",
+    agentName,
+    agentAvatar: "",
+    daysInStage,
+    lastInteraction: updatedAt,
     overdueTasks: 0,
-    stage: "ACCUEIL",
-  },
-  {
-    id: "c2",
-    name: "Amira Hadj",
-    phone: "0661 98 76 54",
-    budget: 8_000_000,
-    property: "Studio - Les Palmiers",
-    agentName: "Lucas Bernard",
-    agentAvatar: "https://i.pravatar.cc/150?u=lucas",
-    daysInStage: 12,
-    lastInteraction: new Date(Date.now() - 1000 * 60 * 60 * 72),
-    overdueTasks: 2,
-    stage: "ACCUEIL",
-  },
-  {
-    id: "c3",
-    name: "Yacine Ferhat",
-    phone: "0770 11 22 33",
-    budget: 22_000_000,
-    property: "Villa Duplex - Horizon Bay",
-    agentName: "Emma Petit",
-    agentAvatar: "https://i.pravatar.cc/150?u=emma",
-    daysInStage: 1,
-    lastInteraction: new Date(Date.now() - 1000 * 60 * 30),
-    overdueTasks: 0,
-    stage: "VISITE_A_GERER",
-  },
-  {
-    id: "c4",
-    name: "Nadia Khelifa",
-    phone: "0555 44 55 66",
-    budget: 15_000_000,
-    property: "Appt F4 - Résidence Riviera",
-    agentName: "Sophie Martin",
-    agentAvatar: "https://i.pravatar.cc/150?u=sophie",
-    daysInStage: 5,
-    lastInteraction: new Date(Date.now() - 1000 * 60 * 60 * 24),
-    overdueTasks: 1,
-    stage: "VISITE_CONFIRMEE",
-  },
-  {
-    id: "c5",
-    name: "Rachid Belkacem",
-    phone: "0661 77 88 99",
-    budget: 18_500_000,
-    property: "Appt F3 - Les Palmiers",
-    agentName: "Lucas Bernard",
-    agentAvatar: "https://i.pravatar.cc/150?u=lucas",
-    daysInStage: 2,
-    lastInteraction: new Date(Date.now() - 1000 * 60 * 60 * 48),
-    overdueTasks: 0,
-    stage: "VISITE_TERMINEE",
-  },
-  {
-    id: "c6",
-    name: "Samia Boudiaf",
-    phone: "0770 22 33 44",
-    budget: 35_000_000,
-    property: "Penthouse - Horizon Bay",
-    agentName: "Emma Petit",
-    agentAvatar: "https://i.pravatar.cc/150?u=emma",
-    daysInStage: 8,
-    lastInteraction: new Date(Date.now() - 1000 * 60 * 60 * 12),
-    overdueTasks: 0,
-    stage: "NEGOCIATION",
-  },
-  {
-    id: "c7",
-    name: "Mourad Slimani",
-    phone: "0555 66 77 88",
-    budget: 14_000_000,
-    property: "Appt F2 - Résidence Riviera",
-    agentName: "Sophie Martin",
-    agentAvatar: "https://i.pravatar.cc/150?u=sophie",
-    daysInStage: 4,
-    lastInteraction: new Date(Date.now() - 1000 * 60 * 60 * 6),
-    overdueTasks: 0,
-    stage: "RESERVATION",
-  },
-  {
-    id: "c8",
-    name: "Fatima Zohra Messaoud",
-    phone: "0661 55 44 33",
-    budget: 20_000_000,
-    property: "Villa - Horizon Bay",
-    agentName: "Lucas Bernard",
-    agentAvatar: "https://i.pravatar.cc/150?u=lucas",
-    daysInStage: 1,
-    lastInteraction: new Date(Date.now() - 1000 * 60 * 60 * 2),
-    overdueTasks: 0,
-    stage: "VENTE",
-  },
-  {
-    id: "c9",
-    name: "Ali Tounsi",
-    phone: "0770 99 88 77",
-    budget: 9_500_000,
-    property: "Studio - Les Palmiers",
-    agentName: "Emma Petit",
-    agentAvatar: "https://i.pravatar.cc/150?u=emma",
-    daysInStage: 15,
-    lastInteraction: new Date(Date.now() - 1000 * 60 * 60 * 120),
-    overdueTasks: 3,
-    stage: "RELANCEMENT",
-  },
-  {
-    id: "c10",
-    name: "Meriem Bouzid",
-    phone: "0555 11 00 99",
-    budget: 11_000_000,
-    property: "Appt F3 - Les Palmiers",
-    agentName: "Sophie Martin",
-    agentAvatar: "https://i.pravatar.cc/150?u=sophie",
-    daysInStage: 2,
-    lastInteraction: new Date(Date.now() - 1000 * 60 * 60 * 8),
-    overdueTasks: 0,
-    stage: "VISITE_A_GERER",
-  },
-  {
-    id: "c11",
-    name: "Djamel Aït-Ahmed",
-    phone: "0661 00 11 22",
-    budget: 27_000_000,
-    property: "Duplex - Résidence Riviera",
-    agentName: "Lucas Bernard",
-    agentAvatar: "https://i.pravatar.cc/150?u=lucas",
-    daysInStage: 6,
-    lastInteraction: new Date(Date.now() - 1000 * 60 * 60 * 36),
-    overdueTasks: 1,
-    stage: "NEGOCIATION",
-  },
-];
+    stage: c.pipelineStage,
+  };
+}
 
 // ============================================================================
 // Page Component
 // ============================================================================
 export default function PipelinePage() {
-  const [clients, setClients] = useState<PipelineClient[]>(MOCK_CLIENTS);
+  const [clients, setClients] = useState<PipelineClient[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [agent, setAgent] = useState("all");
   const [project, setProject] = useState("all");
+
+  // Fetch clients from API
+  useEffect(() => {
+    async function fetchClients() {
+      try {
+        setLoading(true);
+        setError(null);
+        const res = await fetch("/api/v1/clients?limit=100");
+        if (!res.ok) throw new Error(`Erreur ${res.status}`);
+        const json = await res.json();
+        if (!json.success) throw new Error(json.error || "Erreur inconnue");
+        const mapped = (json.data.clients as ApiClient[]).map(mapApiClientToPipeline);
+        setClients(mapped);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Erreur lors du chargement");
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchClients();
+  }, []);
 
   // Loss reason modal state
   const [lossModal, setLossModal] = useState<{
@@ -256,8 +178,8 @@ export default function PipelinePage() {
       const { destination, draggableId } = result;
       if (!destination) return;
 
-      // If dropping into PERDUE, show modal first
-      if (destination.droppableId === "PERDUE") {
+      // If dropping into CLOSED, show loss reason modal first
+      if (destination.droppableId === "CLOSED") {
         const client = clients.find((c) => c.id === draggableId);
         if (!client) return;
         setPendingMove(result);
@@ -323,20 +245,45 @@ export default function PipelinePage() {
         />
       </div>
 
-      {/* Kanban Board */}
-      <DragDropContext onDragEnd={onDragEnd}>
-        <div className="flex-1 overflow-x-auto pb-4 -mx-3 md:-mx-6 lg:-mx-8 px-3 md:px-6 lg:px-8 scrollbar-thin">
-          <div className="flex gap-3 md:gap-4 min-w-max">
-            {PIPELINE_STAGES.map((stage) => (
-              <KanbanColumn
-                key={stage.id}
-                stage={stage}
-                clients={clientsByStage[stage.id] || []}
-              />
-            ))}
-          </div>
+      {/* Loading */}
+      {loading && (
+        <div className="flex items-center justify-center py-20">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <span className="ml-3 text-muted-foreground font-medium">Chargement du pipeline...</span>
         </div>
-      </DragDropContext>
+      )}
+
+      {/* Error */}
+      {error && !loading && (
+        <div className="flex flex-col items-center justify-center py-20 gap-3">
+          <AlertCircle className="h-10 w-10 text-red-500" />
+          <p className="text-red-600 font-medium">{error}</p>
+          <Button
+            variant="outline"
+            onClick={() => window.location.reload()}
+            className="mt-2"
+          >
+            Réessayer
+          </Button>
+        </div>
+      )}
+
+      {/* Kanban Board */}
+      {!loading && !error && (
+        <DragDropContext onDragEnd={onDragEnd}>
+          <div className="flex-1 overflow-x-auto pb-4 -mx-3 md:-mx-6 lg:-mx-8 px-3 md:px-6 lg:px-8 scrollbar-thin">
+            <div className="flex gap-3 md:gap-4 min-w-max">
+              {PIPELINE_STAGES.map((stage) => (
+                <KanbanColumn
+                  key={stage.id}
+                  stage={stage}
+                  clients={clientsByStage[stage.id] || []}
+                />
+              ))}
+            </div>
+          </div>
+        </DragDropContext>
+      )}
 
       {/* Loss Reason Modal */}
       <LossReasonModal
