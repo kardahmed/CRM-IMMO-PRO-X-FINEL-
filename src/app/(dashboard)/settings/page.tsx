@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { Building2, Settings2, Users2, Workflow, Link2, KeyRound, Mail, MessageCircle, Send, CheckCircle2, ShieldAlert } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -7,9 +8,39 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
+import { toast } from "sonner";
 
 
 export default function SettingsPage() {
+  const [workspaceForm, setWorkspaceForm] = useState({
+    agencyName: "IMMO PRO-X",
+    activityType: "Promotion Immobilière",
+    address: "123 Rue Didouche Mourad, Alger Centre",
+    rcNumber: "RC-16-00-1234567A12",
+    contactEmail: "contact@immopro-x.dz",
+  });
+
+  const [smtpForm, setSmtpForm] = useState({
+    host: "",
+    port: "",
+  });
+
+  const [facebookForm, setFacebookForm] = useState({
+    pageId: "",
+  });
+
+  function handleSaveWorkspace() {
+    toast("Parametres sauvegardes");
+  }
+
+  function handleSaveSmtp() {
+    toast("Parametres sauvegardes");
+  }
+
+  function handleSaveFacebook() {
+    toast("Parametres sauvegardes");
+  }
+
   return (
     <div className="space-y-6 pb-10">
       {/* Header */}
@@ -70,29 +101,29 @@ export default function SettingsPage() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="space-y-1.5">
                         <label className="text-xs font-bold uppercase text-muted-foreground">Nom de l'agence</label>
-                        <Input defaultValue="IMMO PRO-X" />
+                        <Input value={workspaceForm.agencyName} onChange={(e) => setWorkspaceForm((prev) => ({ ...prev, agencyName: e.target.value }))} />
                       </div>
                       <div className="space-y-1.5">
                         <label className="text-xs font-bold uppercase text-muted-foreground">Type d'activité</label>
-                        <Input defaultValue="Promotion Immobilière" />
+                        <Input value={workspaceForm.activityType} onChange={(e) => setWorkspaceForm((prev) => ({ ...prev, activityType: e.target.value }))} />
                       </div>
                       <div className="space-y-1.5 md:col-span-2">
                         <label className="text-xs font-bold uppercase text-muted-foreground">Adresse complète</label>
-                        <Textarea defaultValue="123 Rue Didouche Mourad, Alger Centre" className="resize-none" />
+                        <Textarea value={workspaceForm.address} onChange={(e) => setWorkspaceForm((prev) => ({ ...prev, address: e.target.value }))} className="resize-none" />
                       </div>
                       <div className="space-y-1.5">
                         <label className="text-xs font-bold uppercase text-muted-foreground">N° RC / SIRET</label>
-                        <Input defaultValue="RC-16-00-1234567A12" />
+                        <Input value={workspaceForm.rcNumber} onChange={(e) => setWorkspaceForm((prev) => ({ ...prev, rcNumber: e.target.value }))} />
                       </div>
                       <div className="space-y-1.5">
                         <label className="text-xs font-bold uppercase text-muted-foreground">Email de contact principal</label>
-                        <Input defaultValue="contact@immopro-x.dz" />
+                        <Input value={workspaceForm.contactEmail} onChange={(e) => setWorkspaceForm((prev) => ({ ...prev, contactEmail: e.target.value }))} />
                       </div>
                     </div>
                   </div>
                 </div>
                 <div className="flex justify-end pt-4 border-t">
-                  <Button className="font-bold">Sauvegarder les modifications</Button>
+                  <Button className="font-bold" onClick={handleSaveWorkspace}>Sauvegarder les modifications</Button>
                 </div>
               </CardContent>
             </Card>
@@ -199,14 +230,14 @@ export default function SettingsPage() {
                     <div className="grid grid-cols-2 gap-2">
                        <div className="space-y-1.5">
                         <label className="text-xs font-bold uppercase text-muted-foreground">Hôte SMTP</label>
-                        <Input placeholder="smtp.mailtrap.io" />
+                        <Input placeholder="smtp.mailtrap.io" value={smtpForm.host} onChange={(e) => setSmtpForm((prev) => ({ ...prev, host: e.target.value }))} />
                       </div>
                       <div className="space-y-1.5">
                         <label className="text-xs font-bold uppercase text-muted-foreground">Port</label>
-                        <Input placeholder="587" />
+                        <Input placeholder="587" value={smtpForm.port} onChange={(e) => setSmtpForm((prev) => ({ ...prev, port: e.target.value }))} />
                       </div>
                     </div>
-                    <Button size="sm" className="w-full font-bold">Connecter SMTP</Button>
+                    <Button size="sm" className="w-full font-bold" onClick={handleSaveSmtp}>Connecter SMTP</Button>
                   </CardContent>
                 </Card>
 
@@ -220,9 +251,9 @@ export default function SettingsPage() {
                   <CardContent className="pt-4 space-y-4">
                     <div className="space-y-1.5">
                       <label className="text-xs font-bold uppercase text-muted-foreground">ID Page Facebook</label>
-                      <Input placeholder="1234567890" />
+                      <Input placeholder="1234567890" value={facebookForm.pageId} onChange={(e) => setFacebookForm((prev) => ({ ...prev, pageId: e.target.value }))} />
                     </div>
-                    <Button size="sm" className="w-full font-bold bg-[#1877F2] text-white hover:bg-[#1877F2]/90">Connexion Facebook</Button>
+                    <Button size="sm" className="w-full font-bold bg-[#1877F2] text-white hover:bg-[#1877F2]/90" onClick={handleSaveFacebook}>Connexion Facebook</Button>
                   </CardContent>
                 </Card>
              </div>

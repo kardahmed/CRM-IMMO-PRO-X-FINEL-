@@ -44,6 +44,89 @@ import {
 import { Button } from "@/components/ui/button";
 
 // ============================================================================
+// Types
+// ============================================================================
+
+interface IAssignedAgent {
+  id?: string;
+  firstName: string;
+  lastName: string;
+  phone?: string;
+  email?: string;
+}
+
+interface IPayment {
+  id: string;
+  type: string;
+  amount: number;
+  dueDate: string;
+  status: string;
+  paidAt?: string;
+}
+
+interface IVisit {
+  id: string;
+  scheduledAt: string;
+  status: string;
+  feedback?: string;
+  property: { id: string; name: string };
+}
+
+interface ITask {
+  id: string;
+  title: string;
+  type: string;
+  deadline: string;
+  status: string;
+}
+
+interface IInteraction {
+  id: string;
+  type: string;
+  description: string;
+  createdAt: string;
+  userName: string;
+}
+
+interface IClientDetail {
+  id: string;
+  firstName: string;
+  lastName: string;
+  phone: string;
+  email: string;
+  source: string;
+  pipelineStage: string;
+  budgetMin?: number;
+  budgetMax?: number;
+  desiredType?: string;
+  desiredRooms?: number;
+  desiredWilaya?: string;
+  notes?: string;
+  lostReason?: string;
+  portalToken?: string;
+  assignedAgent?: IAssignedAgent;
+  payments: IPayment[];
+  visits: IVisit[];
+  tasks: ITask[];
+  interactions: IInteraction[];
+  // Extended fields used by mock/UI
+  createdAt: string;
+  address?: string;
+  city?: string;
+  budget?: number;
+  propertyType?: string;
+  minArea?: number;
+  maxArea?: number;
+  minRooms?: number;
+  desiredLocation?: string;
+  reservation?: Record<string, unknown>;
+  vente?: Record<string, unknown>;
+  documents?: Record<string, unknown>[];
+  charges?: Record<string, unknown>[];
+  notesLog?: Record<string, unknown>[];
+}
+
+// ============================================================================
 // Mock data for demo — replaced by API fetch below
 // ============================================================================
 const MOCK_CLIENT = {
@@ -148,7 +231,7 @@ export default function ClientDetailPage() {
   const params = useParams();
   const clientId = params.id as string;
 
-  const [client, setClient] = useState<any>(null);
+  const [client, setClient] = useState<IClientDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
 
@@ -199,17 +282,17 @@ export default function ClientDetailPage() {
   }
 
   const totalPayment = (client.payments || []).reduce(
-    (sum: number, p: any) => sum + (p.amount || 0),
+    (sum: number, p: IPayment) => sum + (p.amount || 0),
     0
   );
   const paidAmount = (client.payments || [])
-    .filter((p: any) => p.status === "PAID")
-    .reduce((sum: number, p: any) => sum + (p.amount || 0), 0);
+    .filter((p: IPayment) => p.status === "PAID")
+    .reduce((sum: number, p: IPayment) => sum + (p.amount || 0), 0);
 
   return (
     <div className="space-y-6 pb-10">
       {/* Header */}
-      <ClientHeader client={client} />
+      <ClientHeader client={client as any} />
 
       {/* Accordion Infos (Read-Only) */}
       <ClientInfoPanel client={client} />
@@ -335,11 +418,11 @@ export default function ClientDetailPage() {
           </TabsContent>
 
           <TabsContent value="reservation">
-            <TabReservation reservation={client.reservation} />
+            <TabReservation reservation={client.reservation as any} />
           </TabsContent>
 
           <TabsContent value="vente">
-            <TabVente vente={client.vente} />
+            <TabVente vente={client.vente as any} />
           </TabsContent>
 
           <TabsContent value="echeances">
@@ -358,15 +441,15 @@ export default function ClientDetailPage() {
           </TabsContent>
 
           <TabsContent value="documents">
-            <TabDocuments documents={client.documents || []} />
+            <TabDocuments documents={(client.documents || []) as any} />
           </TabsContent>
 
           <TabsContent value="charges">
-            <TabCharges charges={client.charges || []} />
+            <TabCharges charges={(client.charges || []) as any} />
           </TabsContent>
 
           <TabsContent value="notes">
-            <TabNotes notes={client.notesLog || []} />
+            <TabNotes notes={(client.notesLog || []) as any} />
           </TabsContent>
 
           <TabsContent value="taches">

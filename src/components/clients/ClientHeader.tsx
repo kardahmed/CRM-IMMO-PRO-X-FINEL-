@@ -55,10 +55,10 @@ interface ClientHeaderProps {
     source: string;
     createdAt: string;
     assignedAgent?: {
-      id: string;
+      id?: string;
       firstName: string;
       lastName: string;
-      email: string;
+      email?: string;
     };
   };
 }
