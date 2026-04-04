@@ -1,3 +1,5 @@
+import { withSentryConfig } from "@sentry/nextjs";
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   async headers() {
@@ -33,11 +35,11 @@ const nextConfig = {
             key: "Content-Security-Policy",
             value: [
               "default-src 'self'",
-              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.clerk.accounts.dev https://challenges.cloudflare.com",
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.clerk.accounts.dev https://challenges.cloudflare.com https://*.sentry.io",
               "style-src 'self' 'unsafe-inline'",
               "img-src 'self' blob: data: https://*.pravatar.cc https://*.unsplash.com https://*.clerk.com https://img.clerk.com",
               "font-src 'self' data:",
-              "connect-src 'self' https://*.clerk.accounts.dev https://*.supabase.co https://api.anthropic.com https://graph.facebook.com wss://*.supabase.co",
+              "connect-src 'self' https://*.clerk.accounts.dev https://*.supabase.co https://api.anthropic.com https://graph.facebook.com wss://*.supabase.co https://*.sentry.io",
               "frame-src https://*.clerk.accounts.dev https://challenges.cloudflare.com",
               "frame-ancestors 'none'",
               "base-uri 'self'",
@@ -50,4 +52,18 @@ const nextConfig = {
   },
 };
 
-export default nextConfig;
+export default withSentryConfig(nextConfig, {
+  // Upload source maps for better stack traces
+  org: process.env.SENTRY_ORG,
+  project: process.env.SENTRY_PROJECT,
+  authToken: process.env.SENTRY_AUTH_TOKEN,
+
+  // Suppress logs during build unless there's an error
+  silent: !process.env.CI,
+
+  // Automatically tree-shake Sentry logger in production
+  disableLogger: true,
+
+  // Hide source maps from the client
+  hideSourceMaps: true,
+});
