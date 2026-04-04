@@ -1,6 +1,5 @@
 import { apiHandler, getBody, jsonOk, jsonError } from "@/lib/api-handler";
 import { assignLeadSchema } from "@/lib/validations/facebook-leads";
-import { prisma } from "@/lib/prisma";
 import { triggerAutomations } from "@/services/automation-engine";
 import { createNotification } from "@/services/notification.service";
 
@@ -68,8 +67,8 @@ export const POST = apiHandler(
       link: `/clients/${clientId}`,
     });
 
-    // Log
-    await prisma.activityLog.create({
+    // Log (tenant-scoped)
+    await ctx.db.activityLog.create({
       data: {
         tenantId: ctx.tenantId,
         userId: ctx.user.userId,

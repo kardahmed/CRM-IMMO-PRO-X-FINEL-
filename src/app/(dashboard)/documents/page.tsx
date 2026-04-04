@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
+import DOMPurify from "dompurify";
 import {
   FileText,
   ClipboardCheck,
@@ -229,7 +230,7 @@ export default function DocumentsPage() {
               <CardContent>
                 <div
                   className="rounded-lg border bg-white p-6 text-sm dark:bg-muted/20"
-                  dangerouslySetInnerHTML={{ __html: result.html }}
+                  dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(result.html) }}
                 />
               </CardContent>
             </Card>

@@ -68,6 +68,10 @@ export const PUT = apiHandler(
     const existing = await ctx.db.visit.findFirst({ where: { id } });
     if (!existing) return jsonError("Visite introuvable", 404);
 
+    if (ctx.user.role === "AGENT" && existing.agentId !== ctx.user.userId) {
+      return jsonError("Accès refusé", 403);
+    }
+
     const data: Record<string, unknown> = { status: body.status };
     if (body.feedback !== undefined) data.feedback = body.feedback;
 

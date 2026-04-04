@@ -69,6 +69,10 @@ export const PUT = apiHandler(
     const existing = await ctx.db.task.findFirst({ where: { id } });
     if (!existing) return jsonError("Tâche introuvable", 404);
 
+    if (ctx.user.role === "AGENT" && existing.assignedToId !== ctx.user.userId) {
+      return jsonError("Accès refusé", 403);
+    }
+
     if (body.action === "complete") {
       const updated = await ctx.db.task.update({
         where: { id },

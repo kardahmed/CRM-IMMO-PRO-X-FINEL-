@@ -3,8 +3,6 @@ import {
   sendPortalLinkSchema,
   type SendPortalLinkInput,
 } from "@/lib/validations/portal";
-import { prisma } from "@/lib/prisma";
-
 /**
  * POST /api/v1/portal/send
  *
@@ -65,8 +63,8 @@ export const POST = apiHandler(
       WHATSAPP: `Bonjour ${client.firstName} ! Votre espace client est prêt. Consultez votre dossier ici : ${portalUrl}`,
     };
 
-    // Log l'interaction (trace de l'envoi)
-    await prisma.interaction.create({
+    // Log l'interaction (tenant-scoped)
+    await ctx.db.interaction.create({
       data: {
         tenantId: ctx.tenantId,
         clientId: client.id,
@@ -77,8 +75,8 @@ export const POST = apiHandler(
       },
     });
 
-    // Log dans ActivityLog
-    await prisma.activityLog.create({
+    // Log dans ActivityLog (tenant-scoped)
+    await ctx.db.activityLog.create({
       data: {
         tenantId: ctx.tenantId,
         userId: ctx.user.userId,

@@ -8,6 +8,7 @@ import { processFacebookLead } from "@/services/facebook-leads.service";
 import type { IFacebookLeadPayload } from "@/services/facebook-leads.service";
 import { verifyMetaSignature } from "@/lib/webhook-signature";
 import { rateLimit, getClientIp, RATE_LIMITS } from "@/lib/rate-limit";
+import { decrypt, isEncrypted } from "@/lib/encryption";
 
 /**
  * GET /api/v1/webhooks/facebook-leads
@@ -52,14 +53,16 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
     const rawBody = await req.text();
 
-    // Verify Meta signature (HMAC-SHA256)
+    // Verify Meta signature (HMAC-SHA256) — MANDATORY
     const appSecret = process.env.FACEBOOK_APP_SECRET;
-    if (appSecret) {
-      const signature = req.headers.get("x-hub-signature-256");
-      if (!verifyMetaSignature(rawBody, signature, appSecret)) {
-        console.warn("[Facebook Webhook] Invalid signature");
-        return NextResponse.json({ error: "Invalid signature" }, { status: 403 });
-      }
+    if (!appSecret) {
+      console.error("[Facebook Webhook] FACEBOOK_APP_SECRET not configured");
+      return NextResponse.json({ error: "Webhook not configured" }, { status: 500 });
+    }
+    const signature = req.headers.get("x-hub-signature-256");
+    if (!verifyMetaSignature(rawBody, signature, appSecret)) {
+      console.warn("[Facebook Webhook] Invalid signature");
+      return NextResponse.json({ error: "Invalid signature" }, { status: 403 });
     }
 
     const body = JSON.parse(rawBody);
@@ -158,9 +161,11 @@ async function findTenantByPageId(
     const settings = t.settings as Record<string, unknown>;
     const fb = settings?.facebook as Record<string, unknown> | undefined;
     if (fb?.pageId === pageId && typeof fb?.accessToken === "string") {
+      const rawToken = fb.accessToken;
+      const accessToken = isEncrypted(rawToken) ? decrypt(rawToken) : rawToken;
       return {
         tenantId: t.id,
-        facebookAccessToken: fb.accessToken,
+        facebookAccessToken: accessToken,
         formNames: fb.formNames as Record<string, string> | undefined,
       };
     }

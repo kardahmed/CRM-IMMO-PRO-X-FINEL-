@@ -11,8 +11,26 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { AlertCircle, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
+interface IPropertyDistribution {
+  name: string;
+  value: number;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+interface IDashboardData {
+  role: string;
+  stats: any;
+  conversionData?: any[];
+  pipelineData?: any[];
+  topAgents?: any[];
+  todayVisits?: any[];
+  propertyDistribution?: IPropertyDistribution[];
+  welcomeMessage?: string;
+  tasks?: any[];
+}
+
 export default function DashboardPage() {
-  const [data, setData] = useState<any>(null);
+  const [data, setData] = useState<IDashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
 
@@ -22,9 +40,9 @@ export default function DashboardPage() {
     try {
       const res = await fetch("/api/v1/dashboard");
       if (!res.ok) throw new Error("Failed to fetch");
-      const json = await res.ok ? await res.json() : null;
+      const json = await res.json();
       setData(json);
-    } catch (err) {
+    } catch {
       setError(true);
     } finally {
       setLoading(false);
@@ -62,7 +80,9 @@ export default function DashboardPage() {
     );
   }
 
-  if (data?.role === "CEO") {
+  if (!data) return null;
+
+  if (data.role === "CEO") {
     return (
       <div className="space-y-8 pb-10">
         <header>
@@ -78,23 +98,23 @@ export default function DashboardPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Chart */}
           <div className="lg:col-span-2 space-y-6">
-            <ConversionChart data={data.conversionData} />
+            <ConversionChart data={data.conversionData ?? []} />
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-               <PipelineChart data={data.pipelineData} />
-               <TopAgents agents={data.topAgents} />
+               <PipelineChart data={data.pipelineData ?? []} />
+               <TopAgents agents={data.topAgents ?? []} />
             </div>
           </div>
 
           {/* Right Column */}
           <div className="space-y-6">
              {/* Alerts Placeholder if needed, otherwise Today Visits & Distribution */}
-             <DailyVisits visits={data.todayVisits} />
-             
+             <DailyVisits visits={data.todayVisits ?? []} />
+
              {/* Simple Distribution Mock */}
              <div className="p-6 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 text-white shadow-xl">
                <h3 className="font-black text-lg uppercase tracking-tight mb-4">Répartition Biens</h3>
                <div className="space-y-3">
-                 {data.propertyDistribution.map((p: any, i: number) => (
+                 {(data.propertyDistribution ?? []).map((p: IPropertyDistribution, i: number) => (
                    <div key={i} className="flex flex-col gap-1">
                      <div className="flex justify-between text-xs font-bold">
                        <span>{p.name}</span>
@@ -116,13 +136,13 @@ export default function DashboardPage() {
   // AGENT VIEW
   return (
     <div className="max-w-5xl mx-auto space-y-8 pb-10">
-      <AgentOverview 
-        welcomeMessage={data.welcomeMessage} 
-        stats={data.stats} 
-        tasks={data.tasks} 
+      <AgentOverview
+        welcomeMessage={data.welcomeMessage ?? ""}
+        stats={data.stats}
+        tasks={data.tasks ?? []}
       />
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-         <DailyVisits visits={data.todayVisits} />
+         <DailyVisits visits={data.todayVisits ?? []} />
          <div className="p-8 rounded-2xl bg-neutral-900 text-white flex flex-col justify-between overflow-hidden relative group">
            <RefreshCw className="absolute -right-4 -bottom-4 h-32 w-32 text-white/5 group-hover:rotate-180 transition-transform duration-1000" />
            <div className="relative">

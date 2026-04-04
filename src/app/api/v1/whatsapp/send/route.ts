@@ -1,7 +1,6 @@
 import { apiHandler, getBody, jsonOk, jsonError } from "@/lib/api-handler";
 import { sendWhatsAppSchema } from "@/lib/validations/whatsapp";
 import { sendMessage } from "@/services/whatsapp.service";
-import { prisma } from "@/lib/prisma";
 
 /**
  * POST /api/v1/whatsapp/send
@@ -36,8 +35,8 @@ export const POST = apiHandler(
       return jsonError(result.error ?? "Échec de l'envoi WhatsApp", 502);
     }
 
-    // Créer l'Interaction
-    const interaction = await prisma.interaction.create({
+    // Créer l'Interaction (tenant-scoped)
+    const interaction = await ctx.db.interaction.create({
       data: {
         tenantId: ctx.tenantId,
         clientId: client.id,
@@ -48,8 +47,8 @@ export const POST = apiHandler(
       },
     });
 
-    // Log
-    await prisma.activityLog.create({
+    // Log (tenant-scoped)
+    await ctx.db.activityLog.create({
       data: {
         tenantId: ctx.tenantId,
         userId: ctx.user.userId,

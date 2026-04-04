@@ -49,14 +49,16 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
     const rawBody = await req.text();
 
-    // Verify Meta signature (HMAC-SHA256)
+    // Verify Meta signature (HMAC-SHA256) — MANDATORY
     const appSecret = process.env.FACEBOOK_APP_SECRET;
-    if (appSecret) {
-      const signature = req.headers.get("x-hub-signature-256");
-      if (!verifyMetaSignature(rawBody, signature, appSecret)) {
-        console.warn("[WhatsApp Webhook] Invalid signature");
-        return NextResponse.json({ error: "Invalid signature" }, { status: 403 });
-      }
+    if (!appSecret) {
+      console.error("[WhatsApp Webhook] FACEBOOK_APP_SECRET not configured");
+      return NextResponse.json({ error: "Webhook not configured" }, { status: 500 });
+    }
+    const signature = req.headers.get("x-hub-signature-256");
+    if (!verifyMetaSignature(rawBody, signature, appSecret)) {
+      console.warn("[WhatsApp Webhook] Invalid signature");
+      return NextResponse.json({ error: "Invalid signature" }, { status: 403 });
     }
 
     const body = JSON.parse(rawBody);

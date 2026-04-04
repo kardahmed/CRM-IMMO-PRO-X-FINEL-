@@ -5,6 +5,7 @@ import {
   createNotification,
   createNotificationBulk,
 } from "@/services/notification.service";
+import { decrypt, isEncrypted } from "@/lib/encryption";
 
 // ============================================================================
 // Types
@@ -63,7 +64,10 @@ export async function getWhatsAppConfig(
   const wa = settings?.whatsapp as ITenantWhatsAppConfig | undefined;
   if (!wa?.whatsappApiKey || !wa?.whatsappPhoneId) return null;
 
-  return wa;
+  // Decrypt API key if stored encrypted
+  const apiKey = isEncrypted(wa.whatsappApiKey) ? decrypt(wa.whatsappApiKey) : wa.whatsappApiKey;
+
+  return { ...wa, whatsappApiKey: apiKey };
 }
 
 // ============================================================================
