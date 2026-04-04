@@ -197,23 +197,41 @@ export default function ClientDetailPage() {
 
       {/* Barre d'Actions Rapides (Horizontal Pills) */}
       <div className="flex flex-wrap items-center gap-2 md:gap-3 overflow-x-auto no-scrollbar pb-1">
-        <Button className="rounded-full bg-blue-600 hover:bg-blue-700 text-white font-bold h-9 gap-2 px-5">
-          <Phone className="h-4 w-4" fill="currentColor" /> Appeler
-        </Button>
-        <Button className="rounded-full bg-[#25D366] hover:bg-[#25D366]/90 text-white font-bold h-9 gap-2 px-5 shadow-sm">
-          <MessageCircle className="h-4 w-4" fill="currentColor" /> Appel WhatsApp
-        </Button>
-        <Button className="rounded-full bg-[#128C7E] hover:bg-[#128C7E]/90 text-white font-bold h-9 gap-2 px-5 shadow-sm">
-          <MessageCircle className="h-4 w-4" /> Message WA
-        </Button>
-        <Button variant="outline" className="rounded-full font-bold h-9 gap-2 px-5 border-neutral-300">
-          <MessageSquare className="h-4 w-4 text-purple-600" fill="currentColor" /> SMS
-        </Button>
-        <Button variant="outline" className="rounded-full font-bold h-9 gap-2 px-5 border-neutral-300">
-          <Mail className="h-4 w-4 text-rose-500" fill="currentColor" /> Email
-        </Button>
+        <a href={`tel:${client.phone?.replace(/\s/g, "")}`}>
+          <Button className="rounded-full bg-blue-600 hover:bg-blue-700 text-white font-bold h-9 gap-2 px-5">
+            <Phone className="h-4 w-4" fill="currentColor" /> Appeler
+          </Button>
+        </a>
+        <a href={`https://wa.me/${client.phone?.replace(/[\s+]/g, "")}`} target="_blank" rel="noopener noreferrer">
+          <Button className="rounded-full bg-[#25D366] hover:bg-[#25D366]/90 text-white font-bold h-9 gap-2 px-5 shadow-sm">
+            <MessageCircle className="h-4 w-4" fill="currentColor" /> Appel WhatsApp
+          </Button>
+        </a>
+        <a href={`https://wa.me/${client.phone?.replace(/[\s+]/g, "")}?text=${encodeURIComponent("Bonjour,")}`} target="_blank" rel="noopener noreferrer">
+          <Button className="rounded-full bg-[#128C7E] hover:bg-[#128C7E]/90 text-white font-bold h-9 gap-2 px-5 shadow-sm">
+            <MessageCircle className="h-4 w-4" /> Message WA
+          </Button>
+        </a>
+        <a href={`sms:${client.phone?.replace(/\s/g, "")}`}>
+          <Button variant="outline" className="rounded-full font-bold h-9 gap-2 px-5 border-neutral-300">
+            <MessageSquare className="h-4 w-4 text-purple-600" fill="currentColor" /> SMS
+          </Button>
+        </a>
+        {client.email && (
+          <a href={`mailto:${client.email}`}>
+            <Button variant="outline" className="rounded-full font-bold h-9 gap-2 px-5 border-neutral-300">
+              <Mail className="h-4 w-4 text-rose-500" fill="currentColor" /> Email
+            </Button>
+          </a>
+        )}
         <div className="w-px h-6 bg-border mx-2" />
-        <Button className="rounded-full bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-500 hover:to-orange-600 text-white font-black h-9 gap-2 px-5 shadow-sm">
+        <Button
+          className="rounded-full bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-500 hover:to-orange-600 text-white font-black h-9 gap-2 px-5 shadow-sm"
+          onClick={() => {
+            const tabEl = document.querySelector('[value="suggestions"]') as HTMLElement;
+            if (tabEl) tabEl.click();
+          }}
+        >
           <Sparkles className="h-4 w-4" fill="currentColor" /> Suggestions AI
         </Button>
       </div>

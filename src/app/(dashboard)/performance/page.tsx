@@ -147,8 +147,8 @@ export default function PerformancePage() {
           </div>
         </div>
 
-        <Button variant="outline" className="gap-2 font-bold bg-white dark:bg-black">
-          <Download className="h-4 w-4" /> Générer Rapport PDF
+        <Button variant="outline" className="gap-2 font-bold bg-white dark:bg-black" onClick={() => window.print()}>
+          <Download className="h-4 w-4" /> Generer Rapport PDF
         </Button>
       </div>
 

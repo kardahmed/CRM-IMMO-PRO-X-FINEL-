@@ -187,7 +187,10 @@ export default function DashboardPage() {
              <h3 className="text-xl font-bold mb-2">Relances du jour</h3>
              <p className="text-neutral-400 text-sm">Vous avez {agentStats.todayFollowUps} clients a recontacter aujourd'hui.</p>
            </div>
-           <Button className="mt-8 bg-white text-black hover:bg-neutral-200 font-bold relative">
+           <Button
+             className="mt-8 bg-white text-black hover:bg-neutral-200 font-bold relative"
+             onClick={() => window.location.href = "/clients"}
+           >
              Commencer la session
            </Button>
          </div>

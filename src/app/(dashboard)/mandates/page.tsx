@@ -23,6 +23,7 @@ import {
   TableBody,
   TableCell,
 } from "@/components/ui/table";
+import { toast } from "sonner";
 
 interface IMandate {
   id: string;
@@ -109,12 +110,10 @@ export default function MandatesPage() {
             </p>
           </div>
         </div>
-        <Link href="/mandates/new">
-          <Button>
-            <Plus className="h-4 w-4 mr-1" />
-            Nouveau mandat
-          </Button>
-        </Link>
+        <Button onClick={() => toast.info("Creation de mandats bientot disponible — creez d'abord un proprietaire et un bien")}>
+          <Plus className="h-4 w-4 mr-1" />
+          Nouveau mandat
+        </Button>
       </div>
 
       {/* Filters */}
