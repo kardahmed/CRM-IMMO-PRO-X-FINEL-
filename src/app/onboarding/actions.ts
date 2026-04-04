@@ -1,47 +1,100 @@
 "use server";
 
-import { redirect } from "next/navigation";
-import { auth, clerkClient } from "@clerk/nextjs/server";
+import { auth, clerkClient, currentUser } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
-import type { WorkspaceType, PlanType } from "@prisma/client";
+import { z } from "zod";
+
+const createWorkspaceSchema = z.object({
+  name: z
+    .string()
+    .min(2, "Le nom doit contenir au moins 2 caracteres")
+    .max(100, "Le nom ne peut pas depasser 100 caracteres")
+    .trim(),
+  type: z.enum(["AGENCY", "PROMOTION"], {
+    error: "Type d'activite invalide",
+  }),
+});
 
 export async function createWorkspace(formData: FormData) {
+  const { userId: clerkId } = await auth();
+  if (!clerkId) {
+    return { success: false as const, error: "Non authentifie" };
+  }
+
+  // Validation Zod
+  const parsed = createWorkspaceSchema.safeParse({
+    name: formData.get("name"),
+    type: formData.get("type"),
+  });
+
+  if (!parsed.success) {
+    const firstError = parsed.error.issues[0]?.message || "Donnees invalides";
+    return { success: false as const, error: firstError };
+  }
+
+  const { name, type } = parsed.data;
+
+  // Recuperer les infos Clerk pour creer le User en DB
+  const clerkUser = await currentUser();
+  if (!clerkUser) {
+    return { success: false as const, error: "Utilisateur Clerk introuvable" };
+  }
+
+  // Verifier que l'utilisateur n'a pas deja un tenant
+  const existingMetadata = clerkUser.publicMetadata as { tenantId?: string };
+  if (existingMetadata.tenantId) {
+    return { success: false as const, error: "Vous avez deja un espace de travail" };
+  }
+
   try {
-    const { userId } = await auth();
-    if (!userId) {
-      return { success: false, error: "Non authentifié" };
-    }
+    // Transaction atomique : Tenant + User en une seule operation
+    const { tenant, user } = await prisma.$transaction(async (tx) => {
+      const tenant = await tx.tenant.create({
+        data: {
+          name,
+          type,
+          plan: "STARTER",
+          status: "ACTIVE",
+        },
+      });
 
-    const name = formData.get("name") as string;
-    const type = formData.get("type") as WorkspaceType;
+      const email =
+        clerkUser.emailAddresses?.[0]?.emailAddress || "";
+      const phone =
+        clerkUser.phoneNumbers?.[0]?.phoneNumber || null;
 
-    if (!name || !type) {
-      return { success: false, error: "Nom et type requis" };
-    }
+      const user = await tx.user.create({
+        data: {
+          clerkId,
+          tenantId: tenant.id,
+          firstName: clerkUser.firstName || "",
+          lastName: clerkUser.lastName || "",
+          email,
+          phone,
+          role: "CEO",
+          isActive: true,
+        },
+      });
 
-    // Création du tenant dans Prisma
-    const tenant = await prisma.tenant.create({
-      data: {
-        name,
-        type,
-        plan: "PRO", // Plan par défaut pour le démarrage
-        status: "ACTIVE",
-      },
+      return { tenant, user };
     });
 
+    // Mettre a jour les metadata Clerk
     const client = await clerkClient();
-    await client.users.updateUserMetadata(userId, {
+    await client.users.updateUserMetadata(clerkId, {
       publicMetadata: {
         tenantId: tenant.id,
         role: "CEO",
         workspaceType: type,
-        plan: "PRO",
+        plan: "STARTER",
       },
     });
-    
-    return { success: true };
-  } catch (err: any) {
-    console.error("Action Error:", err);
-    return { success: false, error: err?.message || "Unknown server error" };
+
+    return { success: true as const };
+  } catch (err: unknown) {
+    const message =
+      err instanceof Error ? err.message : "Erreur lors de la creation";
+    console.error("[createWorkspace]", message);
+    return { success: false as const, error: message };
   }
 }

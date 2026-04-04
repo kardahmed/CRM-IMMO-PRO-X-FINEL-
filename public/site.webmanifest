@@ -1,0 +1,16 @@
+{
+  "name": "CRM IMMO PRO X",
+  "short_name": "PRO-X",
+  "description": "SaaS CRM immobilier multi-tenant",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#2563eb",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}

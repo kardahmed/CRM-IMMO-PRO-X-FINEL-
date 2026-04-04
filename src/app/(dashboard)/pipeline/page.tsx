@@ -325,8 +325,8 @@ export default function PipelinePage() {
 
       {/* Kanban Board */}
       <DragDropContext onDragEnd={onDragEnd}>
-        <div className="flex-1 overflow-x-auto pb-4 -mx-6 lg:-mx-8 px-6 lg:px-8">
-          <div className="flex gap-4 min-w-max">
+        <div className="flex-1 overflow-x-auto pb-4 -mx-3 md:-mx-6 lg:-mx-8 px-3 md:px-6 lg:px-8 scrollbar-thin">
+          <div className="flex gap-3 md:gap-4 min-w-max">
             {PIPELINE_STAGES.map((stage) => (
               <KanbanColumn
                 key={stage.id}

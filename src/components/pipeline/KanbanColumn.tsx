@@ -99,7 +99,7 @@ export function KanbanColumn({
   return (
     <div
       className={cn(
-        "flex flex-col rounded-xl border min-w-[280px] w-[280px] shrink-0",
+        "flex flex-col rounded-xl border min-w-[240px] w-[240px] md:min-w-[280px] md:w-[280px] shrink-0",
         stage.borderColor,
         stage.bgColor,
       )}

@@ -215,7 +215,7 @@ export default function ClientDetailPage() {
       <ClientInfoPanel client={client} />
 
       {/* Barre d'Actions Rapides (Horizontal Pills) */}
-      <div className="flex flex-wrap items-center gap-3">
+      <div className="flex flex-wrap items-center gap-2 md:gap-3 overflow-x-auto no-scrollbar pb-1">
         <Button className="rounded-full bg-blue-600 hover:bg-blue-700 text-white font-bold h-9 gap-2 px-5">
           <Phone className="h-4 w-4" fill="currentColor" /> Appeler
         </Button>

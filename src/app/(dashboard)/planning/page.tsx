@@ -68,8 +68,13 @@ const MOCK_VISITS: PlanningVisit[] = [
   },
 ];
 
+function getDefaultView(): ViewMode {
+  if (typeof window !== "undefined" && window.innerWidth < 768) return "day";
+  return "week";
+}
+
 export default function PlanningPage() {
-  const [view, setView] = useState<ViewMode>("week");
+  const [view, setView] = useState<ViewMode>(getDefaultView);
   const [agent, setAgent] = useState("all");
   const [status, setStatus] = useState("all");
   const [date, setDate] = useState(new Date());

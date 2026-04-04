@@ -30,7 +30,7 @@ export function DashboardCard({ label, value, trend, color }: StatCardProps) {
   const isPositive = trend.startsWith("+");
 
   return (
-    <Card className="hover:shadow-lg transition-all duration-300 border-neutral-100 dark:border-neutral-800">
+    <Card className="hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 border-neutral-100 dark:border-neutral-800">
       <CardHeader className="flex flex-row items-center justify-between pb-2">
         <CardTitle className="text-sm font-medium text-muted-foreground">{label}</CardTitle>
         <div className={cn("p-2 rounded-lg", colorMap[color])}>

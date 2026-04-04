@@ -143,7 +143,7 @@ export function TaskExecutionDialog({ taskId, open, onClose, onExecute }: TaskEx
 
   return (
     <Sheet open={open} onOpenChange={(o) => (!o ? onClose() : null)}>
-      <SheetContent className="w-full sm:max-w-2xl overflow-y-auto bg-gray-50 dark:bg-neutral-950 p-0 border-l border-neutral-200 dark:border-neutral-800">
+      <SheetContent className="w-full sm:max-w-2xl overflow-y-auto bg-gray-50 dark:bg-neutral-950 p-0 border-l border-neutral-200 dark:border-neutral-800 max-sm:!w-screen max-sm:!max-w-none">
         {loading || !context ? (
           <div className="flex flex-col items-center justify-center p-12 h-full">
             <RefreshCw className="h-8 w-8 animate-spin text-primary mb-4" />
