@@ -1,82 +1,135 @@
-import { currentUser } from "@clerk/nextjs/server";
-import { NextResponse } from "next/server";
-import type { UserRole } from "@prisma/client";
+import { apiHandler, jsonOk } from "@/lib/api-handler";
 
-export async function GET() {
-  const user = await currentUser();
-  if (!user) {
-    return new NextResponse("Unauthorized", { status: 401 });
-  }
+/**
+ * GET /api/v1/dashboard
+ *
+ * Dashboard data scoped to the authenticated user's tenant.
+ * Uses apiHandler for auth + tenant isolation.
+ */
+export const GET = apiHandler(
+  { module: "DASHBOARD", action: "READ" },
+  async (ctx) => {
+    const { db, user } = ctx;
+    const isCeoOrAdmin = user.role === "CEO" || user.role === "ADMIN";
 
-  const role = (user.publicMetadata?.role as UserRole) || "AGENT";
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+    const todayEnd = new Date();
+    todayEnd.setHours(23, 59, 59, 999);
+    const monthStart = new Date(todayStart.getFullYear(), todayStart.getMonth(), 1);
 
-  // Simulation de données selon le rôle
-  if (role === "CEO" || role === "ADMIN") {
-    return NextResponse.json({
-      role: "CEO",
-      stats: [
-        { label: "Prospects mois", value: "124", trend: "+12%", color: "blue" },
-        { label: "Visites semaine", value: "42", trend: "+8%", color: "green" },
-        { label: "Ventes mois", value: "12", trend: "+5%", color: "purple" },
-        { label: "CA mois", value: "450k €", trend: "+15%", color: "orange" },
-      ],
-      conversionData: [
-        { date: "01/03", value: 400 },
-        { date: "05/03", value: 300 },
-        { date: "10/03", value: 600 },
-        { date: "15/03", value: 800 },
-        { date: "20/03", value: 500 },
-        { date: "25/03", value: 1100 },
-        { date: "30/03", value: 1400 },
-      ],
-      pipelineData: [
-        { name: "Prospect", value: 45 },
-        { name: "Contacté", value: 32 },
-        { name: "RDV", value: 18 },
-        { name: "Offre", value: 12 },
-        { name: "Compromis", value: 8 },
-        { name: "Vente", value: 5 },
-      ],
-      topAgents: [
-        { name: "Sophie Martin", sales: 8, revenue: "120k €", avatar: "https://i.pravatar.cc/150?u=sophie" },
-        { name: "Lucas Bernard", sales: 6, revenue: "95k €", avatar: "https://i.pravatar.cc/150?u=lucas" },
-        { name: "Emma Petit", sales: 5, revenue: "82k €", avatar: "https://i.pravatar.cc/150?u=emma" },
-      ],
-      alerts: [
-        { id: 1, type: "task", title: "5 tâches en retard", severity: "high" },
-        { id: 2, type: "payment", title: "3 paiements impayés", severity: "medium" },
-      ],
-      todayVisits: [
-        { time: "10:00", property: "Villa Contemporaine - Mougins", client: "M. Dupont" },
-        { time: "14:30", property: "Appartement T3 - Antibes", client: "Mme. Leroy" },
-      ],
-      propertyDistribution: [
-        { name: "Appartements", value: 45 },
-        { name: "Villas", value: 30 },
-        { name: "Terrains", value: 15 },
-        { name: "Commerces", value: 10 },
-      ],
+    // Common queries scoped to tenant via ctx.db
+    const [
+      clientCount,
+      newClientsThisMonth,
+      visitCount,
+      tasksDue,
+      recentClients,
+      pipelineCounts,
+    ] = await Promise.all([
+      db.client.count(),
+      db.client.count({
+        where: { createdAt: { gte: monthStart } },
+      }),
+      db.visit.count({
+        where: { scheduledAt: { gte: todayStart, lt: todayEnd } },
+      }),
+      db.task.count({
+        where: {
+          status: { in: ["PENDING", "IN_PROGRESS"] },
+          dueAt: { lt: new Date() },
+        },
+      }),
+      db.client.findMany({
+        take: 5,
+        orderBy: { createdAt: "desc" },
+        select: {
+          id: true,
+          firstName: true,
+          lastName: true,
+          phone: true,
+          pipelineStage: true,
+          createdAt: true,
+        },
+      }),
+      db.client.groupBy({
+        by: ["pipelineStage"],
+        _count: { id: true },
+      }),
+    ]);
+
+    // Build pipeline data
+    const pipelineData = pipelineCounts.map((p) => ({
+      name: p.pipelineStage,
+      value: p._count.id,
+    }));
+
+    // Today's visits with relations
+    const todayVisits = await db.visit.findMany({
+      where: { scheduledAt: { gte: todayStart, lt: todayEnd } },
+      take: 10,
+      orderBy: { scheduledAt: "asc" },
+      select: {
+        id: true,
+        scheduledAt: true,
+        client: { select: { firstName: true, lastName: true } },
+        property: { select: { name: true } },
+      },
     });
-  }
 
-  // Dashboard AGENT
-  return NextResponse.json({
-    role: "AGENT",
-    welcomeMessage: `Bonjour ${user.firstName || "Agent"} !`,
-    stats: {
-      activeClients: 24,
-      monthlyGoal: 75, // 75% atteint
-      todayFollowUps: 8,
-    },
-    todayVisits: [
-      { time: "09:00", property: "Studio - Cannes", client: "Jean Valjean" },
-      { time: "11:00", property: "Maison de ville - Nice", client: "Cosette" },
-      { time: "16:00", property: "Penthouse - Monaco", client: "Javert" },
-    ],
-    tasks: [
-      { id: 1, title: "Reler client Dupont", overdue: true },
-      { id: 2, title: "Envoyer compromis Martin", overdue: false },
-      { id: 3, title: "Préparer visite Javert", overdue: false },
-    ],
-  });
-}
+    const formatVisits = (visits: typeof todayVisits) =>
+      visits.map((v) => ({
+        id: v.id,
+        time: v.scheduledAt,
+        client: `${v.client.firstName} ${v.client.lastName}`,
+        property: v.property?.name || "—",
+      }));
+
+    // Agent-specific: filter by assigned agent
+    if (!isCeoOrAdmin) {
+      const myClients = await db.client.count({
+        where: { assignedAgentId: user.userId },
+      });
+      const myTasks = await db.task.findMany({
+        where: {
+          assignedToId: user.userId,
+          status: { in: ["PENDING", "IN_PROGRESS"] },
+        },
+        take: 5,
+        orderBy: { dueAt: "asc" },
+        select: {
+          id: true,
+          title: true,
+          dueAt: true,
+          status: true,
+        },
+      });
+
+      return jsonOk({
+        role: user.role,
+        welcomeMessage: `Bonjour ${user.firstName || "Agent"} !`,
+        stats: {
+          activeClients: myClients,
+          todayVisits: visitCount,
+          overdueTasks: tasksDue,
+        },
+        todayVisits: formatVisits(todayVisits),
+        tasks: myTasks,
+      });
+    }
+
+    // CEO / Admin view
+    return jsonOk({
+      role: user.role,
+      stats: {
+        totalClients: clientCount,
+        newClientsThisMonth,
+        todayVisits: visitCount,
+        overdueTasks: tasksDue,
+      },
+      pipelineData,
+      recentClients,
+      todayVisits: formatVisits(todayVisits),
+    });
+  },
+);

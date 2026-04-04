@@ -5,6 +5,7 @@ import type { PermissionAction } from "@/lib/permissions-matrix";
 import { hasPermission } from "@/lib/permissions-matrix";
 import { getCurrentUser, type ICurrentUser } from "@/lib/auth";
 import { createTenantPrisma, type TenantPrismaClient } from "@/lib/prisma-tenant";
+import { rateLimit, getClientIp, RATE_LIMITS } from "@/lib/rate-limit";
 
 // ============================================================================
 // Types
@@ -61,6 +62,13 @@ export function apiHandler(options: IApiHandlerOptions, handler: ApiHandlerFn) {
     context?: { params?: Promise<Record<string, string>> },
   ): Promise<NextResponse> => {
     try {
+      // 0. Rate limiting (50 req/sec per IP for authenticated routes)
+      const ip = getClientIp(req);
+      const rl = rateLimit(`api:${ip}`, RATE_LIMITS.authenticated);
+      if (!rl.allowed) {
+        return jsonError("Too many requests", 429);
+      }
+
       // 1. Auth
       let user: ICurrentUser;
       try {

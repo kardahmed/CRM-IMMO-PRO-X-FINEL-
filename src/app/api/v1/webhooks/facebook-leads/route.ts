@@ -6,6 +6,8 @@ import {
 } from "@/lib/validations/facebook-leads";
 import { processFacebookLead } from "@/services/facebook-leads.service";
 import type { IFacebookLeadPayload } from "@/services/facebook-leads.service";
+import { verifyMetaSignature } from "@/lib/webhook-signature";
+import { rateLimit, getClientIp, RATE_LIMITS } from "@/lib/rate-limit";
 
 /**
  * GET /api/v1/webhooks/facebook-leads
@@ -41,7 +43,26 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
  */
 export async function POST(req: NextRequest): Promise<NextResponse> {
   try {
-    const body = await req.json();
+    // Rate limiting
+    const ip = getClientIp(req);
+    const rl = rateLimit(`webhook:facebook:${ip}`, RATE_LIMITS.webhook);
+    if (!rl.allowed) {
+      return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+    }
+
+    const rawBody = await req.text();
+
+    // Verify Meta signature (HMAC-SHA256)
+    const appSecret = process.env.FACEBOOK_APP_SECRET;
+    if (appSecret) {
+      const signature = req.headers.get("x-hub-signature-256");
+      if (!verifyMetaSignature(rawBody, signature, appSecret)) {
+        console.warn("[Facebook Webhook] Invalid signature");
+        return NextResponse.json({ error: "Invalid signature" }, { status: 403 });
+      }
+    }
+
+    const body = JSON.parse(rawBody);
 
     // Valider la structure du webhook
     const parsed = facebookLeadWebhookSchema.safeParse(body);

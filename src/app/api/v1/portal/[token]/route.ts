@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { rateLimit, getClientIp, RATE_LIMITS } from "@/lib/rate-limit";
 
 /**
  * GET /api/v1/portal/[token]
@@ -14,6 +15,16 @@ export async function GET(
   context: { params: Promise<{ token: string }> },
 ): Promise<NextResponse> {
   const { token } = await context.params;
+
+  // Rate limiting: 5 req/min per IP to prevent brute-force token guessing
+  const ip = getClientIp(_req);
+  const rl = rateLimit(`portal:${ip}`, RATE_LIMITS.portal);
+  if (!rl.allowed) {
+    return NextResponse.json(
+      { success: false, error: "Trop de tentatives, réessayez plus tard" },
+      { status: 429 },
+    );
+  }
 
   if (!token || token.length < 20) {
     return NextResponse.json(

@@ -15,11 +15,11 @@ import {
  * Header requis : Authorization: Bearer <CRON_SECRET>
  */
 export async function POST(req: NextRequest): Promise<NextResponse> {
-  // Vérifier le secret CRON
+  // Vérifier le secret CRON (obligatoire)
   const authHeader = req.headers.get("authorization");
   const cronSecret = process.env.CRON_SECRET;
 
-  if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
+  if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
     return NextResponse.json(
       { success: false, error: "Non autorisé" },
       { status: 401 },
