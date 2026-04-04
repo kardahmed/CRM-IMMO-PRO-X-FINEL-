@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { Building2, Settings2, Users2, Workflow, Link2, KeyRound, Mail, MessageCircle, Send, CheckCircle2, ShieldAlert } from "lucide-react";
+import { useState, useEffect, useCallback } from "react";
+import { Building2, Settings2, Users2, Workflow, Link2, KeyRound, Mail, MessageCircle, Send, CheckCircle2, ShieldAlert, Loader2 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,14 +10,37 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 
+interface ITenantSettings {
+  agencyName?: string;
+  activityType?: string;
+  address?: string;
+  rcNumber?: string;
+  contactEmail?: string;
+  smtp?: { host?: string; port?: string };
+  facebookPageId?: string;
+}
+
+interface ITenant {
+  id: string;
+  name: string;
+  type: string;
+  plan: string;
+  status: string;
+  settings: ITenantSettings;
+  createdAt: string;
+}
 
 export default function SettingsPage() {
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [tenant, setTenant] = useState<ITenant | null>(null);
+
   const [workspaceForm, setWorkspaceForm] = useState({
-    agencyName: "IMMO PRO-X",
-    activityType: "Promotion Immobilière",
-    address: "123 Rue Didouche Mourad, Alger Centre",
-    rcNumber: "RC-16-00-1234567A12",
-    contactEmail: "contact@immopro-x.dz",
+    agencyName: "",
+    activityType: "",
+    address: "",
+    rcNumber: "",
+    contactEmail: "",
   });
 
   const [smtpForm, setSmtpForm] = useState({
@@ -29,16 +52,87 @@ export default function SettingsPage() {
     pageId: "",
   });
 
+  const fetchSettings = useCallback(async () => {
+    try {
+      const res = await fetch("/api/v1/settings");
+      if (!res.ok) throw new Error("Erreur chargement");
+      const json = await res.json();
+      const data = json.data as ITenant;
+      setTenant(data);
+
+      const s = data.settings ?? {};
+      setWorkspaceForm({
+        agencyName: s.agencyName ?? data.name ?? "",
+        activityType: s.activityType ?? "",
+        address: s.address ?? "",
+        rcNumber: s.rcNumber ?? "",
+        contactEmail: s.contactEmail ?? "",
+      });
+      setSmtpForm({
+        host: s.smtp?.host ?? "",
+        port: s.smtp?.port ?? "",
+      });
+      setFacebookForm({
+        pageId: s.facebookPageId ?? "",
+      });
+    } catch {
+      toast.error("Impossible de charger les parametres");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchSettings();
+  }, [fetchSettings]);
+
+  async function saveSettings(settings: Partial<ITenantSettings>) {
+    setSaving(true);
+    try {
+      const res = await fetch("/api/v1/settings", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ settings }),
+      });
+      if (!res.ok) throw new Error("Erreur sauvegarde");
+      const json = await res.json();
+      setTenant(json.data);
+      toast.success("Parametres sauvegardes");
+    } catch {
+      toast.error("Erreur lors de la sauvegarde");
+    } finally {
+      setSaving(false);
+    }
+  }
+
   function handleSaveWorkspace() {
-    toast("Parametres sauvegardes");
+    saveSettings({
+      agencyName: workspaceForm.agencyName,
+      activityType: workspaceForm.activityType,
+      address: workspaceForm.address,
+      rcNumber: workspaceForm.rcNumber,
+      contactEmail: workspaceForm.contactEmail,
+    });
   }
 
   function handleSaveSmtp() {
-    toast("Parametres sauvegardes");
+    saveSettings({
+      smtp: { host: smtpForm.host, port: smtpForm.port },
+    });
   }
 
   function handleSaveFacebook() {
-    toast("Parametres sauvegardes");
+    saveSettings({
+      facebookPageId: facebookForm.pageId,
+    });
+  }
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    );
   }
 
   return (
@@ -50,34 +144,39 @@ export default function SettingsPage() {
             <Settings2 className="h-6 w-6" />
           </div>
           <div>
-            <h1 className="text-2xl font-black uppercase tracking-tight">Paramètres</h1>
+            <h1 className="text-2xl font-black uppercase tracking-tight">Parametres</h1>
             <p className="text-sm text-muted-foreground font-medium">Configuration globale du Workspace</p>
           </div>
         </div>
+        {tenant && (
+          <Badge variant="outline" className="text-xs font-bold uppercase">
+            {tenant.plan} - {tenant.type}
+          </Badge>
+        )}
       </div>
 
       <Tabs defaultValue="workspace" className="w-full">
         <TabsList className="w-full justify-start border-b bg-transparent h-auto p-0 rounded-none gap-6 overflow-x-auto">
-          <TabsTrigger 
-            value="workspace" 
+          <TabsTrigger
+            value="workspace"
             className="gap-2 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none font-bold px-1 py-3"
           >
             <Building2 className="h-4 w-4" /> Profil Workspace
           </TabsTrigger>
-          <TabsTrigger 
-            value="users" 
+          <TabsTrigger
+            value="users"
             className="gap-2 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none font-bold px-1 py-3"
           >
             <Users2 className="h-4 w-4" /> Utilisateurs
           </TabsTrigger>
-          <TabsTrigger 
-            value="integrations" 
+          <TabsTrigger
+            value="integrations"
             className="gap-2 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none font-bold px-1 py-3"
           >
-            <Link2 className="h-4 w-4" /> Intégrations
+            <Link2 className="h-4 w-4" /> Integrations
           </TabsTrigger>
-          <TabsTrigger 
-            value="automations" 
+          <TabsTrigger
+            value="automations"
             className="gap-2 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none font-bold px-1 py-3"
           >
             <Workflow className="h-4 w-4" /> Automatisations
@@ -104,15 +203,15 @@ export default function SettingsPage() {
                         <Input value={workspaceForm.agencyName} onChange={(e) => setWorkspaceForm((prev) => ({ ...prev, agencyName: e.target.value }))} />
                       </div>
                       <div className="space-y-1.5">
-                        <label className="text-xs font-bold uppercase text-muted-foreground">Type d'activité</label>
+                        <label className="text-xs font-bold uppercase text-muted-foreground">Type d'activite</label>
                         <Input value={workspaceForm.activityType} onChange={(e) => setWorkspaceForm((prev) => ({ ...prev, activityType: e.target.value }))} />
                       </div>
                       <div className="space-y-1.5 md:col-span-2">
-                        <label className="text-xs font-bold uppercase text-muted-foreground">Adresse complète</label>
+                        <label className="text-xs font-bold uppercase text-muted-foreground">Adresse complete</label>
                         <Textarea value={workspaceForm.address} onChange={(e) => setWorkspaceForm((prev) => ({ ...prev, address: e.target.value }))} className="resize-none" />
                       </div>
                       <div className="space-y-1.5">
-                        <label className="text-xs font-bold uppercase text-muted-foreground">N° RC / SIRET</label>
+                        <label className="text-xs font-bold uppercase text-muted-foreground">N RC / SIRET</label>
                         <Input value={workspaceForm.rcNumber} onChange={(e) => setWorkspaceForm((prev) => ({ ...prev, rcNumber: e.target.value }))} />
                       </div>
                       <div className="space-y-1.5">
@@ -123,7 +222,10 @@ export default function SettingsPage() {
                   </div>
                 </div>
                 <div className="flex justify-end pt-4 border-t">
-                  <Button className="font-bold" onClick={handleSaveWorkspace}>Sauvegarder les modifications</Button>
+                  <Button className="font-bold" onClick={handleSaveWorkspace} disabled={saving}>
+                    {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    Sauvegarder les modifications
+                  </Button>
                 </div>
               </CardContent>
             </Card>
@@ -134,8 +236,8 @@ export default function SettingsPage() {
             <Card>
               <CardHeader className="flex flex-row items-center justify-between pb-4 border-b">
                 <div>
-                  <CardTitle className="text-lg font-black">Membres de l'équipe</CardTitle>
-                  <CardDescription>Gérez les accès et les rôles de vos collaborateurs.</CardDescription>
+                  <CardTitle className="text-lg font-black">Membres de l'equipe</CardTitle>
+                  <CardDescription>Gerez les acces et les roles de vos collaborateurs.</CardDescription>
                 </div>
                 <Button size="sm" className="font-bold gap-1.5">
                   <Users2 className="h-4 w-4" /> Ajouter un membre
@@ -146,7 +248,7 @@ export default function SettingsPage() {
                   <thead className="text-xs uppercase bg-accent/30 text-muted-foreground">
                     <tr>
                       <th className="px-6 py-4 font-bold">Utilisateur</th>
-                      <th className="px-6 py-4 font-bold">Rôle</th>
+                      <th className="px-6 py-4 font-bold">Role</th>
                       <th className="px-6 py-4 font-bold">Statut</th>
                       <th className="px-6 py-4 font-bold text-right">Actions</th>
                     </tr>
@@ -173,8 +275,8 @@ export default function SettingsPage() {
                           )}
                         </td>
                         <td className="px-6 py-4 text-right space-x-2">
-                          <Button variant="ghost" size="sm" className="text-xs font-bold">Éditer</Button>
-                          <Button variant="ghost" size="sm" className="text-xs font-bold text-red-600">Désactiver</Button>
+                          <Button variant="ghost" size="sm" className="text-xs font-bold">Editer</Button>
+                          <Button variant="ghost" size="sm" className="text-xs font-bold text-red-600">Desactiver</Button>
                         </td>
                       </tr>
                     ))}
@@ -191,7 +293,7 @@ export default function SettingsPage() {
                   <CardHeader className="pb-3 border-b">
                     <CardTitle className="text-base font-black flex items-center justify-between">
                       <span className="flex items-center gap-2"><MessageCircle className="h-5 w-5 text-green-500" /> WhatsApp API</span>
-                      <Badge className="bg-green-100 text-green-700 bg-opacity-100 gap-1"><CheckCircle2 className="h-3 w-3" /> Connecté</Badge>
+                      <Badge className="bg-green-100 text-green-700 bg-opacity-100 gap-1"><CheckCircle2 className="h-3 w-3" /> Connecte</Badge>
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="pt-4 space-y-4">
@@ -207,15 +309,15 @@ export default function SettingsPage() {
                   <CardHeader className="pb-3 border-b">
                     <CardTitle className="text-base font-black flex items-center justify-between">
                       <span className="flex items-center gap-2"><KeyRound className="h-5 w-5 text-blue-500" /> Google Maps API</span>
-                      <Badge className="bg-green-100 text-green-700 bg-opacity-100 gap-1"><CheckCircle2 className="h-3 w-3" /> Connecté</Badge>
+                      <Badge className="bg-green-100 text-green-700 bg-opacity-100 gap-1"><CheckCircle2 className="h-3 w-3" /> Connecte</Badge>
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="pt-4 space-y-4">
                     <div className="space-y-1.5">
-                      <label className="text-xs font-bold uppercase text-muted-foreground">Clé API (NEXT_PUBLIC_GOOGLE_MAPS_API_KEY)</label>
-                      <Input type="password" value="AIzaSyAL9gL3TWaTxR5Y_tW7hLJvYgPph7Z0obs" readOnly className="font-mono text-xs" />
+                      <label className="text-xs font-bold uppercase text-muted-foreground">Cle API (NEXT_PUBLIC_GOOGLE_MAPS_API_KEY)</label>
+                      <Input type="password" value="************************" readOnly className="font-mono text-xs" />
                     </div>
-                    <Button variant="outline" size="sm" className="w-full font-bold text-muted-foreground" disabled>Géré via Variables d'Env</Button>
+                    <Button variant="outline" size="sm" className="w-full font-bold text-muted-foreground" disabled>Gere via Variables d'Env</Button>
                   </CardContent>
                 </Card>
 
@@ -223,13 +325,13 @@ export default function SettingsPage() {
                   <CardHeader className="pb-3 border-b">
                     <CardTitle className="text-base font-black flex items-center justify-between">
                       <span className="flex items-center gap-2"><Mail className="h-5 w-5 text-gray-500" /> SMTP Email</span>
-                      <Badge variant="secondary" className="text-muted-foreground gap-1"><ShieldAlert className="h-3 w-3" /> Non Configuré</Badge>
+                      <Badge variant="secondary" className="text-muted-foreground gap-1"><ShieldAlert className="h-3 w-3" /> Non Configure</Badge>
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="pt-4 space-y-4">
                     <div className="grid grid-cols-2 gap-2">
                        <div className="space-y-1.5">
-                        <label className="text-xs font-bold uppercase text-muted-foreground">Hôte SMTP</label>
+                        <label className="text-xs font-bold uppercase text-muted-foreground">Hote SMTP</label>
                         <Input placeholder="smtp.mailtrap.io" value={smtpForm.host} onChange={(e) => setSmtpForm((prev) => ({ ...prev, host: e.target.value }))} />
                       </div>
                       <div className="space-y-1.5">
@@ -237,7 +339,10 @@ export default function SettingsPage() {
                         <Input placeholder="587" value={smtpForm.port} onChange={(e) => setSmtpForm((prev) => ({ ...prev, port: e.target.value }))} />
                       </div>
                     </div>
-                    <Button size="sm" className="w-full font-bold" onClick={handleSaveSmtp}>Connecter SMTP</Button>
+                    <Button size="sm" className="w-full font-bold" onClick={handleSaveSmtp} disabled={saving}>
+                      {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                      Connecter SMTP
+                    </Button>
                   </CardContent>
                 </Card>
 
@@ -245,7 +350,7 @@ export default function SettingsPage() {
                   <CardHeader className="pb-3 border-b">
                     <CardTitle className="text-base font-black flex items-center justify-between">
                       <span className="flex items-center gap-2"><Send className="h-5 w-5 text-blue-600" /> Facebook Leads</span>
-                      <Badge variant="secondary" className="text-muted-foreground gap-1"><ShieldAlert className="h-3 w-3" /> Non Configuré</Badge>
+                      <Badge variant="secondary" className="text-muted-foreground gap-1"><ShieldAlert className="h-3 w-3" /> Non Configure</Badge>
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="pt-4 space-y-4">
@@ -253,7 +358,10 @@ export default function SettingsPage() {
                       <label className="text-xs font-bold uppercase text-muted-foreground">ID Page Facebook</label>
                       <Input placeholder="1234567890" value={facebookForm.pageId} onChange={(e) => setFacebookForm((prev) => ({ ...prev, pageId: e.target.value }))} />
                     </div>
-                    <Button size="sm" className="w-full font-bold bg-[#1877F2] text-white hover:bg-[#1877F2]/90" onClick={handleSaveFacebook}>Connexion Facebook</Button>
+                    <Button size="sm" className="w-full font-bold bg-[#1877F2] text-white hover:bg-[#1877F2]/90" onClick={handleSaveFacebook} disabled={saving}>
+                      {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                      Connexion Facebook
+                    </Button>
                   </CardContent>
                 </Card>
              </div>
@@ -264,26 +372,26 @@ export default function SettingsPage() {
             <Card>
               <CardHeader className="border-b pb-4">
                 <CardTitle className="text-lg font-black flex items-center gap-2">
-                  <Workflow className="h-5 w-5 text-primary" /> Moteur de Règles Automatiques
+                  <Workflow className="h-5 w-5 text-primary" /> Moteur de Regles Automatiques
                 </CardTitle>
-                <CardDescription>Automatisez les tâches chronophages lors des changements d'étapes dans le pipeline.</CardDescription>
+                <CardDescription>Automatisez les taches chronophages lors des changements d'etapes dans le pipeline.</CardDescription>
               </CardHeader>
               <CardContent className="p-0">
                  <div className="p-4 border-b flex items-center justify-between hover:bg-accent/10 transition-colors">
                     <div>
-                      <h4 className="font-black text-sm">Visite Confirmée ➔ Tâche de rappel</h4>
-                      <p className="text-xs text-muted-foreground mt-0.5">Créer automatiquement une tâche "Rappel Visite" 24h avant.</p>
+                      <h4 className="font-black text-sm">Visite Confirmee - Tache de rappel</h4>
+                      <p className="text-xs text-muted-foreground mt-0.5">Creer automatiquement une tache "Rappel Visite" 24h avant.</p>
                     </div>
                     <div className="flex flex-col items-end gap-2">
                        <div className="relative inline-block w-8 h-4 rounded-full bg-primary/20"><div className="absolute top-0.5 right-0.5 w-3 h-3 rounded-full bg-primary" /></div>
                        <Badge variant="outline" className="text-[9px] uppercase font-bold">Via Interne</Badge>
                     </div>
                  </div>
-                 
+
                  <div className="p-4 border-b flex items-center justify-between hover:bg-accent/10 transition-colors">
                     <div>
-                      <h4 className="font-black text-sm">Passage en "Vendu" ➔ Email Bravo</h4>
-                      <p className="text-xs text-muted-foreground mt-0.5">Envoyer le Template Email "Félicitations" au client.</p>
+                      <h4 className="font-black text-sm">Passage en "Vendu" - Email Bravo</h4>
+                      <p className="text-xs text-muted-foreground mt-0.5">Envoyer le Template Email "Felicitations" au client.</p>
                     </div>
                     <div className="flex flex-col items-end gap-2">
                        <div className="relative inline-block w-8 h-4 rounded-full bg-neutral-200 dark:bg-neutral-800"><div className="absolute top-0.5 left-0.5 w-3 h-3 rounded-full bg-neutral-400" /></div>
@@ -293,7 +401,7 @@ export default function SettingsPage() {
 
                  <div className="p-4 flex items-center justify-between hover:bg-accent/10 transition-colors">
                     <div>
-                      <h4 className="font-black text-sm">Nouveau Lead entrant ➔ Message WhatsApp</h4>
+                      <h4 className="font-black text-sm">Nouveau Lead entrant - Message WhatsApp</h4>
                       <p className="text-xs text-muted-foreground mt-0.5">Envoyer un message de bienvenue automatique sur WhatsApp.</p>
                     </div>
                     <div className="flex flex-col items-end gap-2">

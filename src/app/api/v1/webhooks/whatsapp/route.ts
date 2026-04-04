@@ -42,7 +42,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
   try {
     // Rate limiting
     const ip = getClientIp(req);
-    const rl = rateLimit(`webhook:whatsapp:${ip}`, RATE_LIMITS.webhook);
+    const rl = await rateLimit(`webhook:whatsapp:${ip}`, RATE_LIMITS.webhook);
     if (!rl.allowed) {
       return NextResponse.json({ error: "Too many requests" }, { status: 429 });
     }

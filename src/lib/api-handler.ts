@@ -64,7 +64,7 @@ export function apiHandler(options: IApiHandlerOptions, handler: ApiHandlerFn) {
     try {
       // 0. Rate limiting (50 req/sec per IP for authenticated routes)
       const ip = getClientIp(req);
-      const rl = rateLimit(`api:${ip}`, RATE_LIMITS.authenticated);
+      const rl = await rateLimit(`api:${ip}`, RATE_LIMITS.authenticated);
       if (!rl.allowed) {
         return jsonError("Too many requests", 429);
       }

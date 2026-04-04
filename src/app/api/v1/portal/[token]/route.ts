@@ -18,7 +18,7 @@ export async function GET(
 
   // Rate limiting: 5 req/min per IP to prevent brute-force token guessing
   const ip = getClientIp(_req);
-  const rl = rateLimit(`portal:${ip}`, RATE_LIMITS.portal);
+  const rl = await rateLimit(`portal:${ip}`, RATE_LIMITS.portal);
   if (!rl.allowed) {
     return NextResponse.json(
       { success: false, error: "Trop de tentatives, réessayez plus tard" },

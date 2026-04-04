@@ -14,7 +14,7 @@ import { NextRequest } from "next/server";
 export async function GET(req: NextRequest): Promise<NextResponse> {
   // Rate limiting
   const ip = getClientIp(req);
-  const rl = rateLimit(`admin:demo-leads:${ip}`, RATE_LIMITS.authenticated);
+  const rl = await rateLimit(`admin:demo-leads:${ip}`, RATE_LIMITS.authenticated);
   if (!rl.allowed) {
     return NextResponse.json(
       { success: false, error: "Trop de requetes" },

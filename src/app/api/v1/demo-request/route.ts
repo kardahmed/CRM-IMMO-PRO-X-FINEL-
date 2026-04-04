@@ -45,7 +45,7 @@ const demoRequestSchema = z.object({
 export async function POST(req: NextRequest): Promise<NextResponse> {
   // Rate limit: 3 per minute per IP
   const ip = getClientIp(req);
-  const rl = rateLimit(`demo-request:${ip}`, { limit: 3, windowSec: 60 });
+  const rl = await rateLimit(`demo-request:${ip}`, { limit: 3, windowSec: 60 });
   if (!rl.allowed) {
     return NextResponse.json(
       { success: false, error: "Trop de demandes, réessayez dans quelques minutes" },

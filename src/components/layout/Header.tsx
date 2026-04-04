@@ -2,10 +2,10 @@
 
 import { UserButton, useUser } from "@clerk/nextjs";
 import { Search, Settings, Menu } from "lucide-react";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { NotificationBell } from "@/components/layout/NotificationBell";
 import { useSidebar } from "@/hooks/useSidebar";
+import { GlobalSearch } from "@/components/layout/GlobalSearch";
 
 export function Header() {
   const { user } = useUser();
@@ -30,12 +30,8 @@ export function Header() {
           PRO-X
         </span>
 
-        <div className="relative w-full max-w-xl lg:max-w-2xl hidden sm:block">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Rechercher (clients, biens, taches...)"
-            className="pl-9 bg-accent/20 border-accent/30 focus-visible:ring-primary/50 shadow-inner rounded-xl h-10"
-          />
+        <div className="hidden sm:block flex-1">
+          <GlobalSearch />
         </div>
       </div>
 
