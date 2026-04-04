@@ -44,14 +44,14 @@ const STAGE_COLORS: Record<string, string> = {
 
 const STAGE_LABELS: Record<string, string> = {
   NEW: "Nouveau",
-  CONTACTED: "Contact\u00e9",
-  QUALIFIED: "Qualifi\u00e9",
-  VISIT_SCHEDULED: "Visite planifi\u00e9e",
-  VISITED: "Visit\u00e9",
-  NEGOTIATION: "N\u00e9gociation",
-  RESERVED: "R\u00e9serv\u00e9",
-  SIGNED: "Sign\u00e9",
-  CLOSED: "Cl\u00f4tur\u00e9",
+  CONTACTED: "Contacte",
+  QUALIFIED: "Qualifie",
+  VISIT_SCHEDULED: "Visite planifiee",
+  VISITED: "Visite",
+  NEGOTIATION: "Negociation",
+  RESERVED: "Reserve",
+  SIGNED: "Signe",
+  CLOSED: "Cloture",
 };
 
 export default function ClientsPage() {
@@ -99,7 +99,7 @@ export default function ClientsPage() {
               Clients
             </h1>
             <p className="text-sm text-muted-foreground font-medium">
-              G\u00e9rez vos clients et suivez leur progression dans le pipeline
+              Gerez vos clients et suivez leur progression dans le pipeline
             </p>
           </div>
         </div>
@@ -116,7 +116,7 @@ export default function ClientsPage() {
         <div className="relative flex-1 max-w-sm">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Rechercher par nom, t\u00e9l\u00e9phone, email..."
+            placeholder="Rechercher par nom, telephone, email..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="pl-9"
@@ -153,7 +153,7 @@ export default function ClientsPage() {
           <CardContent className="flex flex-col items-center justify-center py-16 gap-3">
             <UserX className="h-12 w-12 text-muted-foreground" />
             <p className="text-lg font-semibold text-muted-foreground">
-              Aucun client trouv\u00e9
+              Aucun client trouve
             </p>
             <p className="text-sm text-muted-foreground">
               {search || stageFilter !== "ALL"
@@ -172,12 +172,12 @@ export default function ClientsPage() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Nom</TableHead>
-                  <TableHead>T\u00e9l\u00e9phone</TableHead>
+                  <TableHead>Telephone</TableHead>
                   <TableHead>Email</TableHead>
                   <TableHead>Source</TableHead>
-                  <TableHead>\u00c9tape Pipeline</TableHead>
+                  <TableHead>Etape Pipeline</TableHead>
                   <TableHead>Agent</TableHead>
-                  <TableHead>Date cr\u00e9ation</TableHead>
+                  <TableHead>Date creation</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>

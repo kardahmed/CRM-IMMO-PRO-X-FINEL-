@@ -44,47 +44,69 @@ const isDashboardRoute = createRouteMatcher([
 ]);
 const isSuperAdminRoute = createRouteMatcher(["/super-admin(.*)"]);
 const isApiRoute = createRouteMatcher(["/api/v1(.*)"]);
-
 const isOnboardingRoute = createRouteMatcher(["/onboarding(.*)"]);
 
+/**
+ * Extract tenantId from Clerk session claims.
+ * Clerk may expose publicMetadata at different paths depending on
+ * the session token template configuration.
+ */
+function extractTenantId(sessionClaims: Record<string, unknown>): string | undefined {
+  // Path 1: Custom session token template with {{user.public_metadata}}
+  const metadata = sessionClaims?.metadata as Record<string, unknown> | undefined;
+  if (metadata?.tenantId) return metadata.tenantId as string;
+
+  // Path 2: publicMetadata directly on claims
+  const pubMeta = sessionClaims?.publicMetadata as Record<string, unknown> | undefined;
+  if (pubMeta?.tenantId) return pubMeta.tenantId as string;
+
+  // Path 3: Nested under user
+  const user = sessionClaims?.user as Record<string, unknown> | undefined;
+  const userPubMeta = user?.publicMetadata as Record<string, unknown> | undefined;
+  if (userPubMeta?.tenantId) return userPubMeta.tenantId as string;
+
+  // Path 4: Direct on claims (some Clerk configs)
+  if (sessionClaims?.tenantId) return sessionClaims.tenantId as string;
+
+  return undefined;
+}
+
 export default clerkMiddleware(async (auth, req) => {
+  // Public routes — no protection needed
   if (isPublicRoute(req)) {
     return;
   }
 
+  // API routes — just check authentication, apiHandler does the rest
   if (isApiRoute(req)) {
     const { userId } = await auth();
     if (!userId) {
       return new NextResponse(
-        JSON.stringify({ success: false, error: "Non authentifié" }),
+        JSON.stringify({ success: false, error: "Non authentifie" }),
         { status: 401, headers: { "Content-Type": "application/json" } },
       );
     }
     return;
   }
 
-  // Protect onboarding route too (must be logged in)
+  // Onboarding — must be logged in, redirect to dashboard if already has tenant
   if (isOnboardingRoute(req)) {
     await auth.protect();
-    // If they already have a tenant, redirect to dashboard
     const { sessionClaims } = await auth();
-    const claims = sessionClaims as Record<string, any>;
-    const tenantId = claims?.metadata?.tenantId || claims?.publicMetadata?.tenantId;
+    const tenantId = extractTenantId((sessionClaims || {}) as Record<string, unknown>);
     if (tenantId) {
       return NextResponse.redirect(new URL("/dashboard", req.url));
     }
     return;
   }
 
+  // Dashboard & Super Admin routes — require auth + tenant
   if (isDashboardRoute(req) || isSuperAdminRoute(req)) {
     await auth.protect();
     const { sessionClaims } = await auth();
-    const claims = sessionClaims as Record<string, any>;
-    
-    // Supabase / Clerk usually puts publicMetadata inside sessionClaims.publicMetadata or sessionClaims.metadata depending on template
-    const tenantId = claims?.metadata?.tenantId || claims?.publicMetadata?.tenantId;
-    
-    // Redirect to onboarding if no tenant is set
+    const tenantId = extractTenantId((sessionClaims || {}) as Record<string, unknown>);
+
+    // No tenant → redirect to onboarding (except super admin)
     if (!tenantId && !isSuperAdminRoute(req)) {
       return NextResponse.redirect(new URL("/onboarding", req.url));
     }
