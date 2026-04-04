@@ -24,6 +24,21 @@ const isDashboardRoute = createRouteMatcher([
   "/performance(.*)",
   "/map(.*)",
   "/objectives(.*)",
+  "/notifications(.*)",
+  "/owners(.*)",
+  "/mandates(.*)",
+  "/payments(.*)",
+  "/commissions(.*)",
+  "/construction(.*)",
+  "/availability(.*)",
+  "/automations(.*)",
+  "/ai(.*)",
+  "/documents(.*)",
+  "/cadastre(.*)",
+  "/portal-manager(.*)",
+  "/audit-log(.*)",
+  "/portfolio(.*)",
+  "/transaction-type(.*)",
 ]);
 const isSuperAdminRoute = createRouteMatcher(["/super-admin(.*)"]);
 const isApiRoute = createRouteMatcher(["/api/v1(.*)"]);

@@ -39,28 +39,28 @@ const NAV_ITEMS: Record<ModuleId, INavItem> = {
     id: "pipeline",
     label: "Pipeline",
     icon: "kanban",
-    href: "/dashboard/pipeline",
+    href: "/pipeline",
     moduleId: "PIPELINE",
   },
   CLIENTS: {
     id: "clients",
     label: "Clients",
     icon: "users",
-    href: "/dashboard/clients",
+    href: "/clients",
     moduleId: "CLIENTS",
   },
   PLANNING: {
     id: "planning",
     label: "Planning",
     icon: "calendar",
-    href: "/dashboard/planning",
+    href: "/planning",
     moduleId: "PLANNING",
   },
   NOTIFICATIONS: {
     id: "notifications",
     label: "Notifications",
     icon: "bell",
-    href: "/dashboard/notifications",
+    href: "/notifications",
     moduleId: "NOTIFICATIONS",
   },
 
@@ -69,28 +69,28 @@ const NAV_ITEMS: Record<ModuleId, INavItem> = {
     id: "projects",
     label: "Programmes",
     icon: "building-2",
-    href: "/dashboard/projects",
+    href: "/projects",
     moduleId: "PROJECTS",
   },
   CONSTRUCTION_PROGRESS: {
     id: "construction",
     label: "Avancement",
     icon: "hard-hat",
-    href: "/dashboard/construction",
+    href: "/construction",
     moduleId: "CONSTRUCTION_PROGRESS",
   },
   AVAILABILITY_GRID: {
     id: "availability",
-    label: "Disponibilité",
+    label: "Disponibilite",
     icon: "grid-3x3",
-    href: "/dashboard/availability",
+    href: "/availability",
     moduleId: "AVAILABILITY_GRID",
   },
   PAYMENT_SCHEDULE: {
     id: "payments",
-    label: "Échéancier",
+    label: "Echeancier",
     icon: "banknote",
-    href: "/dashboard/payments",
+    href: "/payments",
     moduleId: "PAYMENT_SCHEDULE",
   },
 
@@ -99,35 +99,35 @@ const NAV_ITEMS: Record<ModuleId, INavItem> = {
     id: "portfolio",
     label: "Portefeuille",
     icon: "home",
-    href: "/dashboard/portfolio",
+    href: "/portfolio",
     moduleId: "PORTFOLIO",
   },
   OWNERS: {
     id: "owners",
-    label: "Propriétaires",
+    label: "Proprietaires",
     icon: "user-check",
-    href: "/dashboard/owners",
+    href: "/owners",
     moduleId: "OWNERS",
   },
   MANDATES: {
     id: "mandates",
     label: "Mandats",
     icon: "file-signature",
-    href: "/dashboard/mandates",
+    href: "/mandates",
     moduleId: "MANDATES",
   },
   COMMISSIONS: {
     id: "commissions",
     label: "Commissions",
     icon: "percent",
-    href: "/dashboard/commissions",
+    href: "/commissions",
     moduleId: "COMMISSIONS",
   },
   TRANSACTION_TYPE: {
     id: "transaction-type",
     label: "Type transaction",
     icon: "arrow-left-right",
-    href: "/dashboard/transaction-type",
+    href: "/transaction-type",
     moduleId: "TRANSACTION_TYPE",
   },
 
@@ -136,72 +136,72 @@ const NAV_ITEMS: Record<ModuleId, INavItem> = {
     id: "automations",
     label: "Automatisations",
     icon: "zap",
-    href: "/dashboard/automations",
+    href: "/automations",
     moduleId: "AUTOMATIONS",
   },
   AI_AGENT: {
     id: "ai-agent",
     label: "Assistant IA",
     icon: "sparkles",
-    href: "/dashboard/ai",
+    href: "/ai",
     moduleId: "AI_AGENT",
   },
   GEOMAP: {
     id: "geomap",
     label: "Carte",
     icon: "map",
-    href: "/dashboard/map",
+    href: "/map",
     moduleId: "GEOMAP",
   },
   CADASTRE: {
     id: "cadastre",
     label: "Cadastre",
     icon: "map-pin",
-    href: "/dashboard/cadastre",
+    href: "/cadastre",
     moduleId: "CADASTRE",
   },
   PORTAL: {
     id: "portal",
     label: "Portail client",
     icon: "globe",
-    href: "/dashboard/portal",
+    href: "/portal-manager",
     moduleId: "PORTAL",
   },
   PERFORMANCE: {
     id: "performance",
     label: "Performance",
     icon: "trending-up",
-    href: "/dashboard/performance",
+    href: "/performance",
     moduleId: "PERFORMANCE",
   },
   DOCUMENTS: {
     id: "documents",
     label: "Documents",
     icon: "file-text",
-    href: "/dashboard/documents",
+    href: "/documents",
     moduleId: "DOCUMENTS",
   },
   OBJECTIVES: {
     id: "objectives",
     label: "Objectifs",
     icon: "target",
-    href: "/dashboard/objectives",
+    href: "/objectives",
     moduleId: "OBJECTIVES",
   },
 
   // Admin
   SETTINGS: {
     id: "settings",
-    label: "Paramètres",
+    label: "Parametres",
     icon: "settings",
-    href: "/dashboard/settings",
+    href: "/settings",
     moduleId: "SETTINGS",
   },
   AUDIT_LOG: {
     id: "audit-log",
     label: "Journal",
     icon: "scroll-text",
-    href: "/dashboard/audit-log",
+    href: "/audit-log",
     moduleId: "AUDIT_LOG",
   },
 };
@@ -261,6 +261,13 @@ const SECTION_ORDER: { title: string; modules: ModuleId[] }[] = [
  * Génère la navigation sidebar filtrée par type de workspace, plan et rôle.
  * Seuls les modules accessibles apparaissent.
  */
+/**
+ * Retourne le href d'un module depuis NAV_ITEMS.
+ */
+export function getModuleHref(moduleId: ModuleId): string {
+  return NAV_ITEMS[moduleId]?.href ?? "/dashboard";
+}
+
 export function getNavigation(
   workspaceType: WorkspaceType,
   plan: PlanType,

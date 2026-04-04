@@ -9,7 +9,14 @@ import {
 } from "@clerk/nextjs";
 import { usePathname } from "next/navigation";
 
-const HIDDEN_ROUTES = ["/onboarding", "/dashboard", "/pipeline", "/clients", "/planning", "/map", "/projects", "/settings", "/objectives", "/performance"];
+const HIDDEN_ROUTES = [
+  "/onboarding", "/dashboard", "/pipeline", "/clients", "/planning", "/map",
+  "/projects", "/settings", "/objectives", "/performance", "/notifications",
+  "/owners", "/mandates", "/payments", "/commissions", "/construction",
+  "/availability", "/automations", "/ai", "/documents", "/cadastre",
+  "/portal-manager", "/audit-log", "/portfolio", "/transaction-type",
+  "/super-admin",
+];
 
 export function AuthHeader() {
   const pathname = usePathname();

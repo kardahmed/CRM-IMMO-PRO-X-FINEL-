@@ -3,6 +3,7 @@
 import { useModules } from "@/hooks/usePermissions";
 import { useSidebar } from "@/hooks/useSidebar";
 import { MODULE_REGISTRY } from "@/lib/modules";
+import { getModuleHref } from "@/lib/navigation";
 import { cn } from "@/lib/utils";
 import {
   ChevronLeft,
@@ -76,14 +77,15 @@ function SidebarNav({ collapsed, onNavigate }: { collapsed: boolean; onNavigate?
         const mod = MODULE_REGISTRY[mId];
         if (!mod) return null;
         const Icon = iconMap[mod.icon] || LayoutDashboard;
+        const href = getModuleHref(mId);
         const isActive =
-          pathname === `/${mod.id.toLowerCase()}` ||
-          pathname === "/dashboard" ||
-          (mod.id === "DASHBOARD" && pathname === "/");
+          pathname === href ||
+          (mId === "DASHBOARD" && (pathname === "/dashboard" || pathname === "/")) ||
+          (mId !== "DASHBOARD" && pathname.startsWith(href + "/"));
 
         const content = (
           <Link
-            href={mod.id === "DASHBOARD" ? "/" : `/${mod.id.toLowerCase()}`}
+            href={href}
             onClick={onNavigate}
             className={cn(
               "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 group",
