@@ -50,7 +50,7 @@ export default function LandingPage() {
             <a href="#features" className="text-sm font-bold text-neutral-400 hover:text-white transition-colors">Solutions</a>
             <a href="#pricing" className="text-sm font-bold text-neutral-400 hover:text-white transition-colors">Tarifs</a>
             <a href="#testimonials" className="text-sm font-bold text-neutral-400 hover:text-white transition-colors">Temoignages</a>
-            <Link href="/demo" className="text-sm font-bold text-indigo-400 hover:text-indigo-300 transition-colors">Demander une Demo</Link>
+            <Link href="/sign-up" className="text-sm font-bold text-indigo-400 hover:text-indigo-300 transition-colors">Essai Gratuit</Link>
           </div>
 
           <div className="flex items-center gap-4">
@@ -97,9 +97,9 @@ export default function LandingPage() {
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-6">
-            <Link href="/demo">
+            <Link href="/sign-up">
               <Button className="h-14 px-10 bg-indigo-600 hover:bg-indigo-700 text-white font-black text-lg rounded-full shadow-2xl shadow-indigo-600/30 group">
-                Demander une Demo <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                Essai Gratuit 14 jours <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
               </Button>
             </Link>
             <a href="#pricing">
@@ -284,7 +284,7 @@ export default function LandingPage() {
                 "SLA 99.9%",
               ]}
               cta="Contacter l'equipe"
-              href="/demo"
+              href="/sign-up"
             />
           </div>
 
@@ -335,9 +335,9 @@ export default function LandingPage() {
               Testez gratuitement pendant 14 jours. Aucune carte bancaire requise.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Link href="/demo">
+              <Link href="/sign-up">
                 <Button className="h-14 px-10 bg-white text-indigo-700 hover:bg-neutral-100 font-black text-lg rounded-full">
-                  Demander une Demo Gratuite
+                  Commencer l'essai gratuit
                 </Button>
               </Link>
               <Link href="/sign-up">

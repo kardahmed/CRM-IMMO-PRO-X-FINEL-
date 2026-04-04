@@ -43,7 +43,7 @@ export function DemoBanner({ expiresAt }: DemoBannerProps) {
           </span>
         </span>
       </div>
-      <Link href="/sign-up" className="shrink-0">
+      <a href="mailto:contact@immopro-x.dz" className="shrink-0">
         <Button
           size="sm"
           className={`h-7 text-xs font-bold rounded-full px-3 gap-1 ${
@@ -54,7 +54,7 @@ export function DemoBanner({ expiresAt }: DemoBannerProps) {
         >
           Passer au Pro <ArrowRight className="h-3 w-3" />
         </Button>
-      </Link>
+      </a>
     </div>
   );
 }
