@@ -20,6 +20,17 @@ export const GET = apiHandler(
         status: true,
         settings: true,
         createdAt: true,
+        users: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            email: true,
+            role: true,
+            isActive: true,
+          },
+          orderBy: { createdAt: "asc" },
+        },
       },
     });
 

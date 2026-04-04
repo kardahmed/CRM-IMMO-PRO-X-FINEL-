@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { Zap, CheckCircle, XCircle, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
@@ -67,6 +68,31 @@ export default function AutomationsPage() {
   useEffect(() => {
     fetchConfigs();
   }, [fetchConfigs]);
+
+  const handleToggle = useCallback(async (pipelineStage: string, isActive: boolean) => {
+    // Optimistic update
+    setConfigs((prev) =>
+      prev.map((c) => (c.pipelineStage === pipelineStage ? { ...c, isActive } : c))
+    );
+    try {
+      const res = await fetch("/api/v1/automations/config", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ pipelineStage, isActive }),
+      });
+      const json = await res.json();
+      if (!json.success) {
+        throw new Error(json.error ?? "Erreur");
+      }
+      toast.success(`Automatisation ${isActive ? "activee" : "desactivee"}`);
+    } catch {
+      // Rollback
+      setConfigs((prev) =>
+        prev.map((c) => (c.pipelineStage === pipelineStage ? { ...c, isActive: !isActive } : c))
+      );
+      toast.error("Erreur lors de la mise a jour");
+    }
+  }, []);
 
   // -------------------------------------------------------------------------
   // Render
@@ -153,6 +179,7 @@ export default function AutomationsPage() {
                   </div>
                   <Switch
                     checked={config.isActive}
+                    onCheckedChange={(checked: boolean) => handleToggle(config.pipelineStage, checked)}
                     aria-label={`Activer ${meta.label}`}
                   />
                 </CardHeader>

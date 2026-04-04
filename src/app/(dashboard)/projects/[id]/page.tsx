@@ -10,12 +10,16 @@ import {
   Image as ImageIcon,
   Loader2,
   AlertCircle,
-  RefreshCw,
+  Upload,
+  Plus,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -23,6 +27,9 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
+import { toast } from "sonner";
+import { format } from "date-fns";
+import { fr } from "date-fns/locale";
 import { UnitGrid, type ProjectUnit } from "@/components/projects/UnitGrid";
 import { CreditSimulator } from "@/components/shared/CreditSimulator";
 
@@ -69,6 +76,8 @@ export default function ProjectDetailPage() {
 
   const [selectedUnit, setSelectedUnit] = useState<ProjectUnit | null>(null);
   const [isUnitOpen, setIsUnitOpen] = useState(false);
+  const [updatingProgress, setUpdatingProgress] = useState(false);
+  const [progressForm, setProgressForm] = useState({ percentage: "", note: "" });
 
   async function fetchProject() {
     setLoading(true);
@@ -260,8 +269,83 @@ export default function ProjectDetailPage() {
           </TabsContent>
 
           <TabsContent value="mises-a-jour">
-            <div className="p-12 text-center text-muted-foreground italic border rounded-xl bg-card">
-              Timeline de chantier a venir...
+            <div className="space-y-6">
+              {/* Progress Update Form */}
+              <Card>
+                <CardContent className="p-5 space-y-4">
+                  <h3 className="font-black text-sm uppercase text-muted-foreground">Mettre a jour l&apos;avancement</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+                    <div className="space-y-2">
+                      <label className="text-xs font-bold text-muted-foreground">Pourcentage (%)</label>
+                      <Input
+                        type="number"
+                        min={0}
+                        max={100}
+                        placeholder={`Actuel: ${project.progressPercentage}%`}
+                        value={progressForm.percentage}
+                        onChange={(e) => setProgressForm((p) => ({ ...p, percentage: e.target.value }))}
+                      />
+                    </div>
+                    <div className="space-y-2 md:col-span-1">
+                      <label className="text-xs font-bold text-muted-foreground">Note (optionnel)</label>
+                      <Input
+                        placeholder="Ex: Gros oeuvre termine"
+                        value={progressForm.note}
+                        onChange={(e) => setProgressForm((p) => ({ ...p, note: e.target.value }))}
+                      />
+                    </div>
+                    <Button
+                      className="font-bold"
+                      disabled={updatingProgress || !progressForm.percentage}
+                      onClick={async () => {
+                        setUpdatingProgress(true);
+                        try {
+                          const res = await fetch(`/api/v1/projects/${projectId}`, {
+                            method: "PATCH",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({
+                              progressPercentage: parseInt(progressForm.percentage),
+                            }),
+                          });
+                          const json = await res.json();
+                          if (!json.success) throw new Error(json.error ?? "Erreur");
+                          toast.success("Avancement mis a jour");
+                          setProgressForm({ percentage: "", note: "" });
+                          fetchProject();
+                        } catch (err) {
+                          toast.error(err instanceof Error ? err.message : "Erreur");
+                        } finally {
+                          setUpdatingProgress(false);
+                        }
+                      }}
+                    >
+                      {updatingProgress ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Plus className="h-4 w-4 mr-2" />}
+                      Enregistrer
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Current Status */}
+              <Card>
+                <CardContent className="p-5">
+                  <div className="flex items-center gap-3 mb-4">
+                    <HardHat className="h-5 w-5 text-amber-500" />
+                    <h3 className="font-black text-sm">Etat actuel du chantier</h3>
+                  </div>
+                  <div className="space-y-3">
+                    <div className="flex justify-between text-sm font-bold">
+                      <span>Avancement global</span>
+                      <span>{project.progressPercentage}%</span>
+                    </div>
+                    <Progress value={project.progressPercentage} className="h-3 bg-neutral-200 dark:bg-neutral-800 [&_[data-slot=progress-indicator]]:bg-amber-500" />
+                    <div className="flex justify-between text-xs text-muted-foreground">
+                      <span>Statut: <Badge className={`${statusCfg.className} font-bold text-[10px] ml-1`}>{statusCfg.label}</Badge></span>
+                      <span>Unites: {soldUnits}/{totalUnits} vendues</span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
           </TabsContent>
 
@@ -289,9 +373,44 @@ export default function ProjectDetailPage() {
           </TabsContent>
 
           <TabsContent value="cadastre">
-            <div className="p-12 text-center text-muted-foreground italic border rounded-xl bg-card">
-              Documents notaries, permis de construire, livret foncier...
-            </div>
+            <Card>
+              <CardContent className="p-5 space-y-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <FileText className="h-5 w-5 text-primary" />
+                    <h3 className="font-black text-sm">Documents du projet</h3>
+                  </div>
+                  <Button variant="outline" size="sm" className="font-bold gap-1.5" onClick={() => toast.info("Upload de documents bientot disponible")}>
+                    <Upload className="h-3.5 w-3.5" /> Ajouter un document
+                  </Button>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {[
+                    { name: "Permis de construire", type: "PDF", status: "requis" },
+                    { name: "Livret foncier", type: "PDF", status: "requis" },
+                    { name: "Plan cadastral", type: "PDF", status: "optionnel" },
+                    { name: "Etude de sol", type: "PDF", status: "optionnel" },
+                    { name: "Assurance decennale", type: "PDF", status: "requis" },
+                    { name: "Plans architecte", type: "DWG/PDF", status: "optionnel" },
+                  ].map((doc) => (
+                    <div key={doc.name} className="flex items-center justify-between p-3 rounded-lg border bg-accent/5 hover:bg-accent/10 transition-colors">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 rounded-lg bg-primary/10">
+                          <FileText className="h-4 w-4 text-primary" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-bold">{doc.name}</p>
+                          <p className="text-[10px] text-muted-foreground uppercase">{doc.type}</p>
+                        </div>
+                      </div>
+                      <Badge variant={doc.status === "requis" ? "default" : "secondary"} className="text-[10px] font-bold uppercase">
+                        {doc.status === "requis" ? "Non fourni" : "Optionnel"}
+                      </Badge>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
         </div>
       </Tabs>

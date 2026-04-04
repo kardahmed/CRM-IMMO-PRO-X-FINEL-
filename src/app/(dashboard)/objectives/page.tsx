@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Target, Trophy, Plus, CheckCircle2, AlertTriangle, TrendingUp, Search, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -80,25 +81,92 @@ export default function ObjectivesPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [teamMembers, setTeamMembers] = useState<Array<{ id: string; firstName: string; lastName: string }>>([]);
+
+  const [objForm, setObjForm] = useState({
+    type: "",
+    targetValue: "",
+    period: "",
+    assignedToId: "",
+  });
+
+  const fetchObjectives = useCallback(async () => {
+    try {
+      setLoading(true);
+      const res = await fetch("/api/v1/objectives");
+      const json = await res.json();
+      if (!json.success) {
+        setError(json.error ?? "Erreur lors du chargement");
+        return;
+      }
+      setObjectives(json.data);
+    } catch {
+      setError("Impossible de contacter le serveur");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
-    async function fetchObjectives() {
-      try {
-        const res = await fetch("/api/v1/objectives");
-        const json = await res.json();
-        if (!json.success) {
-          setError(json.error ?? "Erreur lors du chargement");
-          return;
-        }
-        setObjectives(json.data);
-      } catch {
-        setError("Impossible de contacter le serveur");
-      } finally {
-        setLoading(false);
-      }
-    }
     fetchObjectives();
-  }, []);
+  }, [fetchObjectives]);
+
+  const handleOpenCreate = async () => {
+    setIsModalOpen(true);
+    setObjForm({ type: "", targetValue: "", period: "", assignedToId: "" });
+    try {
+      const res = await fetch("/api/v1/performance");
+      const json = await res.json();
+      if (json.success) setTeamMembers(json.data.agents ?? json.data ?? []);
+    } catch { /* ignore */ }
+  };
+
+  const handleSubmitObjective = async () => {
+    if (!objForm.type || !objForm.targetValue || !objForm.period || !objForm.assignedToId) {
+      toast.error("Veuillez remplir tous les champs");
+      return;
+    }
+    setSaving(true);
+    try {
+      const now = new Date();
+      let startDate = now;
+      let endDate = new Date(now);
+      if (objForm.period === "MONTHLY") {
+        startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+        endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+      } else if (objForm.period === "QUARTERLY") {
+        const q = Math.floor(now.getMonth() / 3);
+        startDate = new Date(now.getFullYear(), q * 3, 1);
+        endDate = new Date(now.getFullYear(), q * 3 + 3, 0);
+      } else if (objForm.period === "YEARLY") {
+        startDate = new Date(now.getFullYear(), 0, 1);
+        endDate = new Date(now.getFullYear(), 11, 31);
+      }
+
+      const res = await fetch("/api/v1/objectives", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          type: objForm.type,
+          targetValue: parseFloat(objForm.targetValue),
+          period: objForm.period,
+          assignedToId: objForm.assignedToId,
+          startDate: startDate.toISOString(),
+          endDate: endDate.toISOString(),
+        }),
+      });
+      const json = await res.json();
+      if (!json.success) throw new Error(json.error ?? "Erreur");
+      toast.success("Objectif cree avec succes");
+      setIsModalOpen(false);
+      fetchObjectives();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Erreur lors de la creation");
+    } finally {
+      setSaving(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -168,10 +236,10 @@ export default function ObjectivesPage() {
           </div>
         </div>
 
+        <Button className="bg-purple-600 hover:bg-purple-700 text-white font-bold shadow-md" onClick={handleOpenCreate}>
+          <Plus className="h-4 w-4 mr-1.5" /> Creer un objectif
+        </Button>
         <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-          <DialogTrigger render={<Button className="bg-purple-600 hover:bg-purple-700 text-white font-bold shadow-md" />}>
-            <Plus className="h-4 w-4 mr-1.5" /> Créer un objectif
-          </DialogTrigger>
           <DialogContent className="sm:max-w-md">
             <DialogHeader>
               <DialogTitle className="text-xl font-black flex items-center gap-2">
@@ -179,16 +247,12 @@ export default function ObjectivesPage() {
               </DialogTitle>
             </DialogHeader>
             <div className="space-y-4 py-4">
-              <div className="space-y-2">
-                <label className="text-xs font-bold uppercase text-muted-foreground">Titre de l&apos;objectif</label>
-                <Input placeholder="Ex: Clôturer 5 ventes ce mois-ci" />
-              </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <label className="text-xs font-bold uppercase text-muted-foreground">Type de métrique</label>
-                  <Select>
+                  <label className="text-xs font-bold uppercase text-muted-foreground">Type de metrique</label>
+                  <Select value={objForm.type} onValueChange={(v: string | null) => setObjForm((p) => ({ ...p, type: v ?? "" }))}>
                     <SelectTrigger>
-                      <SelectValue placeholder="Sélectionner" />
+                      <SelectValue placeholder="Selectionner" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="SALES">Ventes (#)</SelectItem>
@@ -201,14 +265,19 @@ export default function ObjectivesPage() {
                 </div>
                 <div className="space-y-2">
                   <label className="text-xs font-bold uppercase text-muted-foreground">Cible (Valeur)</label>
-                  <Input type="number" placeholder="Ex: 5" />
+                  <Input
+                    type="number"
+                    placeholder="Ex: 5"
+                    value={objForm.targetValue}
+                    onChange={(e) => setObjForm((p) => ({ ...p, targetValue: e.target.value }))}
+                  />
                 </div>
               </div>
               <div className="space-y-2">
-                <label className="text-xs font-bold uppercase text-muted-foreground">Période</label>
-                <Select>
+                <label className="text-xs font-bold uppercase text-muted-foreground">Periode</label>
+                <Select value={objForm.period} onValueChange={(v: string | null) => setObjForm((p) => ({ ...p, period: v ?? "" }))}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Sélectionner" />
+                    <SelectValue placeholder="Selectionner" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="MONTHLY">Mensuel</SelectItem>
@@ -217,8 +286,22 @@ export default function ObjectivesPage() {
                   </SelectContent>
                 </Select>
               </div>
+              <div className="space-y-2">
+                <label className="text-xs font-bold uppercase text-muted-foreground">Assigner a</label>
+                <Select value={objForm.assignedToId} onValueChange={(v: string | null) => setObjForm((p) => ({ ...p, assignedToId: v ?? "" }))}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selectionner un membre" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {teamMembers.map((m) => (
+                      <SelectItem key={m.id} value={m.id}>{m.firstName} {m.lastName}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
-            <Button className="w-full bg-purple-600 hover:bg-purple-700 font-bold" onClick={() => setIsModalOpen(false)}>
+            <Button className="w-full bg-purple-600 hover:bg-purple-700 font-bold" onClick={handleSubmitObjective} disabled={saving}>
+              {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Sauvegarder l&apos;objectif
             </Button>
           </DialogContent>

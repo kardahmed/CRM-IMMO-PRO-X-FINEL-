@@ -13,13 +13,29 @@ import type {
   ApiTask,
 } from "@/components/planning/types";
 import { TASK_STATUS_COLORS, TASK_STATUS_LABELS } from "@/components/planning/types";
-import { Calendar as CalendarIcon, Loader2, AlertCircle, ListTodo, User, Clock } from "lucide-react";
+import { Calendar as CalendarIcon, Loader2, AlertCircle, ListTodo, User, Clock, Plus } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
+import { toast } from "sonner";
 
 /* ------------------------------------------------------------------ */
 /*  Helpers                                                            */
@@ -77,6 +93,14 @@ export default function PlanningPage() {
   const [error, setError] = useState<string | null>(null);
 
   const [selectedVisit, setSelectedVisit] = useState<PlanningVisit | null>(null);
+
+  // Create visit dialog
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [creating, setCreating] = useState(false);
+  const [clients, setClients] = useState<Array<{ id: string; firstName: string; lastName: string }>>([]);
+  const [properties, setProperties] = useState<Array<{ id: string; name: string }>>([]);
+  const [agents, setAgents] = useState<Array<{ id: string; firstName: string; lastName: string }>>([]);
+  const [visitForm, setVisitForm] = useState({ clientId: "", propertyId: "", agentId: "", scheduledAt: "" });
 
   /* ---- Fetch ---------------------------------------------------- */
 
@@ -167,8 +191,53 @@ export default function PlanningPage() {
     setSelectedVisit(null);
   };
 
-  const handleCreateVisit = () => {
-    alert("Ouverture du formulaire de creation de visite...");
+  const handleOpenCreateVisit = async () => {
+    setIsCreateOpen(true);
+    setVisitForm({ clientId: "", propertyId: "", agentId: "", scheduledAt: "" });
+    try {
+      const [cRes, pRes, aRes] = await Promise.all([
+        fetch("/api/v1/clients?limit=50"),
+        fetch("/api/v1/properties?limit=50"),
+        fetch("/api/v1/performance"),
+      ]);
+      const cJson = await cRes.json();
+      const pJson = await pRes.json();
+      const aJson = await aRes.json();
+      if (cJson.success) setClients(cJson.data.clients ?? cJson.data ?? []);
+      if (pJson.success) setProperties(pJson.data.properties ?? pJson.data ?? []);
+      if (aJson.success) setAgents(aJson.data.agents ?? aJson.data ?? []);
+    } catch {
+      // Lists may fail — user can still type IDs
+    }
+  };
+
+  const handleSubmitVisit = async () => {
+    if (!visitForm.clientId || !visitForm.propertyId || !visitForm.agentId || !visitForm.scheduledAt) {
+      toast.error("Veuillez remplir tous les champs");
+      return;
+    }
+    setCreating(true);
+    try {
+      const res = await fetch("/api/v1/visits", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          clientId: visitForm.clientId,
+          propertyId: visitForm.propertyId,
+          agentId: visitForm.agentId,
+          scheduledAt: new Date(visitForm.scheduledAt).toISOString(),
+        }),
+      });
+      const json = await res.json();
+      if (!json.success) throw new Error(json.error ?? "Erreur");
+      toast.success("Visite creee avec succes");
+      setIsCreateOpen(false);
+      fetchData();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Erreur lors de la creation");
+    } finally {
+      setCreating(false);
+    }
   };
 
   /* ---- Render --------------------------------------------------- */
@@ -196,7 +265,7 @@ export default function PlanningPage() {
           onAgentChange={setAgent}
           status={status}
           onStatusChange={setStatus}
-          onCreateVisit={handleCreateVisit}
+          onCreateVisit={handleOpenCreateVisit}
         />
       </div>
 
@@ -347,6 +416,70 @@ export default function PlanningPage() {
         onClose={() => setSelectedVisit(null)}
         onAction={handleAction}
       />
+
+      {/* Create Visit Dialog */}
+      <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-black flex items-center gap-2">
+              <Plus className="h-5 w-5 text-primary" /> Nouvelle Visite
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <label className="text-xs font-bold uppercase text-muted-foreground">Client</label>
+              <Select value={visitForm.clientId} onValueChange={(v: string | null) => setVisitForm((p) => ({ ...p, clientId: v ?? "" }))}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selectionner un client" />
+                </SelectTrigger>
+                <SelectContent>
+                  {clients.map((c) => (
+                    <SelectItem key={c.id} value={c.id}>{c.firstName} {c.lastName}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <label className="text-xs font-bold uppercase text-muted-foreground">Bien</label>
+              <Select value={visitForm.propertyId} onValueChange={(v: string | null) => setVisitForm((p) => ({ ...p, propertyId: v ?? "" }))}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selectionner un bien" />
+                </SelectTrigger>
+                <SelectContent>
+                  {properties.map((p) => (
+                    <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <label className="text-xs font-bold uppercase text-muted-foreground">Agent</label>
+              <Select value={visitForm.agentId} onValueChange={(v: string | null) => setVisitForm((p) => ({ ...p, agentId: v ?? "" }))}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selectionner un agent" />
+                </SelectTrigger>
+                <SelectContent>
+                  {agents.map((a) => (
+                    <SelectItem key={a.id} value={a.id}>{a.firstName} {a.lastName}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <label className="text-xs font-bold uppercase text-muted-foreground">Date et heure</label>
+              <Input
+                type="datetime-local"
+                value={visitForm.scheduledAt}
+                onChange={(e) => setVisitForm((p) => ({ ...p, scheduledAt: e.target.value }))}
+              />
+            </div>
+          </div>
+          <Button className="w-full font-bold" onClick={handleSubmitVisit} disabled={creating}>
+            {creating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            Creer la visite
+          </Button>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

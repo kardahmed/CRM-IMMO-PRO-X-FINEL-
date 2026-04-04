@@ -1,13 +1,24 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { ProjectCard } from "@/components/projects/ProjectCard";
-import { FolderKanban, Loader2, AlertCircle } from "lucide-react";
+import { FolderKanban, Loader2, AlertCircle, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
-import { cn } from "@/lib/utils";
-import Link from "next/link";
+import { Input } from "@/components/ui/input";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { toast } from "sonner";
 
 interface Project {
   id: string;
@@ -43,25 +54,66 @@ export default function ProjectsPage() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [creating, setCreating] = useState(false);
+  const [projectForm, setProjectForm] = useState({
+    name: "",
+    address: "",
+    wilaya: "",
+    commune: "",
+    status: "PLANNING",
+  });
+
+  const fetchProjects = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const res = await fetch("/api/v1/projects?limit=100");
+      if (!res.ok) throw new Error(`Erreur ${res.status}`);
+      const json = await res.json();
+      if (!json.success) throw new Error(json.error || "Erreur inconnue");
+      setProjects(json.data.projects);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Erreur lors du chargement");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
-    async function fetchProjects() {
-      try {
-        setLoading(true);
-        setError(null);
-        const res = await fetch("/api/v1/projects?limit=100");
-        if (!res.ok) throw new Error(`Erreur ${res.status}`);
-        const json = await res.json();
-        if (!json.success) throw new Error(json.error || "Erreur inconnue");
-        setProjects(json.data.projects);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Erreur lors du chargement");
-      } finally {
-        setLoading(false);
-      }
-    }
     fetchProjects();
-  }, []);
+  }, [fetchProjects]);
+
+  const handleCreateProject = async () => {
+    if (!projectForm.name.trim()) {
+      toast.error("Le nom du projet est requis");
+      return;
+    }
+    setCreating(true);
+    try {
+      const res = await fetch("/api/v1/projects", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: projectForm.name,
+          address: projectForm.address || null,
+          wilaya: projectForm.wilaya || null,
+          commune: projectForm.commune || null,
+          status: projectForm.status,
+        }),
+      });
+      const json = await res.json();
+      if (!json.success) throw new Error(json.error ?? "Erreur");
+      toast.success("Projet cree avec succes");
+      setIsCreateOpen(false);
+      setProjectForm({ name: "", address: "", wilaya: "", commune: "", status: "PLANNING" });
+      fetchProjects();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Erreur lors de la creation");
+    } finally {
+      setCreating(false);
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -78,8 +130,11 @@ export default function ProjectsPage() {
           </div>
         </div>
 
-        <Button className="bg-amber-500 hover:bg-amber-600 font-bold text-white shadow-md">
-          + Nouveau Projet
+        <Button
+          className="bg-amber-500 hover:bg-amber-600 font-bold text-white shadow-md"
+          onClick={() => { setIsCreateOpen(true); setProjectForm({ name: "", address: "", wilaya: "", commune: "", status: "PLANNING" }); }}
+        >
+          <Plus className="h-4 w-4 mr-1.5" /> Nouveau Projet
         </Button>
       </div>
 
@@ -128,7 +183,7 @@ export default function ProjectsPage() {
                 key={project.id}
                 id={project.id}
                 name={project.name}
-                location={[project.commune, project.wilaya].filter(Boolean).join(", ") || project.address || "Non renseigné"}
+                location={[project.commune, project.wilaya].filter(Boolean).join(", ") || project.address || "Non renseigne"}
                 availableUnits={availableUnits}
                 totalUnits={totalUnits}
                 progress={project.progressPercentage}
@@ -139,6 +194,69 @@ export default function ProjectsPage() {
           })}
         </div>
       )}
+
+      {/* Create Project Dialog */}
+      <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-black flex items-center gap-2">
+              <FolderKanban className="h-5 w-5 text-amber-500" /> Nouveau Projet
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <label className="text-xs font-bold uppercase text-muted-foreground">Nom du projet</label>
+              <Input
+                placeholder="Ex: Residence Les Oliviers"
+                value={projectForm.name}
+                onChange={(e) => setProjectForm((p) => ({ ...p, name: e.target.value }))}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <label className="text-xs font-bold uppercase text-muted-foreground">Wilaya</label>
+                <Input
+                  placeholder="Ex: Alger"
+                  value={projectForm.wilaya}
+                  onChange={(e) => setProjectForm((p) => ({ ...p, wilaya: e.target.value }))}
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-xs font-bold uppercase text-muted-foreground">Commune</label>
+                <Input
+                  placeholder="Ex: Bab Ezzouar"
+                  value={projectForm.commune}
+                  onChange={(e) => setProjectForm((p) => ({ ...p, commune: e.target.value }))}
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <label className="text-xs font-bold uppercase text-muted-foreground">Adresse</label>
+              <Input
+                placeholder="Adresse complete"
+                value={projectForm.address}
+                onChange={(e) => setProjectForm((p) => ({ ...p, address: e.target.value }))}
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-xs font-bold uppercase text-muted-foreground">Statut initial</label>
+              <Select value={projectForm.status} onValueChange={(v: string | null) => setProjectForm((p) => ({ ...p, status: v ?? "PLANNING" }))}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="PLANNING">Planification</SelectItem>
+                  <SelectItem value="IN_PROGRESS">En cours</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <Button className="w-full bg-amber-500 hover:bg-amber-600 text-white font-bold" onClick={handleCreateProject} disabled={creating}>
+            {creating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            Creer le projet
+          </Button>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
