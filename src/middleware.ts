@@ -13,9 +13,21 @@ const isPublicRoute = createRouteMatcher([
   "/api/v1/webhooks/(.*)",
 ]);
 
-const isDashboardRoute = createRouteMatcher(["/(dashboard)(.*)"]);
+const isDashboardRoute = createRouteMatcher([
+  "/dashboard(.*)",
+  "/clients(.*)",
+  "/pipeline(.*)",
+  "/projects(.*)",
+  "/planning(.*)",
+  "/settings(.*)",
+  "/performance(.*)",
+  "/map(.*)",
+  "/objectives(.*)",
+]);
 const isSuperAdminRoute = createRouteMatcher(["/super-admin(.*)"]);
 const isApiRoute = createRouteMatcher(["/api/v1(.*)"]);
+
+const isOnboardingRoute = createRouteMatcher(["/onboarding(.*)"]);
 
 export default clerkMiddleware(async (auth, req) => {
   if (isPublicRoute(req)) {
@@ -33,8 +45,31 @@ export default clerkMiddleware(async (auth, req) => {
     return;
   }
 
+  // Protect onboarding route too (must be logged in)
+  if (isOnboardingRoute(req)) {
+    await auth.protect();
+    // If they already have a tenant, redirect to dashboard
+    const { sessionClaims } = await auth();
+    const claims = sessionClaims as Record<string, any>;
+    const tenantId = claims?.metadata?.tenantId || claims?.publicMetadata?.tenantId;
+    if (tenantId) {
+      return NextResponse.redirect(new URL("/dashboard", req.url));
+    }
+    return;
+  }
+
   if (isDashboardRoute(req) || isSuperAdminRoute(req)) {
     await auth.protect();
+    const { sessionClaims } = await auth();
+    const claims = sessionClaims as Record<string, any>;
+    
+    // Supabase / Clerk usually puts publicMetadata inside sessionClaims.publicMetadata or sessionClaims.metadata depending on template
+    const tenantId = claims?.metadata?.tenantId || claims?.publicMetadata?.tenantId;
+    
+    // Redirect to onboarding if no tenant is set
+    if (!tenantId && !isSuperAdminRoute(req)) {
+      return NextResponse.redirect(new URL("/onboarding", req.url));
+    }
   }
 });
 

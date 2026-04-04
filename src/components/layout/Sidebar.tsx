@@ -102,11 +102,11 @@ export function Sidebar() {
               const module = MODULE_REGISTRY[mId];
               if (!module) return null;
               const Icon = iconMap[module.icon] || LayoutDashboard;
-              const isActive = pathname === `/${module.id.toLowerCase()}` || (module.id === "DASHBOARD" && pathname === "/");
+              const isActive = pathname === "/dashboard" || pathname === `/${module.id.toLowerCase()}`;
 
               const content = (
                 <Link
-                  href={module.id === "DASHBOARD" ? "/" : `/${module.id.toLowerCase()}`}
+                  href={module.id === "DASHBOARD" ? "/dashboard" : `/${module.id.toLowerCase()}`}
                   className={cn(
                     "flex items-center gap-3 px-3 py-2 rounded-lg transition-colors group",
                     isActive 
