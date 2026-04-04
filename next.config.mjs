@@ -35,7 +35,7 @@ const nextConfig = {
             key: "Content-Security-Policy",
             value: [
               "default-src 'self'",
-              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.clerk.accounts.dev https://challenges.cloudflare.com https://*.sentry.io",
+              `script-src 'self' 'unsafe-inline' ${process.env.NODE_ENV === "development" ? "'unsafe-eval'" : ""} https://*.clerk.accounts.dev https://challenges.cloudflare.com https://*.sentry.io`.trim(),
               "style-src 'self' 'unsafe-inline'",
               "img-src 'self' blob: data: https://*.pravatar.cc https://*.unsplash.com https://*.clerk.com https://img.clerk.com",
               "font-src 'self' data:",

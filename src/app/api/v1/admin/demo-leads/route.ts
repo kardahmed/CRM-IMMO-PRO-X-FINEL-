@@ -1,14 +1,27 @@
 import { NextResponse } from "next/server";
 import { currentUser } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
+import { rateLimit, getClientIp, RATE_LIMITS } from "@/lib/rate-limit";
 import type { UserRole } from "@prisma/client";
+import { NextRequest } from "next/server";
 
 /**
  * GET /api/v1/admin/demo-leads
  *
- * Super Admin only — returns all DemoLead entries for the admin panel.
+ * Super Admin / Admin only — returns all DemoLead entries for the admin panel.
+ * Uses manual auth (not apiHandler) because DemoLead is cross-tenant.
  */
-export async function GET(): Promise<NextResponse> {
+export async function GET(req: NextRequest): Promise<NextResponse> {
+  // Rate limiting
+  const ip = getClientIp(req);
+  const rl = rateLimit(`admin:demo-leads:${ip}`, RATE_LIMITS.authenticated);
+  if (!rl.allowed) {
+    return NextResponse.json(
+      { success: false, error: "Trop de requetes" },
+      { status: 429 },
+    );
+  }
+
   const user = await currentUser();
   if (!user) {
     return NextResponse.json(
