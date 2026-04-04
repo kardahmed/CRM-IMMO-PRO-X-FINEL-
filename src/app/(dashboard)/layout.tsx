@@ -5,11 +5,16 @@ import { Toaster } from "sonner";
 import { DemoBanner } from "@/components/shared/demo-banner";
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
+import { redirect } from "next/navigation";
 
-async function getDemoInfo(): Promise<{
+interface ITenantInfo {
   isDemo: boolean;
+  isSuspended: boolean;
+  isDemoExpired: boolean;
   expiresAt: string | null;
-} | null> {
+}
+
+async function getTenantInfo(): Promise<ITenantInfo | null> {
   try {
     const { userId } = await auth();
     if (!userId) return null;
@@ -26,8 +31,14 @@ async function getDemoInfo(): Promise<{
     });
     if (!tenant) return null;
 
+    const isDemo = tenant.status === "DEMO";
+    const isDemoExpired =
+      isDemo && tenant.demoExpiresAt != null && new Date() > tenant.demoExpiresAt;
+
     return {
-      isDemo: tenant.status === "DEMO",
+      isDemo,
+      isSuspended: tenant.status === "SUSPENDED",
+      isDemoExpired,
       expiresAt: tenant.demoExpiresAt?.toISOString() ?? null,
     };
   } catch {
@@ -40,15 +51,25 @@ export default async function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const demoInfo = await getDemoInfo();
+  const tenantInfo = await getTenantInfo();
+
+  // Block access for suspended tenants
+  if (tenantInfo?.isSuspended) {
+    redirect("/suspended");
+  }
+
+  // Block access for expired demo tenants
+  if (tenantInfo?.isDemoExpired) {
+    redirect("/demo-expired");
+  }
 
   return (
     <SidebarProvider>
       <div className="flex h-screen overflow-hidden bg-background">
         <Sidebar />
         <div className="flex flex-col flex-1 overflow-hidden min-w-0">
-          {demoInfo?.isDemo && (
-            <DemoBanner expiresAt={demoInfo.expiresAt} />
+          {tenantInfo?.isDemo && (
+            <DemoBanner expiresAt={tenantInfo.expiresAt} />
           )}
           <Header />
           <main className="flex-1 overflow-y-auto bg-accent/5 p-3 md:p-6 lg:p-8">

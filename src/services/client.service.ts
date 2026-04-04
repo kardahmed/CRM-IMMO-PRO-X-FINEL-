@@ -267,11 +267,16 @@ export async function changeClientStage(
       ? randomUUID()
       : undefined;
 
+  // Portal token expires in 180 days
+  const portalTokenExpiresAt = portalToken
+    ? new Date(Date.now() + 180 * 24 * 60 * 60 * 1000)
+    : undefined;
+
   const updated = await db.client.update({
     where: { id: clientId },
     data: {
       pipelineStage: newStage,
-      ...(portalToken ? { portalToken } : {}),
+      ...(portalToken ? { portalToken, portalTokenExpiresAt } : {}),
     } as any,
   });
 

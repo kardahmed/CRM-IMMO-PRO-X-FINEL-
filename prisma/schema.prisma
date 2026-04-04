@@ -408,7 +408,8 @@ model Client {
   lostReason    String?       @map("lost_reason")
 
   // Portail client (token unique généré à RESERVED/SIGNED)
-  portalToken String? @unique @map("portal_token")
+  portalToken          String?   @unique @map("portal_token")
+  portalTokenExpiresAt DateTime? @map("portal_token_expires_at")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")

@@ -42,6 +42,7 @@ export async function GET(
         firstName: true,
         lastName: true,
         pipelineStage: true,
+        portalTokenExpiresAt: true,
         // Agent assigné (contact)
         assignedAgent: {
           select: {
@@ -69,6 +70,14 @@ export async function GET(
       return NextResponse.json(
         { success: false, error: "Portail introuvable ou lien expiré" },
         { status: 404 },
+      );
+    }
+
+    // Check token expiration
+    if (client.portalTokenExpiresAt && new Date() > client.portalTokenExpiresAt) {
+      return NextResponse.json(
+        { success: false, error: "Ce lien portail a expiré. Contactez votre agent." },
+        { status: 410 },
       );
     }
 
