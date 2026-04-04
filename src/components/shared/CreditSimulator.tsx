@@ -4,12 +4,13 @@ import { useState, useMemo } from "react";
 import { Calculator, Send, Percent, Calendar } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 
 interface CreditSimulatorProps {
   initialPrixBien?: number;
@@ -183,7 +184,16 @@ N'hésitez pas si vous avez des questions !`;
             </div>
 
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-              <DialogTrigger render={<Button className="w-full mt-8 h-12 uppercase font-black text-sm gap-2 shadow-xl shadow-primary/20 hover:-translate-y-0.5 transition-transform" />}>
+              <DialogTrigger
+                render={
+                  <button
+                    className={cn(
+                      buttonVariants({ variant: "default" }),
+                      "w-full mt-8 h-12 uppercase font-black text-sm gap-2 shadow-xl shadow-primary/20 hover:-translate-y-0.5 transition-transform"
+                    )}
+                  />
+                }
+              >
                 <Send className="h-4 w-4" /> Envoyer au client
               </DialogTrigger>
               <DialogContent className="sm:max-w-lg">

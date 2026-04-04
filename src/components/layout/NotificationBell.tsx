@@ -12,6 +12,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useNotifications, type INotification } from "@/hooks/useNotifications";
+import { cn } from "@/lib/utils";
+import { buttonVariants } from "@/components/ui/button";
 
 // ============================================================================
 // Notification type → icon/color mapping
@@ -104,10 +106,11 @@ export function NotificationBell() {
     <DropdownMenu>
       <DropdownMenuTrigger
         render={
-          <Button
-            variant="ghost"
-            size="icon"
-            className="relative hover:bg-accent/50 outline-none"
+          <button
+            className={cn(
+              buttonVariants({ variant: "ghost", size: "icon" }),
+              "relative hover:bg-accent/50 outline-none"
+            )}
           />
         }
       >

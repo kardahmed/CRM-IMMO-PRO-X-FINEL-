@@ -122,7 +122,11 @@ export function Sidebar() {
               if (isCollapsed) {
                 return (
                   <Tooltip key={mId}>
-                    <TooltipTrigger render={<div className="flex w-full" />}>{content}</TooltipTrigger>
+                    <TooltipTrigger
+                      render={<div className="flex w-full cursor-pointer" />}
+                    >
+                      {content}
+                    </TooltipTrigger>
                     <TooltipContent side="right">{module.label}</TooltipContent>
                   </Tooltip>
                 );
