@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Users, Plus, Search, Loader2, UserX } from "lucide-react";
@@ -9,6 +10,21 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Table,
   TableHeader,
@@ -17,6 +33,7 @@ import {
   TableBody,
   TableCell,
 } from "@/components/ui/table";
+import { toast } from "sonner";
 
 interface IClient {
   id: string;
@@ -54,30 +71,110 @@ const STAGE_LABELS: Record<string, string> = {
   CLOSED: "Cloture",
 };
 
+const SOURCE_OPTIONS = [
+  { value: "FACEBOOK", label: "Facebook" },
+  { value: "WEBSITE", label: "Site web" },
+  { value: "REFERRAL", label: "Parrainage" },
+  { value: "WALK_IN", label: "Walk-in" },
+  { value: "PHONE", label: "Telephone" },
+  { value: "OTHER", label: "Autre" },
+];
+
+const TYPE_OPTIONS = [
+  { value: "APARTMENT", label: "Appartement" },
+  { value: "STUDIO", label: "Studio" },
+  { value: "DUPLEX", label: "Duplex" },
+  { value: "PENTHOUSE", label: "Penthouse" },
+  { value: "VILLA", label: "Villa" },
+  { value: "COMMERCIAL", label: "Commercial" },
+  { value: "TERRAIN", label: "Terrain" },
+];
+
 export default function ClientsPage() {
+  const router = useRouter();
   const [clients, setClients] = useState<IClient[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [stageFilter, setStageFilter] = useState<string>("ALL");
 
+  // Create dialog
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [creating, setCreating] = useState(false);
+  const [form, setForm] = useState({
+    firstName: "",
+    lastName: "",
+    phone: "",
+    email: "",
+    source: "",
+    desiredType: "",
+    budgetMin: "",
+    budgetMax: "",
+  });
+
   useEffect(() => {
-    async function fetchClients() {
-      try {
-        const res = await fetch("/api/v1/clients");
-        if (!res.ok) throw new Error("Erreur");
-        const json = await res.json();
-        if (json.success) {
-          const d = json.data;
-          setClients(Array.isArray(d) ? d : d.clients ?? []);
-        }
-      } catch {
-        console.error("Impossible de charger les clients");
-      } finally {
-        setLoading(false);
-      }
-    }
     fetchClients();
   }, []);
+
+  async function fetchClients() {
+    try {
+      const res = await fetch("/api/v1/clients");
+      if (!res.ok) throw new Error("Erreur");
+      const json = await res.json();
+      if (json.success) {
+        const d = json.data;
+        setClients(Array.isArray(d) ? d : d.clients ?? []);
+      }
+    } catch {
+      console.error("Impossible de charger les clients");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleCreate() {
+    if (!form.firstName || !form.lastName || !form.phone) {
+      toast.error("Prenom, nom et telephone sont requis");
+      return;
+    }
+    setCreating(true);
+    try {
+      const body: Record<string, unknown> = {
+        firstName: form.firstName,
+        lastName: form.lastName,
+        phone: form.phone,
+      };
+      if (form.email) body.email = form.email;
+      if (form.source) body.source = form.source;
+      if (form.desiredType) body.desiredType = form.desiredType;
+      if (form.budgetMin) body.budgetMin = Number(form.budgetMin);
+      if (form.budgetMax) body.budgetMax = Number(form.budgetMax);
+
+      const res = await fetch("/api/v1/clients", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      const json = await res.json();
+      if (!res.ok) {
+        toast.error(json.error || "Erreur lors de la creation");
+        return;
+      }
+      toast.success("Client cree avec succes");
+      setIsCreateOpen(false);
+      setForm({ firstName: "", lastName: "", phone: "", email: "", source: "", desiredType: "", budgetMin: "", budgetMax: "" });
+      // Navigate to new client's dossier
+      const newClient = json.data;
+      if (newClient?.id) {
+        router.push(`/clients/${newClient.id}`);
+      } else {
+        fetchClients();
+      }
+    } catch {
+      toast.error("Erreur reseau");
+    } finally {
+      setCreating(false);
+    }
+  }
 
   const filtered = clients.filter((c) => {
     const matchSearch =
@@ -106,12 +203,10 @@ export default function ClientsPage() {
             </p>
           </div>
         </div>
-        <Link href="/clients/new">
-          <Button>
-            <Plus className="h-4 w-4 mr-1" />
-            Nouveau client
-          </Button>
-        </Link>
+        <Button onClick={() => setIsCreateOpen(true)}>
+          <Plus className="h-4 w-4 mr-1" />
+          Nouveau client
+        </Button>
       </div>
 
       {/* Filters */}
@@ -228,6 +323,108 @@ export default function ClientsPage() {
           </CardContent>
         </Card>
       )}
+
+      {/* Create Client Dialog */}
+      <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Nouveau client</DialogTitle>
+            <DialogDescription>Remplissez les informations du client</DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-2">
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label>Prenom *</Label>
+                <Input
+                  value={form.firstName}
+                  onChange={(e) => setForm({ ...form, firstName: e.target.value })}
+                  placeholder="Prenom"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label>Nom *</Label>
+                <Input
+                  value={form.lastName}
+                  onChange={(e) => setForm({ ...form, lastName: e.target.value })}
+                  placeholder="Nom"
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label>Telephone *</Label>
+                <Input
+                  value={form.phone}
+                  onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                  placeholder="0555 00 00 00"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label>Email</Label>
+                <Input
+                  type="email"
+                  value={form.email}
+                  onChange={(e) => setForm({ ...form, email: e.target.value })}
+                  placeholder="email@example.com"
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label>Source</Label>
+                <Select value={form.source} onValueChange={(v) => setForm({ ...form, source: v })}>
+                  <SelectTrigger><SelectValue placeholder="Selectionner" /></SelectTrigger>
+                  <SelectContent>
+                    {SOURCE_OPTIONS.map((o) => (
+                      <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1.5">
+                <Label>Type de bien souhaite</Label>
+                <Select value={form.desiredType} onValueChange={(v) => setForm({ ...form, desiredType: v })}>
+                  <SelectTrigger><SelectValue placeholder="Selectionner" /></SelectTrigger>
+                  <SelectContent>
+                    {TYPE_OPTIONS.map((o) => (
+                      <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label>Budget min (DA)</Label>
+                <Input
+                  type="number"
+                  value={form.budgetMin}
+                  onChange={(e) => setForm({ ...form, budgetMin: e.target.value })}
+                  placeholder="5 000 000"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label>Budget max (DA)</Label>
+                <Input
+                  type="number"
+                  value={form.budgetMax}
+                  onChange={(e) => setForm({ ...form, budgetMax: e.target.value })}
+                  placeholder="20 000 000"
+                />
+              </div>
+            </div>
+          </div>
+          <div className="flex justify-end gap-2 pt-2">
+            <Button variant="outline" onClick={() => setIsCreateOpen(false)} disabled={creating}>
+              Annuler
+            </Button>
+            <Button onClick={handleCreate} disabled={creating}>
+              {creating ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <Plus className="h-4 w-4 mr-1" />}
+              Creer le client
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

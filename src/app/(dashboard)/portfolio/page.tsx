@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
 import {
@@ -15,6 +16,22 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { toast } from "sonner";
 
 interface IProperty {
   id: string;
@@ -38,19 +55,29 @@ const STATUS_COLORS: Record<string, string> = {
 
 const STATUS_LABELS: Record<string, string> = {
   AVAILABLE: "Disponible",
-  RESERVED: "Reservé",
+  RESERVED: "Reserve",
   SOLD: "Vendu",
-  RENTED: "Loué",
+  RENTED: "Loue",
 };
 
 const TYPE_LABELS: Record<string, string> = {
   APARTMENT: "Appartement",
-  HOUSE: "Maison",
+  STUDIO: "Studio",
+  DUPLEX: "Duplex",
+  PENTHOUSE: "Penthouse",
   VILLA: "Villa",
-  LAND: "Terrain",
   COMMERCIAL: "Commercial",
-  OFFICE: "Bureau",
+  PARKING: "Parking",
+  CAVE: "Cave",
+  TERRAIN: "Terrain",
 };
+
+const TYPE_OPTIONS = Object.entries(TYPE_LABELS).map(([value, label]) => ({ value, label }));
+
+const TRANSACTION_OPTIONS = [
+  { value: "SALE", label: "Vente" },
+  { value: "RENT", label: "Location" },
+];
 
 const formatPrice = (price: number) =>
   new Intl.NumberFormat("fr-DZ", {
@@ -60,29 +87,87 @@ const formatPrice = (price: number) =>
   }).format(price);
 
 export default function PortfolioPage() {
+  const router = useRouter();
   const [properties, setProperties] = useState<IProperty[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("ALL");
 
+  // Create dialog
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [creating, setCreating] = useState(false);
+  const [form, setForm] = useState({
+    name: "",
+    type: "",
+    transactionType: "",
+    price: "",
+    surface: "",
+    rooms: "",
+    floor: "",
+  });
+
   useEffect(() => {
-    async function fetchProperties() {
-      try {
-        const res = await fetch("/api/v1/properties");
-        if (!res.ok) throw new Error("Erreur");
-        const json = await res.json();
-        if (json.success) {
-          const d = json.data;
-          setProperties(Array.isArray(d) ? d : d.properties ?? []);
-        }
-      } catch {
-        console.error("Impossible de charger les biens");
-      } finally {
-        setLoading(false);
-      }
-    }
     fetchProperties();
   }, []);
+
+  async function fetchProperties() {
+    try {
+      const res = await fetch("/api/v1/properties");
+      if (!res.ok) throw new Error("Erreur");
+      const json = await res.json();
+      if (json.success) {
+        const d = json.data;
+        setProperties(Array.isArray(d) ? d : d.properties ?? []);
+      }
+    } catch {
+      console.error("Impossible de charger les biens");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleCreate() {
+    if (!form.name || !form.type) {
+      toast.error("Nom et type sont requis");
+      return;
+    }
+    setCreating(true);
+    try {
+      const body: Record<string, unknown> = {
+        name: form.name,
+        type: form.type,
+      };
+      if (form.transactionType) body.transactionType = form.transactionType;
+      if (form.price) body.price = Number(form.price);
+      if (form.surface) body.surface = Number(form.surface);
+      if (form.rooms) body.rooms = Number(form.rooms);
+      if (form.floor) body.floor = Number(form.floor);
+
+      const res = await fetch("/api/v1/properties", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      const json = await res.json();
+      if (!res.ok) {
+        toast.error(json.error || "Erreur lors de la creation");
+        return;
+      }
+      toast.success("Bien cree avec succes");
+      setIsCreateOpen(false);
+      setForm({ name: "", type: "", transactionType: "", price: "", surface: "", rooms: "", floor: "" });
+      const newProp = json.data;
+      if (newProp?.id) {
+        router.push(`/portfolio/${newProp.id}`);
+      } else {
+        fetchProperties();
+      }
+    } catch {
+      toast.error("Erreur reseau");
+    } finally {
+      setCreating(false);
+    }
+  }
 
   const filtered = properties.filter((p) => {
     const matchSearch =
@@ -107,16 +192,14 @@ export default function PortfolioPage() {
               Portefeuille
             </h1>
             <p className="text-sm text-muted-foreground font-medium">
-              Gérez votre portefeuille de biens immobiliers
+              Gerez votre portefeuille de biens immobiliers
             </p>
           </div>
         </div>
-        <Link href="/portfolio/new">
-          <Button>
-            <Plus className="h-4 w-4 mr-1" />
-            Nouveau bien
-          </Button>
-        </Link>
+        <Button onClick={() => setIsCreateOpen(true)}>
+          <Plus className="h-4 w-4 mr-1" />
+          Nouveau bien
+        </Button>
       </div>
 
       {/* Filters */}
@@ -161,7 +244,7 @@ export default function PortfolioPage() {
           <CardContent className="flex flex-col items-center justify-center py-16 gap-3">
             <Home className="h-12 w-12 text-muted-foreground" />
             <p className="text-lg font-semibold text-muted-foreground">
-              Aucun bien trouvé
+              Aucun bien trouve
             </p>
             <p className="text-sm text-muted-foreground">
               {search || statusFilter !== "ALL"
@@ -207,14 +290,14 @@ export default function PortfolioPage() {
                   <div className="flex gap-4 text-sm text-muted-foreground">
                     <span>{property.surface} m²</span>
                     <span>
-                      {property.rooms} pièce{property.rooms > 1 ? "s" : ""}
+                      {property.rooms} piece{property.rooms > 1 ? "s" : ""}
                     </span>
                     {property.floor !== null && property.floor !== undefined && (
-                      <span>Étage {property.floor}</span>
+                      <span>Etage {property.floor}</span>
                     )}
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    Ajouté{" "}
+                    Ajoute{" "}
                     {formatDistanceToNow(new Date(property.createdAt), {
                       addSuffix: true,
                       locale: fr,
@@ -226,6 +309,99 @@ export default function PortfolioPage() {
           ))}
         </div>
       )}
+
+      {/* Create Property Dialog */}
+      <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Nouveau bien</DialogTitle>
+            <DialogDescription>Remplissez les informations du bien immobilier</DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-2">
+            <div className="space-y-1.5">
+              <Label>Nom / Designation *</Label>
+              <Input
+                value={form.name}
+                onChange={(e) => setForm({ ...form, name: e.target.value })}
+                placeholder="Ex: Appartement F3 Hydra"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label>Type *</Label>
+                <Select value={form.type} onValueChange={(v) => setForm({ ...form, type: v })}>
+                  <SelectTrigger><SelectValue placeholder="Selectionner" /></SelectTrigger>
+                  <SelectContent>
+                    {TYPE_OPTIONS.map((o) => (
+                      <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1.5">
+                <Label>Transaction</Label>
+                <Select value={form.transactionType} onValueChange={(v) => setForm({ ...form, transactionType: v })}>
+                  <SelectTrigger><SelectValue placeholder="Selectionner" /></SelectTrigger>
+                  <SelectContent>
+                    {TRANSACTION_OPTIONS.map((o) => (
+                      <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label>Prix (DA)</Label>
+                <Input
+                  type="number"
+                  value={form.price}
+                  onChange={(e) => setForm({ ...form, price: e.target.value })}
+                  placeholder="15 000 000"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label>Surface (m²)</Label>
+                <Input
+                  type="number"
+                  value={form.surface}
+                  onChange={(e) => setForm({ ...form, surface: e.target.value })}
+                  placeholder="85"
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label>Nombre de pieces</Label>
+                <Input
+                  type="number"
+                  value={form.rooms}
+                  onChange={(e) => setForm({ ...form, rooms: e.target.value })}
+                  placeholder="3"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label>Etage</Label>
+                <Input
+                  type="number"
+                  value={form.floor}
+                  onChange={(e) => setForm({ ...form, floor: e.target.value })}
+                  placeholder="2"
+                />
+              </div>
+            </div>
+          </div>
+          <div className="flex justify-end gap-2 pt-2">
+            <Button variant="outline" onClick={() => setIsCreateOpen(false)} disabled={creating}>
+              Annuler
+            </Button>
+            <Button onClick={handleCreate} disabled={creating}>
+              {creating ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <Plus className="h-4 w-4 mr-1" />}
+              Creer le bien
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -109,7 +109,6 @@ interface IClientDetail {
   visits: IVisit[];
   tasks: ITask[];
   interactions: IInteraction[];
-  // Extended fields used by mock/UI
   createdAt: string;
   address?: string;
   city?: string;
@@ -126,106 +125,6 @@ interface IClientDetail {
   notesLog?: Record<string, unknown>[];
 }
 
-// ============================================================================
-// Mock data for demo — replaced by API fetch below
-// ============================================================================
-const MOCK_CLIENT = {
-  id: "c1",
-  firstName: "Karim",
-  lastName: "Benmohamed",
-  phone: "0555 12 34 56",
-  email: "karim.benmohamed@email.dz",
-  pipelineStage: "NEGOCIATION",
-  source: "Site web",
-  createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 45).toISOString(),
-  address: "12 Rue Didouche Mourad",
-  city: "Alger",
-  notes: "Client très motivé, cherche un bien pour investissement.",
-  budget: 10_000_000,
-  budgetMax: 18_000_000,
-  propertyType: "APPARTEMENT",
-  minArea: 70,
-  maxArea: 120,
-  minRooms: 3,
-  desiredLocation: "Hydra, El Biar",
-  assignedAgent: {
-    id: "a1",
-    firstName: "Sophie",
-    lastName: "Martin",
-    email: "sophie@immoprox.dz",
-  },
-  visits: [
-    {
-      id: "v1",
-      scheduledAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 10).toISOString(),
-      status: "DONE",
-      feedback: "Le client a aimé l'agencement mais trouve le prix un peu élevé.",
-      property: { id: "p1", name: "Appt F3 - Résidence Riviera" },
-    },
-    {
-      id: "v2",
-      scheduledAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 5).toISOString(),
-      status: "DONE",
-      feedback: "Très intéressé, demande une deuxième visite avec sa femme.",
-      property: { id: "p2", name: "Villa Duplex - Horizon Bay" },
-    },
-    {
-      id: "v3",
-      scheduledAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 2).toISOString(),
-      status: "CONFIRMED",
-      property: { id: "p2", name: "Villa Duplex - Horizon Bay" },
-    },
-  ],
-  payments: [
-    { id: "pay1", type: "Réservation", amount: 500_000, dueDate: new Date(Date.now() - 1000 * 60 * 60 * 24 * 3).toISOString(), status: "PAID", paidAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 3).toISOString() },
-    { id: "pay2", type: "1ère tranche", amount: 5_000_000, dueDate: new Date(Date.now() - 1000 * 60 * 60 * 24 * 1).toISOString(), status: "OVERDUE" },
-    { id: "pay3", type: "2ème tranche", amount: 5_000_000, dueDate: new Date(Date.now() + 1000 * 60 * 60 * 24 * 30).toISOString(), status: "PENDING" },
-    { id: "pay4", type: "Solde", amount: 7_500_000, dueDate: new Date(Date.now() + 1000 * 60 * 60 * 24 * 90).toISOString(), status: "PENDING" },
-  ],
-  tasks: [
-    { id: "t1", title: "Envoyer le compromis de vente", type: "DOCUMENT", deadline: new Date(Date.now() - 1000 * 60 * 60 * 24 * 2).toISOString(), status: "PENDING" },
-    { id: "t2", title: "Relancer pour paiement 1ère tranche", type: "CALL", deadline: new Date(Date.now() - 1000 * 60 * 60 * 12).toISOString(), status: "PENDING" },
-    { id: "t3", title: "Préparer visite avec architecte", type: "VISIT", deadline: new Date(Date.now() + 1000 * 60 * 60 * 24 * 3).toISOString(), status: "PENDING" },
-    { id: "t4", title: "Appel de bienvenue", type: "CALL", deadline: new Date(Date.now() - 1000 * 60 * 60 * 24 * 40).toISOString(), status: "DONE" },
-  ],
-  interactions: [
-    { id: "h1", type: "CALL", description: "Appel sortant — Confirmation visite F3 Riviera", createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 12).toISOString(), userName: "Sophie Martin" },
-    { id: "h2", type: "VISIT", description: "Visite Appt F3 Résidence Riviera — Client a aimé, prix à négocier", createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 10).toISOString(), userName: "Sophie Martin" },
-    { id: "h3", type: "EMAIL", description: "Envoi brochure Villa Duplex Horizon Bay", createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 8).toISOString(), userName: "Sophie Martin" },
-    { id: "h4", type: "STAGE_CHANGE", description: "Étape changée : Visite terminée → Négociation", createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 5).toISOString(), userName: "Système" },
-    { id: "h5", type: "VISIT", description: "Visite Villa Duplex Horizon Bay — Très intéressé", createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 5).toISOString(), userName: "Sophie Martin" },
-    { id: "h6", type: "SMS", description: "SMS envoyé : Rappel paiement réservation", createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 4).toISOString(), userName: "Sophie Martin" },
-    { id: "h7", type: "NOTE", description: "Note ajoutée : Client très motivé, cherche un bien pour investissement", createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 3).toISOString(), userName: "Sophie Martin" },
-    { id: "h8", type: "TASK_COMPLETED", description: "Tâche terminée : Appel de bienvenue", createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 2).toISOString(), userName: "Sophie Martin" },
-  ],
-  reservation: {
-    contractId: "RES-2023-089",
-    date: new Date(Date.now() - 1000 * 60 * 60 * 24 * 4).toISOString(),
-    property: { id: "p2", name: "Villa Duplex - Horizon Bay", unit: "B-12" },
-    amount: 18_000_000,
-    deposit: 500_000,
-    status: "SIGNED",
-  },
-  vente: {
-    notary: "Me. Haddad",
-    promesseDate: new Date(Date.now() + 1000 * 60 * 60 * 24 * 10).toISOString(),
-    acteDate: null,
-    status: "EN_ATTENTE_PROMESSE",
-    percentCompleted: 40,
-  },
-  documents: [
-    { id: "doc1", title: "Pièce d'identité (CNI)", type: "IDENTITY", url: "#", uploadedAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 10).toISOString(), size: "1.2 MB" },
-    { id: "doc2", title: "Contrat de Réservation Signé", type: "CONTRACT", url: "#", uploadedAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 3).toISOString(), size: "2.5 MB" },
-  ],
-  charges: [
-    { id: "c1", label: "TMA - Ajout prise électrique", amount: 25_000, status: "UNPAID" },
-    { id: "c2", label: "Frais de dossier", amount: 15_000, status: "PAID" },
-  ],
-  notesLog: [
-    { id: "n1", content: "Le client exige une vue dégagée sur le jardin. Ne veut pas de RDC.", author: "Sophie Martin", date: new Date(Date.now() - 1000 * 60 * 60 * 24 * 10).toISOString() },
-    { id: "n2", content: "Validé le financement bancaire avec la banque CPA à 80%.", author: "Sophie Martin", date: new Date(Date.now() - 1000 * 60 * 60 * 24 * 5).toISOString() },
-  ]
-};
 
 export default function ClientDetailPage() {
   const params = useParams();
@@ -244,11 +143,10 @@ export default function ClientDetailPage() {
         const data = await res.json();
         setClient(data.data || data);
       } else {
-        // Use mock data for demo
-        setClient(MOCK_CLIENT);
+        setError(true);
       }
     } catch {
-      setClient(MOCK_CLIENT);
+      setError(true);
     } finally {
       setLoading(false);
     }
