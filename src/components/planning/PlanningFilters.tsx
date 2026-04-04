@@ -32,11 +32,10 @@ const AGENTS = [
 
 const STATUSES = [
   { id: "all", label: "Tous les statuts" },
-  { id: "PLANNED", label: "Programmée" },
-  { id: "CONFIRMED", label: "Confirmée" },
-  { id: "DONE", label: "Terminée" },
-  { id: "CANCELLED", label: "Annulée" },
-  { id: "POSTPONED", label: "Reportée" },
+  { id: "SCHEDULED", label: "Programmee" },
+  { id: "COMPLETED", label: "Terminee" },
+  { id: "CANCELLED", label: "Annulee" },
+  { id: "NO_SHOW", label: "Absent" },
 ];
 
 export function PlanningFilters({

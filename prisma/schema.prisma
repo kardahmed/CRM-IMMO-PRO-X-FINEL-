@@ -380,6 +380,7 @@ model Property {
   @@index([tenantId, status])
   @@index([tenantId, type])
   @@index([tenantId, projectId])
+  @@index([tenantId, createdAt])
   @@map("properties")
 }
 
@@ -425,6 +426,7 @@ model Client {
   @@index([tenantId])
   @@index([tenantId, pipelineStage])
   @@index([tenantId, assignedAgentId])
+  @@index([tenantId, email])
   @@map("clients")
 }
 
@@ -455,6 +457,7 @@ model Task {
   @@index([tenantId, status])
   @@index([tenantId, assignedToId])
   @@index([tenantId, dueAt])
+  @@index([tenantId, createdAt])
   @@map("tasks")
 }
 
@@ -480,6 +483,7 @@ model Visit {
   @@index([tenantId])
   @@index([tenantId, agentId])
   @@index([tenantId, scheduledAt])
+  @@index([tenantId, createdAt])
   @@map("visits")
 }
 
@@ -501,6 +505,7 @@ model Interaction {
 
   @@index([tenantId])
   @@index([tenantId, clientId])
+  @@index([tenantId, createdAt])
   @@map("interactions")
 }
 
@@ -524,6 +529,7 @@ model Payment {
   @@index([tenantId])
   @@index([tenantId, clientId])
   @@index([tenantId, status])
+  @@index([tenantId, createdAt])
   @@map("payments")
 }
 

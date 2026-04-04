@@ -19,9 +19,10 @@ interface ProjectCardProps {
 }
 
 const STATUS_CONFIG: Record<string, { label: string; color: string }> = {
-  LAUNCHING: { label: "Lancement", color: "bg-blue-100 text-blue-700 bg-opacity-90" },
+  PLANNING: { label: "Planification", color: "bg-blue-100 text-blue-700 bg-opacity-90" },
   IN_PROGRESS: { label: "En cours", color: "bg-amber-100 text-amber-700 bg-opacity-90" },
   DELIVERED: { label: "Livré", color: "bg-green-100 text-green-700 bg-opacity-90" },
+  CANCELLED: { label: "Annulé", color: "bg-red-100 text-red-700 bg-opacity-90" },
 };
 
 export function ProjectCard({ id, name, location, availableUnits, totalUnits, progress, status, imageUrl }: ProjectCardProps) {
