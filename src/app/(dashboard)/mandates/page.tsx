@@ -67,7 +67,10 @@ export default function MandatesPage() {
         const res = await fetch("/api/v1/mandates");
         if (!res.ok) throw new Error("Erreur");
         const json = await res.json();
-        if (json.success) setMandates(json.data);
+        if (json.success) {
+          const d = json.data;
+          setMandates(Array.isArray(d) ? d : d.mandates ?? []);
+        }
       } catch {
         console.error("Impossible de charger les mandats");
       } finally {

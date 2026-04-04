@@ -47,7 +47,8 @@ export default function CommissionsPage() {
       if (!res.ok) throw new Error("Failed to fetch");
       const json = await res.json();
       if (json.success) {
-        setPayments(json.data);
+        const d = json.data;
+        setPayments(Array.isArray(d) ? d : d.payments ?? []);
       } else {
         throw new Error("API error");
       }

@@ -46,7 +46,10 @@ export default function OwnersPage() {
         const res = await fetch("/api/v1/owners");
         if (!res.ok) throw new Error("Erreur");
         const json = await res.json();
-        if (json.success) setOwners(json.data);
+        if (json.success) {
+          const d = json.data;
+          setOwners(Array.isArray(d) ? d : d.owners ?? []);
+        }
       } catch {
         console.error("Impossible de charger les propriétaires");
       } finally {

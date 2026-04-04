@@ -78,7 +78,8 @@ export default function AvailabilityPage() {
       const res = await fetch("/api/v1/properties");
       const json = await res.json();
       if (json.success) {
-        setProperties(json.data);
+        const d = json.data;
+        setProperties(Array.isArray(d) ? d : d.properties ?? []);
       } else {
         setError(json.error ?? "Erreur lors du chargement des biens");
       }

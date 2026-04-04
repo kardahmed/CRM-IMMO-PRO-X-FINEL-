@@ -62,7 +62,8 @@ export default function ConstructionPage() {
       const res = await fetch("/api/v1/projects");
       const json = await res.json();
       if (json.success) {
-        setProjects(json.data);
+        const d = json.data;
+        setProjects(Array.isArray(d) ? d : d.projects ?? []);
       } else {
         setError(json.error ?? "Erreur lors du chargement des projets");
       }

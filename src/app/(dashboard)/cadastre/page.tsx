@@ -39,7 +39,8 @@ export default function CadastrePage() {
       if (!res.ok) throw new Error("Failed to fetch");
       const json = await res.json();
       if (json.success) {
-        setProperties(json.data);
+        const d = json.data;
+        setProperties(Array.isArray(d) ? d : d.properties ?? []);
       } else {
         throw new Error("API error");
       }

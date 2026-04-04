@@ -71,7 +71,10 @@ export default function PortfolioPage() {
         const res = await fetch("/api/v1/properties");
         if (!res.ok) throw new Error("Erreur");
         const json = await res.json();
-        if (json.success) setProperties(json.data);
+        if (json.success) {
+          const d = json.data;
+          setProperties(Array.isArray(d) ? d : d.properties ?? []);
+        }
       } catch {
         console.error("Impossible de charger les biens");
       } finally {

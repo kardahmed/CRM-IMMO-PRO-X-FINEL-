@@ -73,7 +73,10 @@ export default function PaymentsPage() {
         const res = await fetch("/api/v1/payments");
         if (!res.ok) throw new Error("Erreur");
         const json = await res.json();
-        if (json.success) setPayments(json.data);
+        if (json.success) {
+          const d = json.data;
+          setPayments(Array.isArray(d) ? d : d.payments ?? []);
+        }
       } catch {
         console.error("Impossible de charger les paiements");
       } finally {

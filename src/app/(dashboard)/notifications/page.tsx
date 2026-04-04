@@ -66,7 +66,10 @@ export default function NotificationsPage() {
         const res = await fetch("/api/v1/notifications");
         if (!res.ok) throw new Error("Erreur");
         const json = await res.json();
-        if (json.success) setNotifications(json.data);
+        if (json.success) {
+          const d = json.data;
+          setNotifications(Array.isArray(d) ? d : d.notifications ?? []);
+        }
       } catch {
         console.error("Impossible de charger les notifications");
       } finally {
