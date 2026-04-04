@@ -11,22 +11,63 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { AlertCircle, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
+interface ICeoStats {
+  totalClients: number;
+  newClientsThisMonth: number;
+  todayVisits: number;
+  overdueTasks: number;
+}
+
+interface IAgentStats {
+  activeClients: number;
+  monthlyGoal: number;
+  todayFollowUps: number;
+  todayVisits: number;
+  overdueTasks: number;
+}
+
+interface IPipelineItem {
+  name: string;
+  value: number;
+}
+
+interface IVisit {
+  id: string;
+  time: string;
+  client: string;
+  property: string;
+}
+
+interface IAgentTask {
+  id: number;
+  title: string;
+  overdue: boolean;
+}
+
 interface IPropertyDistribution {
   name: string;
   value: number;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 interface IDashboardData {
   role: string;
-  stats: any;
-  conversionData?: any[];
-  pipelineData?: any[];
-  topAgents?: any[];
-  todayVisits?: any[];
+  stats: ICeoStats | IAgentStats;
+  conversionData?: Array<{ date: string; value: number }>;
+  pipelineData?: IPipelineItem[];
+  topAgents?: Array<{ name: string; sales: number; revenue: string; avatar: string }>;
+  todayVisits?: IVisit[];
   propertyDistribution?: IPropertyDistribution[];
   welcomeMessage?: string;
-  tasks?: any[];
+  tasks?: IAgentTask[];
+}
+
+function buildCeoCards(stats: ICeoStats) {
+  return [
+    { label: "Total Clients", value: String(stats.totalClients), trend: `+${stats.newClientsThisMonth} ce mois`, color: "blue" },
+    { label: "Visites Aujourd'hui", value: String(stats.todayVisits), trend: "+0", color: "green" },
+    { label: "Nouveaux ce mois", value: String(stats.newClientsThisMonth), trend: "+0", color: "purple" },
+    { label: "Taches en retard", value: String(stats.overdueTasks), trend: stats.overdueTasks > 0 ? `-${stats.overdueTasks}` : "+0", color: "orange" },
+  ];
 }
 
 export default function DashboardPage() {
@@ -41,7 +82,7 @@ export default function DashboardPage() {
       const res = await fetch("/api/v1/dashboard");
       if (!res.ok) throw new Error("Failed to fetch");
       const json = await res.json();
-      setData(json);
+      setData(json.data ?? json);
     } catch {
       setError(true);
     } finally {
@@ -74,7 +115,7 @@ export default function DashboardPage() {
         <AlertCircle className="h-12 w-12 text-destructive" />
         <p className="text-xl font-bold">Impossible de charger le tableau de bord</p>
         <Button onClick={fetchDashboard} variant="outline">
-          <RefreshCw className="h-4 w-4 mr-2" /> Réessayer
+          <RefreshCw className="h-4 w-4 mr-2" /> Reessayer
         </Button>
       </div>
     );
@@ -82,21 +123,20 @@ export default function DashboardPage() {
 
   if (!data) return null;
 
-  if (data.role === "CEO") {
+  if (data.role === "CEO" || data.role === "ADMIN") {
+    const ceoStats = data.stats as ICeoStats;
     return (
       <div className="space-y-8 pb-10">
         <header>
           <h1 className="text-3xl font-black tracking-tight text-neutral-900 dark:text-neutral-100 uppercase">
             Vue d'ensemble <span className="text-primary italic">Executive</span>
           </h1>
-          <p className="text-muted-foreground mt-1 font-medium">Analyse des performances immobilières en temps réel.</p>
+          <p className="text-muted-foreground mt-1 font-medium">Analyse des performances immobilieres en temps reel.</p>
         </header>
 
-        {/* TOP STATS */}
-        <DashboardCardsGrid stats={data.stats} />
+        <DashboardCardsGrid stats={buildCeoCards(ceoStats)} />
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Main Chart */}
           <div className="lg:col-span-2 space-y-6">
             <ConversionChart data={data.conversionData ?? []} />
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -105,16 +145,13 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* Right Column */}
           <div className="space-y-6">
-             {/* Alerts Placeholder if needed, otherwise Today Visits & Distribution */}
              <DailyVisits visits={data.todayVisits ?? []} />
 
-             {/* Simple Distribution Mock */}
              <div className="p-6 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 text-white shadow-xl">
-               <h3 className="font-black text-lg uppercase tracking-tight mb-4">Répartition Biens</h3>
+               <h3 className="font-black text-lg uppercase tracking-tight mb-4">Repartition Biens</h3>
                <div className="space-y-3">
-                 {(data.propertyDistribution ?? []).map((p: IPropertyDistribution, i: number) => (
+                 {(data.propertyDistribution ?? []).map((p, i) => (
                    <div key={i} className="flex flex-col gap-1">
                      <div className="flex justify-between text-xs font-bold">
                        <span>{p.name}</span>
@@ -134,11 +171,12 @@ export default function DashboardPage() {
   }
 
   // AGENT VIEW
+  const agentStats = data.stats as IAgentStats;
   return (
     <div className="max-w-5xl mx-auto space-y-8 pb-10">
       <AgentOverview
         welcomeMessage={data.welcomeMessage ?? ""}
-        stats={data.stats}
+        stats={agentStats}
         tasks={data.tasks ?? []}
       />
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -147,7 +185,7 @@ export default function DashboardPage() {
            <RefreshCw className="absolute -right-4 -bottom-4 h-32 w-32 text-white/5 group-hover:rotate-180 transition-transform duration-1000" />
            <div className="relative">
              <h3 className="text-xl font-bold mb-2">Relances du jour</h3>
-             <p className="text-neutral-400 text-sm">Vous avez {data.stats.todayFollowUps} clients à recontacter aujourd'hui.</p>
+             <p className="text-neutral-400 text-sm">Vous avez {agentStats.todayFollowUps} clients a recontacter aujourd'hui.</p>
            </div>
            <Button className="mt-8 bg-white text-black hover:bg-neutral-200 font-bold relative">
              Commencer la session

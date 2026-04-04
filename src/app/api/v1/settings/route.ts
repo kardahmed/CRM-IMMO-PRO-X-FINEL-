@@ -1,7 +1,5 @@
-import { NextResponse } from "next/server";
 import { z } from "zod";
 import { apiHandler, getBody, jsonOk, jsonError } from "@/lib/api-handler";
-import { prisma } from "@/lib/prisma";
 
 /**
  * GET /api/v1/settings
@@ -12,7 +10,7 @@ import { prisma } from "@/lib/prisma";
 export const GET = apiHandler(
   { module: "SETTINGS", action: "READ" },
   async (ctx) => {
-    const tenant = await prisma.tenant.findUnique({
+    const tenant = await ctx.db.tenant.findUnique({
       where: { id: ctx.tenantId },
       select: {
         id: true,
@@ -65,7 +63,7 @@ export const PUT = apiHandler(
   async (ctx) => {
     const body = getBody<SettingsPayload>(ctx.req);
 
-    const existing = await prisma.tenant.findUnique({
+    const existing = await ctx.db.tenant.findUnique({
       where: { id: ctx.tenantId },
       select: { settings: true },
     });
@@ -83,7 +81,7 @@ export const PUT = apiHandler(
       ? { ...currentSettings, ...body.settings }
       : currentSettings;
 
-    const updated = await prisma.tenant.update({
+    const updated = await ctx.db.tenant.update({
       where: { id: ctx.tenantId },
       data: {
         ...(body.name ? { name: body.name } : {}),
