@@ -1,5 +1,13 @@
+import React from "react";
+import {
+  Document,
+  Page,
+  View,
+  Text,
+  StyleSheet,
+} from "@react-pdf/renderer";
 import { prisma } from "@/lib/prisma";
-import { htmlToPdf } from "@/lib/pdf-renderer";
+import { renderDocumentToPdf } from "@/lib/pdf-renderer";
 
 // ============================================================================
 // Types
@@ -42,47 +50,316 @@ function formatPrice(n: number): string {
   );
 }
 
-function baseStyles(): string {
-  return `
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color: #1e293b; line-height: 1.6; padding: 40px; }
-    .header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #3b82f6; padding-bottom: 16px; margin-bottom: 24px; }
-    .header h1 { font-size: 20px; font-weight: 800; color: #1e293b; }
-    .header .subtitle { font-size: 13px; color: #64748b; }
-    .section { margin-bottom: 20px; }
-    .section-title { font-size: 14px; font-weight: 700; color: #1e293b; border-bottom: 1px solid #e2e8f0; padding-bottom: 6px; margin-bottom: 10px; }
-    .row { display: flex; margin-bottom: 6px; font-size: 13px; }
-    .label { width: 180px; color: #64748b; font-weight: 500; }
-    .value { font-weight: 600; }
-    table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 13px; }
-    th { background: #f1f5f9; text-align: left; padding: 8px 10px; font-size: 11px; text-transform: uppercase; color: #64748b; }
-    td { padding: 8px 10px; border-bottom: 1px solid #f1f5f9; }
-    .signature-block { display: flex; justify-content: space-between; margin-top: 60px; }
-    .signature-box { width: 200px; text-align: center; }
-    .signature-line { border-top: 1px solid #1e293b; margin-top: 60px; padding-top: 4px; font-size: 12px; color: #64748b; }
-    .footer { margin-top: 40px; border-top: 1px solid #e2e8f0; padding-top: 8px; text-align: center; font-size: 10px; color: #94a3b8; }
-    .highlight { background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 6px; padding: 12px 16px; margin: 12px 0; }
-    .amount { font-size: 22px; font-weight: 800; color: #1e293b; }
-  `;
+function generateRef(): string {
+  return `DOC-${Date.now().toString(36).toUpperCase()}`;
 }
 
-function docHeader(tenantName: string, docTitle: string, docDate: Date): string {
-  return `
-    <div class="header">
-      <div>
-        <h1>${tenantName}</h1>
-        <p class="subtitle">${docTitle}</p>
-      </div>
-      <div style="text-align:right">
-        <p style="font-size:13px;font-weight:600">${formatDate(docDate)}</p>
-        <p style="font-size:11px;color:#94a3b8">Réf: DOC-${Date.now().toString(36).toUpperCase()}</p>
-      </div>
-    </div>
-  `;
+// ============================================================================
+// Shared Styles
+// ============================================================================
+
+const colors = {
+  dark: "#1e293b",
+  gray: "#64748b",
+  lightGray: "#94a3b8",
+  border: "#e2e8f0",
+  bgLight: "#f1f5f9",
+  accent: "#3b82f6",
+  bgHighlight: "#eff6ff",
+  highlightBorder: "#bfdbfe",
+  red: "#dc2626",
+  green: "#16a34a",
+};
+
+const s = StyleSheet.create({
+  page: {
+    padding: 40,
+    fontFamily: "Helvetica",
+    fontSize: 11,
+    color: colors.dark,
+    lineHeight: 1.6,
+  },
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    borderBottomWidth: 2,
+    borderBottomColor: colors.accent,
+    paddingBottom: 12,
+    marginBottom: 20,
+  },
+  headerTitle: {
+    fontSize: 18,
+    fontFamily: "Helvetica-Bold",
+    color: colors.dark,
+  },
+  headerSubtitle: {
+    fontSize: 11,
+    color: colors.gray,
+    marginTop: 2,
+  },
+  headerRight: {
+    alignItems: "flex-end",
+  },
+  headerDate: {
+    fontSize: 11,
+    fontFamily: "Helvetica-Bold",
+  },
+  headerRef: {
+    fontSize: 9,
+    color: colors.lightGray,
+    marginTop: 2,
+  },
+  section: {
+    marginBottom: 16,
+  },
+  sectionTitle: {
+    fontSize: 12,
+    fontFamily: "Helvetica-Bold",
+    color: colors.dark,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+    paddingBottom: 4,
+    marginBottom: 8,
+  },
+  row: {
+    flexDirection: "row",
+    marginBottom: 4,
+  },
+  label: {
+    width: 160,
+    color: colors.gray,
+    fontFamily: "Helvetica",
+  },
+  value: {
+    fontFamily: "Helvetica-Bold",
+    flex: 1,
+  },
+  highlight: {
+    backgroundColor: colors.bgHighlight,
+    borderWidth: 1,
+    borderColor: colors.highlightBorder,
+    borderRadius: 4,
+    padding: 10,
+    marginVertical: 8,
+  },
+  amount: {
+    fontSize: 20,
+    fontFamily: "Helvetica-Bold",
+    color: colors.dark,
+  },
+  amountSub: {
+    fontSize: 10,
+    color: colors.gray,
+    marginTop: 3,
+  },
+  tableHeader: {
+    flexDirection: "row",
+    backgroundColor: colors.bgLight,
+    paddingVertical: 6,
+    paddingHorizontal: 8,
+  },
+  tableHeaderCell: {
+    fontSize: 9,
+    fontFamily: "Helvetica-Bold",
+    color: colors.gray,
+    textTransform: "uppercase",
+  },
+  tableRow: {
+    flexDirection: "row",
+    paddingVertical: 6,
+    paddingHorizontal: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.bgLight,
+  },
+  tableCell: {
+    fontSize: 10,
+  },
+  signatureBlock: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: 50,
+  },
+  signatureBox: {
+    width: 180,
+    alignItems: "center",
+  },
+  signatureLine: {
+    borderTopWidth: 1,
+    borderTopColor: colors.dark,
+    marginTop: 50,
+    paddingTop: 4,
+    width: "100%",
+    alignItems: "center",
+  },
+  signatureLabel: {
+    fontSize: 10,
+    color: colors.gray,
+  },
+  footer: {
+    marginTop: 30,
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
+    paddingTop: 6,
+    alignItems: "center",
+  },
+  footerText: {
+    fontSize: 8,
+    color: colors.lightGray,
+  },
+  emptyBox: {
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: 4,
+    padding: 10,
+    minHeight: 80,
+  },
+  emptyBoxText: {
+    fontSize: 11,
+    color: colors.gray,
+  },
+});
+
+// ============================================================================
+// Reusable layout components
+// ============================================================================
+
+function DocHeader({
+  tenantName,
+  docTitle,
+  docDate,
+}: {
+  tenantName: string;
+  docTitle: string;
+  docDate: Date;
+}) {
+  return React.createElement(
+    View,
+    { style: s.header },
+    React.createElement(
+      View,
+      null,
+      React.createElement(Text, { style: s.headerTitle }, tenantName),
+      React.createElement(Text, { style: s.headerSubtitle }, docTitle),
+    ),
+    React.createElement(
+      View,
+      { style: s.headerRight },
+      React.createElement(Text, { style: s.headerDate }, formatDate(docDate)),
+      React.createElement(
+        Text,
+        { style: s.headerRef },
+        `Réf: ${generateRef()}`,
+      ),
+    ),
+  );
 }
 
-function docFooter(tenantName: string): string {
-  return `<div class="footer">Document généré par CRM IMMO PRO X — ${tenantName} — ${formatDate(new Date())}</div>`;
+function DocFooter({ tenantName }: { tenantName: string }) {
+  return React.createElement(
+    View,
+    { style: s.footer },
+    React.createElement(
+      Text,
+      { style: s.footerText },
+      `Document généré par CRM IMMO PRO X — ${tenantName} — ${formatDate(new Date())}`,
+    ),
+  );
+}
+
+function Section({
+  title,
+  children,
+}: {
+  title: string;
+  children: React.ReactNode;
+}) {
+  return React.createElement(
+    View,
+    { style: s.section },
+    React.createElement(Text, { style: s.sectionTitle }, title),
+    children,
+  );
+}
+
+function Row({ label, value }: { label: string; value: string }) {
+  return React.createElement(
+    View,
+    { style: s.row },
+    React.createElement(Text, { style: s.label }, label),
+    React.createElement(Text, { style: s.value }, value),
+  );
+}
+
+function SignatureBlock({
+  leftLabel,
+  rightLabel,
+}: {
+  leftLabel: string;
+  rightLabel: string;
+}) {
+  return React.createElement(
+    View,
+    { style: s.signatureBlock },
+    React.createElement(
+      View,
+      { style: s.signatureBox },
+      React.createElement(
+        View,
+        { style: s.signatureLine },
+        React.createElement(Text, { style: s.signatureLabel }, leftLabel),
+      ),
+    ),
+    React.createElement(
+      View,
+      { style: s.signatureBox },
+      React.createElement(
+        View,
+        { style: s.signatureLine },
+        React.createElement(Text, { style: s.signatureLabel }, rightLabel),
+      ),
+    ),
+  );
+}
+
+// ============================================================================
+// Helpers to build property rows
+// ============================================================================
+
+interface IPropertyBasic {
+  name: string;
+  type: string;
+  surface?: number | null;
+  rooms?: number | null;
+  floor?: number | null;
+  price?: unknown;
+  project?: { name: string; address?: string | null; wilaya?: string | null } | null;
+  cadastralRef?: string | null;
+  lotNumber?: string | null;
+  titleDeedNumber?: string | null;
+}
+
+function buildPropertyRows(
+  property: IPropertyBasic,
+  keyPrefix: string,
+  priceLabel = "Prix",
+): React.ReactElement[] {
+  const rows: React.ReactElement[] = [];
+  rows.push(React.createElement(Row, { key: `${keyPrefix}-n`, label: "Désignation", value: property.name }));
+  rows.push(React.createElement(Row, { key: `${keyPrefix}-t`, label: "Type", value: property.type }));
+  if (property.surface) rows.push(React.createElement(Row, { key: `${keyPrefix}-s`, label: "Surface", value: `${property.surface} m²` }));
+  if (property.rooms) rows.push(React.createElement(Row, { key: `${keyPrefix}-r`, label: "Pièces", value: String(property.rooms) }));
+  if (property.floor !== null && property.floor !== undefined) rows.push(React.createElement(Row, { key: `${keyPrefix}-f`, label: "Étage", value: String(property.floor) }));
+  if (property.price) rows.push(React.createElement(Row, { key: `${keyPrefix}-p`, label: priceLabel, value: formatPrice(Number(property.price)) }));
+  if (property.cadastralRef) rows.push(React.createElement(Row, { key: `${keyPrefix}-cad`, label: "Réf. cadastrale", value: property.cadastralRef }));
+  if (property.lotNumber) rows.push(React.createElement(Row, { key: `${keyPrefix}-lot`, label: "N° de lot", value: property.lotNumber }));
+  if (property.titleDeedNumber) rows.push(React.createElement(Row, { key: `${keyPrefix}-td`, label: "N° acte", value: property.titleDeedNumber }));
+  if (property.project) {
+    let projVal = property.project.name;
+    if (property.project.address) projVal += ` — ${property.project.address}`;
+    if (property.project.wilaya) projVal += `, ${property.project.wilaya}`;
+    rows.push(React.createElement(Row, { key: `${keyPrefix}-pj`, label: "Projet", value: projVal }));
+  }
+  return rows;
 }
 
 // ============================================================================
@@ -93,7 +370,7 @@ async function buildBonReservation(
   tenantId: string,
   clientId: string,
   propertyId?: string,
-): Promise<string> {
+): Promise<React.ReactElement> {
   const tenant = await prisma.tenant.findUnique({
     where: { id: tenantId },
     select: { name: true },
@@ -101,16 +378,10 @@ async function buildBonReservation(
 
   const client = await prisma.client.findFirst({
     where: { id: clientId, tenantId },
-    select: {
-      firstName: true,
-      lastName: true,
-      phone: true,
-      email: true,
-    },
+    select: { firstName: true, lastName: true, phone: true, email: true },
   });
   if (!client) throw new Error("Client introuvable");
 
-  // Trouver le bien (param ou via paiement)
   let propId = propertyId;
   if (!propId) {
     const payment = await prisma.payment.findFirst({
@@ -124,18 +395,12 @@ async function buildBonReservation(
     ? await prisma.property.findFirst({
         where: { id: propId, tenantId },
         select: {
-          name: true,
-          type: true,
-          surface: true,
-          rooms: true,
-          floor: true,
-          price: true,
+          name: true, type: true, surface: true, rooms: true, floor: true, price: true,
           project: { select: { name: true, address: true } },
         },
       })
     : null;
 
-  // Paiement de réservation
   const reservationPayment = await prisma.payment.findFirst({
     where: { clientId, tenantId, type: "RESERVATION" },
     select: { amount: true, createdAt: true, status: true },
@@ -144,50 +409,49 @@ async function buildBonReservation(
 
   const tenantName = tenant?.name ?? "CRM IMMO PRO X";
 
-  return `<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><style>${baseStyles()}</style></head><body>
-    ${docHeader(tenantName, "Bon de Réservation", reservationPayment?.createdAt ?? new Date())}
+  const paymentContent = reservationPayment
+    ? React.createElement(
+        View,
+        { style: s.highlight },
+        React.createElement(Text, { style: s.amount }, formatPrice(Number(reservationPayment.amount))),
+        React.createElement(
+          Text,
+          { style: s.amountSub },
+          `Versé le ${formatDate(reservationPayment.createdAt)} — Statut : ${reservationPayment.status === "COMPLETED" ? "Encaissé" : "En attente"}`,
+        ),
+      )
+    : React.createElement(
+        Text,
+        { style: { fontSize: 11, color: colors.lightGray } },
+        "Aucun paiement de réservation enregistré",
+      );
 
-    <div class="section">
-      <div class="section-title">Réservant</div>
-      <div class="row"><span class="label">Nom complet</span><span class="value">${client.firstName} ${client.lastName}</span></div>
-      <div class="row"><span class="label">Téléphone</span><span class="value">${client.phone}</span></div>
-      ${client.email ? `<div class="row"><span class="label">Email</span><span class="value">${client.email}</span></div>` : ""}
-    </div>
-
-    ${
+  return React.createElement(
+    Document,
+    null,
+    React.createElement(
+      Page,
+      { size: "A4", style: s.page },
+      React.createElement(DocHeader, {
+        tenantName,
+        docTitle: "Bon de Réservation",
+        docDate: reservationPayment?.createdAt ?? new Date(),
+      }),
+      React.createElement(
+        Section,
+        { title: "Réservant" },
+        React.createElement(Row, { label: "Nom complet", value: `${client.firstName} ${client.lastName}` }),
+        React.createElement(Row, { label: "Téléphone", value: client.phone }),
+        client.email ? React.createElement(Row, { label: "Email", value: client.email }) : null,
+      ),
       property
-        ? `<div class="section">
-      <div class="section-title">Bien réservé</div>
-      <div class="row"><span class="label">Désignation</span><span class="value">${property.name}</span></div>
-      <div class="row"><span class="label">Type</span><span class="value">${property.type}</span></div>
-      ${property.surface ? `<div class="row"><span class="label">Surface</span><span class="value">${property.surface} m²</span></div>` : ""}
-      ${property.rooms ? `<div class="row"><span class="label">Pièces</span><span class="value">${property.rooms}</span></div>` : ""}
-      ${property.floor !== null && property.floor !== undefined ? `<div class="row"><span class="label">Étage</span><span class="value">${property.floor}</span></div>` : ""}
-      ${property.price ? `<div class="row"><span class="label">Prix</span><span class="value">${formatPrice(Number(property.price))}</span></div>` : ""}
-      ${property.project ? `<div class="row"><span class="label">Projet</span><span class="value">${property.project.name}${property.project.address ? ` — ${property.project.address}` : ""}</span></div>` : ""}
-    </div>`
-        : ""
-    }
-
-    <div class="section">
-      <div class="section-title">Acompte de réservation</div>
-      ${
-        reservationPayment
-          ? `<div class="highlight">
-        <div class="amount">${formatPrice(Number(reservationPayment.amount))}</div>
-        <p style="font-size:12px;color:#64748b;margin-top:4px">Versé le ${formatDate(reservationPayment.createdAt)} — Statut : ${reservationPayment.status === "COMPLETED" ? "Encaissé" : "En attente"}</p>
-      </div>`
-          : '<p style="color:#94a3b8;font-size:13px">Aucun paiement de réservation enregistré</p>'
-      }
-    </div>
-
-    <div class="signature-block">
-      <div class="signature-box"><div class="signature-line">Le réservant</div></div>
-      <div class="signature-box"><div class="signature-line">Le promoteur</div></div>
-    </div>
-
-    ${docFooter(tenantName)}
-  </body></html>`;
+        ? React.createElement(Section, { title: "Bien réservé" }, ...buildPropertyRows(property, "br"))
+        : null,
+      React.createElement(Section, { title: "Acompte de réservation" }, paymentContent),
+      React.createElement(SignatureBlock, { leftLabel: "Le réservant", rightLabel: "Le promoteur" }),
+      React.createElement(DocFooter, { tenantName }),
+    ),
+  );
 }
 
 // ============================================================================
@@ -198,7 +462,7 @@ async function buildRecuPaiement(
   tenantId: string,
   clientId: string,
   paymentId?: string,
-): Promise<string> {
+): Promise<React.ReactElement> {
   const tenant = await prisma.tenant.findUnique({
     where: { id: tenantId },
     select: { name: true },
@@ -210,7 +474,6 @@ async function buildRecuPaiement(
   });
   if (!client) throw new Error("Client introuvable");
 
-  // Paiement spécifique ou le dernier
   const payment = paymentId
     ? await prisma.payment.findFirst({
         where: { id: paymentId, tenantId },
@@ -224,7 +487,6 @@ async function buildRecuPaiement(
 
   if (!payment) throw new Error("Paiement introuvable");
 
-  // Total payé et restant
   const allPayments = await prisma.payment.findMany({
     where: { clientId, tenantId },
     select: { amount: true, status: true },
@@ -232,9 +494,8 @@ async function buildRecuPaiement(
 
   const totalPaid = allPayments
     .filter((p) => p.status === "COMPLETED")
-    .reduce((s, p) => s + Number(p.amount), 0);
-
-  const totalDue = allPayments.reduce((s, p) => s + Number(p.amount), 0);
+    .reduce((acc, p) => acc + Number(p.amount), 0);
+  const totalDue = allPayments.reduce((acc, p) => acc + Number(p.amount), 0);
   const remaining = totalDue - totalPaid;
 
   const typeLabels: Record<string, string> = {
@@ -247,37 +508,53 @@ async function buildRecuPaiement(
 
   const tenantName = tenant?.name ?? "CRM IMMO PRO X";
 
-  return `<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><style>${baseStyles()}</style></head><body>
-    ${docHeader(tenantName, "Reçu de Paiement", payment.createdAt)}
-
-    <div class="section">
-      <div class="section-title">Client</div>
-      <div class="row"><span class="label">Nom complet</span><span class="value">${client.firstName} ${client.lastName}</span></div>
-      <div class="row"><span class="label">Téléphone</span><span class="value">${client.phone}</span></div>
-    </div>
-
-    <div class="section">
-      <div class="section-title">Détail du paiement</div>
-      <div class="highlight">
-        <div class="amount">${formatPrice(Number(payment.amount))}</div>
-        <p style="font-size:12px;color:#64748b;margin-top:4px">${typeLabels[payment.type] ?? payment.type} — ${formatDate(payment.createdAt)}</p>
-      </div>
-    </div>
-
-    <div class="section">
-      <div class="section-title">Situation financière</div>
-      <div class="row"><span class="label">Total versé</span><span class="value">${formatPrice(totalPaid)}</span></div>
-      <div class="row"><span class="label">Total dû</span><span class="value">${formatPrice(totalDue)}</span></div>
-      <div class="row"><span class="label">Solde restant</span><span class="value" style="color:${remaining > 0 ? "#dc2626" : "#16a34a"}">${formatPrice(remaining)}</span></div>
-    </div>
-
-    <div class="signature-block">
-      <div class="signature-box"><div class="signature-line">Le client</div></div>
-      <div class="signature-box"><div class="signature-line">Le responsable</div></div>
-    </div>
-
-    ${docFooter(tenantName)}
-  </body></html>`;
+  return React.createElement(
+    Document,
+    null,
+    React.createElement(
+      Page,
+      { size: "A4", style: s.page },
+      React.createElement(DocHeader, { tenantName, docTitle: "Reçu de Paiement", docDate: payment.createdAt }),
+      React.createElement(
+        Section,
+        { title: "Client" },
+        React.createElement(Row, { label: "Nom complet", value: `${client.firstName} ${client.lastName}` }),
+        React.createElement(Row, { label: "Téléphone", value: client.phone }),
+      ),
+      React.createElement(
+        Section,
+        { title: "Détail du paiement" },
+        React.createElement(
+          View,
+          { style: s.highlight },
+          React.createElement(Text, { style: s.amount }, formatPrice(Number(payment.amount))),
+          React.createElement(
+            Text,
+            { style: s.amountSub },
+            `${typeLabels[payment.type] ?? payment.type} — ${formatDate(payment.createdAt)}`,
+          ),
+        ),
+      ),
+      React.createElement(
+        Section,
+        { title: "Situation financière" },
+        React.createElement(Row, { label: "Total versé", value: formatPrice(totalPaid) }),
+        React.createElement(Row, { label: "Total dû", value: formatPrice(totalDue) }),
+        React.createElement(
+          View,
+          { style: s.row },
+          React.createElement(Text, { style: s.label }, "Solde restant"),
+          React.createElement(
+            Text,
+            { style: [s.value, { color: remaining > 0 ? colors.red : colors.green }] },
+            formatPrice(remaining),
+          ),
+        ),
+      ),
+      React.createElement(SignatureBlock, { leftLabel: "Le client", rightLabel: "Le responsable" }),
+      React.createElement(DocFooter, { tenantName }),
+    ),
+  );
 }
 
 // ============================================================================
@@ -289,7 +566,7 @@ async function buildFicheVisite(
   clientId: string,
   propertyId?: string,
   visitId?: string,
-): Promise<string> {
+): Promise<React.ReactElement> {
   const tenant = await prisma.tenant.findUnique({
     where: { id: tenantId },
     select: { name: true },
@@ -301,79 +578,80 @@ async function buildFicheVisite(
   });
   if (!client) throw new Error("Client introuvable");
 
-  // Visite
+  const visitInclude = {
+    property: {
+      select: {
+        name: true, type: true, surface: true, rooms: true, price: true,
+        project: { select: { name: true, address: true } },
+      },
+    },
+    agent: { select: { firstName: true, lastName: true, phone: true } },
+  };
+
   const visit = visitId
     ? await prisma.visit.findFirst({
         where: { id: visitId, tenantId },
-        include: {
-          property: {
-            select: { name: true, type: true, surface: true, rooms: true, price: true, project: { select: { name: true, address: true } } },
-          },
-          agent: { select: { firstName: true, lastName: true, phone: true } },
-        },
+        include: visitInclude,
       })
     : await prisma.visit.findFirst({
-        where: {
-          clientId,
-          tenantId,
-          ...(propertyId ? { propertyId } : {}),
-        },
-        include: {
-          property: {
-            select: { name: true, type: true, surface: true, rooms: true, price: true, project: { select: { name: true, address: true } } },
-          },
-          agent: { select: { firstName: true, lastName: true, phone: true } },
-        },
+        where: { clientId, tenantId, ...(propertyId ? { propertyId } : {}) },
+        include: visitInclude,
         orderBy: { scheduledAt: "desc" },
       });
 
   const tenantName = tenant?.name ?? "CRM IMMO PRO X";
 
-  return `<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><style>${baseStyles()}</style></head><body>
-    ${docHeader(tenantName, "Fiche de Visite", visit?.scheduledAt ?? new Date())}
-
-    <div class="section">
-      <div class="section-title">Client</div>
-      <div class="row"><span class="label">Nom complet</span><span class="value">${client.firstName} ${client.lastName}</span></div>
-      <div class="row"><span class="label">Téléphone</span><span class="value">${client.phone}</span></div>
-      ${client.budgetMin || client.budgetMax ? `<div class="row"><span class="label">Budget</span><span class="value">${client.budgetMin ? formatPrice(Number(client.budgetMin)) : "?"} — ${client.budgetMax ? formatPrice(Number(client.budgetMax)) : "?"}</span></div>` : ""}
-    </div>
-
-    ${
+  return React.createElement(
+    Document,
+    null,
+    React.createElement(
+      Page,
+      { size: "A4", style: s.page },
+      React.createElement(DocHeader, {
+        tenantName,
+        docTitle: "Fiche de Visite",
+        docDate: visit?.scheduledAt ?? new Date(),
+      }),
+      React.createElement(
+        Section,
+        { title: "Client" },
+        React.createElement(Row, { label: "Nom complet", value: `${client.firstName} ${client.lastName}` }),
+        React.createElement(Row, { label: "Téléphone", value: client.phone }),
+        client.budgetMin || client.budgetMax
+          ? React.createElement(Row, {
+              label: "Budget",
+              value: `${client.budgetMin ? formatPrice(Number(client.budgetMin)) : "?"} — ${client.budgetMax ? formatPrice(Number(client.budgetMax)) : "?"}`,
+            })
+          : null,
+      ),
       visit?.property
-        ? `<div class="section">
-      <div class="section-title">Bien visité</div>
-      <div class="row"><span class="label">Désignation</span><span class="value">${visit.property.name}</span></div>
-      <div class="row"><span class="label">Type</span><span class="value">${visit.property.type}</span></div>
-      ${visit.property.surface ? `<div class="row"><span class="label">Surface</span><span class="value">${visit.property.surface} m²</span></div>` : ""}
-      ${visit.property.rooms ? `<div class="row"><span class="label">Pièces</span><span class="value">${visit.property.rooms}</span></div>` : ""}
-      ${visit.property.price ? `<div class="row"><span class="label">Prix</span><span class="value">${formatPrice(Number(visit.property.price))}</span></div>` : ""}
-      ${visit.property.project ? `<div class="row"><span class="label">Projet</span><span class="value">${visit.property.project.name}${visit.property.project.address ? ` — ${visit.property.project.address}` : ""}</span></div>` : ""}
-    </div>`
-        : ""
-    }
-
-    <div class="section">
-      <div class="section-title">Détails de la visite</div>
-      <div class="row"><span class="label">Date</span><span class="value">${visit ? formatDate(visit.scheduledAt) : "Non programmée"}</span></div>
-      <div class="row"><span class="label">Statut</span><span class="value">${visit?.status ?? "—"}</span></div>
-      ${visit?.agent ? `<div class="row"><span class="label">Agent</span><span class="value">${visit.agent.firstName} ${visit.agent.lastName} (${visit.agent.phone ?? ""})</span></div>` : ""}
-    </div>
-
-    <div class="section">
-      <div class="section-title">Observations</div>
-      <div style="border:1px solid #e2e8f0;border-radius:6px;padding:12px;min-height:100px;font-size:13px;color:#64748b">
-        ${visit?.feedback ?? "À compléter après la visite..."}
-      </div>
-    </div>
-
-    <div class="signature-block">
-      <div class="signature-box"><div class="signature-line">Le client</div></div>
-      <div class="signature-box"><div class="signature-line">L'agent</div></div>
-    </div>
-
-    ${docFooter(tenantName)}
-  </body></html>`;
+        ? React.createElement(Section, { title: "Bien visité" }, ...buildPropertyRows(visit.property, "fv"))
+        : null,
+      React.createElement(
+        Section,
+        { title: "Détails de la visite" },
+        React.createElement(Row, { label: "Date", value: visit ? formatDate(visit.scheduledAt) : "Non programmée" }),
+        React.createElement(Row, { label: "Statut", value: visit?.status ?? "—" }),
+        visit?.agent
+          ? React.createElement(Row, {
+              label: "Agent",
+              value: `${visit.agent.firstName} ${visit.agent.lastName} (${visit.agent.phone ?? ""})`,
+            })
+          : null,
+      ),
+      React.createElement(
+        Section,
+        { title: "Observations" },
+        React.createElement(
+          View,
+          { style: s.emptyBox },
+          React.createElement(Text, { style: s.emptyBoxText }, visit?.feedback ?? "À compléter après la visite..."),
+        ),
+      ),
+      React.createElement(SignatureBlock, { leftLabel: "Le client", rightLabel: "L'agent" }),
+      React.createElement(DocFooter, { tenantName }),
+    ),
+  );
 }
 
 // ============================================================================
@@ -384,7 +662,7 @@ async function buildCompromisVente(
   tenantId: string,
   clientId: string,
   propertyId?: string,
-): Promise<string> {
+): Promise<React.ReactElement> {
   const tenant = await prisma.tenant.findUnique({
     where: { id: tenantId },
     select: { name: true },
@@ -409,21 +687,13 @@ async function buildCompromisVente(
     ? await prisma.property.findFirst({
         where: { id: propId, tenantId },
         select: {
-          name: true,
-          type: true,
-          surface: true,
-          rooms: true,
-          floor: true,
-          price: true,
-          cadastralRef: true,
-          lotNumber: true,
-          titleDeedNumber: true,
+          name: true, type: true, surface: true, rooms: true, floor: true, price: true,
+          cadastralRef: true, lotNumber: true, titleDeedNumber: true,
           project: { select: { name: true, address: true, wilaya: true } },
         },
       })
     : null;
 
-  // Tableau paiements
   const payments = await prisma.payment.findMany({
     where: { clientId, tenantId },
     select: { type: true, amount: true, status: true, createdAt: true },
@@ -438,83 +708,82 @@ async function buildCompromisVente(
     REFUND: "Remboursement",
   };
 
-  const paymentRows = payments
-    .map(
-      (p) =>
-        `<tr>
-      <td>${typeLabels[p.type] ?? p.type}</td>
-      <td style="text-align:right;font-weight:600">${formatPrice(Number(p.amount))}</td>
-      <td>${formatDate(p.createdAt)}</td>
-      <td>${p.status === "COMPLETED" ? "Payé" : p.status === "PENDING" ? "En attente" : p.status}</td>
-    </tr>`,
-    )
-    .join("");
-
   const tenantName = tenant?.name ?? "CRM IMMO PRO X";
 
-  return `<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><style>${baseStyles()}</style></head><body>
-    ${docHeader(tenantName, "Compromis de Vente", new Date())}
+  const paymentTableRows = payments.map((p, i) =>
+    React.createElement(
+      View,
+      { key: `pay-${i}`, style: s.tableRow },
+      React.createElement(Text, { style: [s.tableCell, { width: "25%" }] }, typeLabels[p.type] ?? p.type),
+      React.createElement(
+        Text,
+        { style: [s.tableCell, { width: "25%", textAlign: "right", fontFamily: "Helvetica-Bold" }] },
+        formatPrice(Number(p.amount)),
+      ),
+      React.createElement(Text, { style: [s.tableCell, { width: "25%" }] }, formatDate(p.createdAt)),
+      React.createElement(
+        Text,
+        { style: [s.tableCell, { width: "25%" }] },
+        p.status === "COMPLETED" ? "Payé" : p.status === "PENDING" ? "En attente" : p.status,
+      ),
+    ),
+  );
 
-    <div class="section">
-      <div class="section-title">Le vendeur</div>
-      <div class="row"><span class="label">Société</span><span class="value">${tenantName}</span></div>
-    </div>
-
-    <div class="section">
-      <div class="section-title">L'acquéreur</div>
-      <div class="row"><span class="label">Nom complet</span><span class="value">${client.firstName} ${client.lastName}</span></div>
-      <div class="row"><span class="label">Téléphone</span><span class="value">${client.phone}</span></div>
-      ${client.email ? `<div class="row"><span class="label">Email</span><span class="value">${client.email}</span></div>` : ""}
-    </div>
-
-    ${
+  return React.createElement(
+    Document,
+    null,
+    React.createElement(
+      Page,
+      { size: "A4", style: s.page },
+      React.createElement(DocHeader, { tenantName, docTitle: "Compromis de Vente", docDate: new Date() }),
+      React.createElement(
+        Section,
+        { title: "Le vendeur" },
+        React.createElement(Row, { label: "Société", value: tenantName }),
+      ),
+      React.createElement(
+        Section,
+        { title: "L'acquéreur" },
+        React.createElement(Row, { label: "Nom complet", value: `${client.firstName} ${client.lastName}` }),
+        React.createElement(Row, { label: "Téléphone", value: client.phone }),
+        client.email ? React.createElement(Row, { label: "Email", value: client.email }) : null,
+      ),
       property
-        ? `<div class="section">
-      <div class="section-title">Objet de la vente</div>
-      <div class="row"><span class="label">Désignation</span><span class="value">${property.name}</span></div>
-      <div class="row"><span class="label">Type</span><span class="value">${property.type}</span></div>
-      ${property.surface ? `<div class="row"><span class="label">Surface</span><span class="value">${property.surface} m²</span></div>` : ""}
-      ${property.rooms ? `<div class="row"><span class="label">Pièces</span><span class="value">${property.rooms}</span></div>` : ""}
-      ${property.floor !== null && property.floor !== undefined ? `<div class="row"><span class="label">Étage</span><span class="value">${property.floor}</span></div>` : ""}
-      ${property.price ? `<div class="row"><span class="label">Prix de vente</span><span class="value" style="font-size:16px">${formatPrice(Number(property.price))}</span></div>` : ""}
-      ${property.cadastralRef ? `<div class="row"><span class="label">Réf. cadastrale</span><span class="value">${property.cadastralRef}</span></div>` : ""}
-      ${property.lotNumber ? `<div class="row"><span class="label">N° de lot</span><span class="value">${property.lotNumber}</span></div>` : ""}
-      ${property.titleDeedNumber ? `<div class="row"><span class="label">N° acte</span><span class="value">${property.titleDeedNumber}</span></div>` : ""}
-      ${property.project ? `<div class="row"><span class="label">Projet</span><span class="value">${property.project.name}${property.project.address ? ` — ${property.project.address}` : ""}${property.project.wilaya ? `, ${property.project.wilaya}` : ""}</span></div>` : ""}
-    </div>`
-        : ""
-    }
-
-    ${
+        ? React.createElement(Section, { title: "Objet de la vente" }, ...buildPropertyRows(property, "cv", "Prix de vente"))
+        : null,
       payments.length > 0
-        ? `<div class="section">
-      <div class="section-title">Conditions financières</div>
-      <table>
-        <thead><tr><th>Type</th><th style="text-align:right">Montant</th><th>Date</th><th>Statut</th></tr></thead>
-        <tbody>${paymentRows}</tbody>
-      </table>
-    </div>`
-        : ""
-    }
-
-    <div class="section">
-      <div class="section-title">Conditions particulières</div>
-      <div style="border:1px solid #e2e8f0;border-radius:6px;padding:12px;min-height:80px;font-size:13px;color:#64748b">
-        À compléter...
-      </div>
-    </div>
-
-    <p style="font-size:12px;color:#64748b;margin:20px 0">
-      Fait en deux exemplaires originaux, à ________________, le ${formatDate(new Date())}.
-    </p>
-
-    <div class="signature-block">
-      <div class="signature-box"><div class="signature-line">L'acquéreur</div></div>
-      <div class="signature-box"><div class="signature-line">Le vendeur</div></div>
-    </div>
-
-    ${docFooter(tenantName)}
-  </body></html>`;
+        ? React.createElement(
+            Section,
+            { title: "Conditions financières" },
+            React.createElement(
+              View,
+              { style: s.tableHeader },
+              React.createElement(Text, { style: [s.tableHeaderCell, { width: "25%" }] }, "Type"),
+              React.createElement(Text, { style: [s.tableHeaderCell, { width: "25%", textAlign: "right" }] }, "Montant"),
+              React.createElement(Text, { style: [s.tableHeaderCell, { width: "25%" }] }, "Date"),
+              React.createElement(Text, { style: [s.tableHeaderCell, { width: "25%" }] }, "Statut"),
+            ),
+            ...paymentTableRows,
+          )
+        : null,
+      React.createElement(
+        Section,
+        { title: "Conditions particulières" },
+        React.createElement(
+          View,
+          { style: s.emptyBox },
+          React.createElement(Text, { style: s.emptyBoxText }, "À compléter..."),
+        ),
+      ),
+      React.createElement(
+        Text,
+        { style: { fontSize: 10, color: colors.gray, marginVertical: 16 } },
+        `Fait en deux exemplaires originaux, à ________________, le ${formatDate(new Date())}.`,
+      ),
+      React.createElement(SignatureBlock, { leftLabel: "L'acquéreur", rightLabel: "Le vendeur" }),
+      React.createElement(DocFooter, { tenantName }),
+    ),
+  );
 }
 
 // ============================================================================
@@ -525,7 +794,7 @@ async function buildBonCommande(
   tenantId: string,
   clientId: string,
   propertyId?: string,
-): Promise<string> {
+): Promise<React.ReactElement> {
   const tenant = await prisma.tenant.findUnique({
     where: { id: tenantId },
     select: { name: true },
@@ -537,16 +806,20 @@ async function buildBonCommande(
   });
   if (!client) throw new Error("Client introuvable");
 
-  const property = propertyId
+  let propId = propertyId;
+  if (!propId) {
+    const payment = await prisma.payment.findFirst({
+      where: { clientId, tenantId, propertyId: { not: null } },
+      select: { propertyId: true },
+    });
+    propId = payment?.propertyId ?? undefined;
+  }
+
+  const property = propId
     ? await prisma.property.findFirst({
-        where: { id: propertyId, tenantId },
+        where: { id: propId, tenantId },
         select: {
-          name: true,
-          type: true,
-          surface: true,
-          rooms: true,
-          floor: true,
-          price: true,
+          name: true, type: true, surface: true, rooms: true, floor: true, price: true,
           project: { select: { name: true, address: true } },
         },
       })
@@ -554,50 +827,48 @@ async function buildBonCommande(
 
   const tenantName = tenant?.name ?? "CRM IMMO PRO X";
 
-  return `<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><style>${baseStyles()}</style></head><body>
-    ${docHeader(tenantName, "Bon de Commande", new Date())}
-
-    <div class="section">
-      <div class="section-title">Commanditaire</div>
-      <div class="row"><span class="label">Nom complet</span><span class="value">${client.firstName} ${client.lastName}</span></div>
-      <div class="row"><span class="label">Téléphone</span><span class="value">${client.phone}</span></div>
-      ${client.email ? `<div class="row"><span class="label">Email</span><span class="value">${client.email}</span></div>` : ""}
-    </div>
-
-    ${
+  return React.createElement(
+    Document,
+    null,
+    React.createElement(
+      Page,
+      { size: "A4", style: s.page },
+      React.createElement(DocHeader, { tenantName, docTitle: "Bon de Commande", docDate: new Date() }),
+      React.createElement(
+        Section,
+        { title: "Commanditaire" },
+        React.createElement(Row, { label: "Nom complet", value: `${client.firstName} ${client.lastName}` }),
+        React.createElement(Row, { label: "Téléphone", value: client.phone }),
+        client.email ? React.createElement(Row, { label: "Email", value: client.email }) : null,
+      ),
       property
-        ? `<div class="section">
-      <div class="section-title">Bien commandé</div>
-      <div class="row"><span class="label">Désignation</span><span class="value">${property.name}</span></div>
-      <div class="row"><span class="label">Type</span><span class="value">${property.type}</span></div>
-      ${property.surface ? `<div class="row"><span class="label">Surface</span><span class="value">${property.surface} m²</span></div>` : ""}
-      ${property.rooms ? `<div class="row"><span class="label">Pièces</span><span class="value">${property.rooms}</span></div>` : ""}
-      ${property.floor !== null && property.floor !== undefined ? `<div class="row"><span class="label">Étage</span><span class="value">${property.floor}</span></div>` : ""}
-      ${property.price ? `<div class="row"><span class="label">Prix</span><span class="value">${formatPrice(Number(property.price))}</span></div>` : ""}
-      ${property.project ? `<div class="row"><span class="label">Projet</span><span class="value">${property.project.name}${property.project.address ? ` — ${property.project.address}` : ""}</span></div>` : ""}
-    </div>`
-        : ""
-    }
-
-    <div class="section">
-      <div class="section-title">Options et personnalisations</div>
-      <div style="border:1px solid #e2e8f0;border-radius:6px;padding:12px;min-height:80px;font-size:13px;color:#64748b">
-        À compléter selon les choix du client...
-      </div>
-    </div>
-
-    <div class="section">
-      <div class="section-title">Conditions</div>
-      <p style="font-size:12px;color:#64748b">Ce bon de commande engage le commanditaire à l'acquisition du bien désigné ci-dessus aux conditions convenues. Tout acompte versé sera déduit du prix total.</p>
-    </div>
-
-    <div class="signature-block">
-      <div class="signature-box"><div class="signature-line">Le commanditaire</div></div>
-      <div class="signature-box"><div class="signature-line">Le vendeur</div></div>
-    </div>
-
-    ${docFooter(tenantName)}
-  </body></html>`;
+        ? React.createElement(Section, { title: "Bien commandé" }, ...buildPropertyRows(property, "bc", "Prix unitaire"))
+        : null,
+      property?.price
+        ? React.createElement(
+            Section,
+            { title: "Montant total" },
+            React.createElement(
+              View,
+              { style: s.highlight },
+              React.createElement(Text, { style: s.amount }, formatPrice(Number(property.price))),
+              React.createElement(Text, { style: s.amountSub }, "Montant TTC"),
+            ),
+          )
+        : null,
+      React.createElement(
+        Section,
+        { title: "Conditions de livraison" },
+        React.createElement(
+          View,
+          { style: s.emptyBox },
+          React.createElement(Text, { style: s.emptyBoxText }, "À compléter..."),
+        ),
+      ),
+      React.createElement(SignatureBlock, { leftLabel: "Le commanditaire", rightLabel: "Le fournisseur" }),
+      React.createElement(DocFooter, { tenantName }),
+    ),
+  );
 }
 
 // ============================================================================
@@ -608,7 +879,7 @@ async function buildEtatDesLieux(
   tenantId: string,
   clientId: string,
   propertyId?: string,
-): Promise<string> {
+): Promise<React.ReactElement> {
   const tenant = await prisma.tenant.findUnique({
     where: { id: tenantId },
     select: { name: true },
@@ -624,83 +895,93 @@ async function buildEtatDesLieux(
     ? await prisma.property.findFirst({
         where: { id: propertyId, tenantId },
         select: {
-          name: true,
-          type: true,
-          surface: true,
-          rooms: true,
-          floor: true,
+          name: true, type: true, surface: true, rooms: true, floor: true,
           project: { select: { name: true, address: true } },
         },
       })
     : null;
 
-  const rooms = property?.rooms ?? 3;
-  const roomRows = Array.from({ length: rooms }, (_, i) => {
-    const label = i === 0 ? "Entrée / Séjour" : i === rooms - 1 ? "Cuisine / SDB" : `Pièce ${i + 1}`;
-    return `<tr>
-      <td>${label}</td>
-      <td style="text-align:center">☐ Bon ☐ Moyen ☐ Mauvais</td>
-      <td style="text-align:center">☐ Bon ☐ Moyen ☐ Mauvais</td>
-      <td></td>
-    </tr>`;
-  }).join("");
-
   const tenantName = tenant?.name ?? "CRM IMMO PRO X";
 
-  return `<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><style>${baseStyles()}</style></head><body>
-    ${docHeader(tenantName, "État des Lieux", new Date())}
+  const roomLabels = [
+    "Entrée", "Salon / Séjour", "Cuisine", "Chambre 1",
+    "Chambre 2", "Salle de bain", "WC", "Balcon / Terrasse",
+  ];
 
-    <div class="section">
-      <div class="section-title">Locataire / Acquéreur</div>
-      <div class="row"><span class="label">Nom complet</span><span class="value">${client.firstName} ${client.lastName}</span></div>
-      <div class="row"><span class="label">Téléphone</span><span class="value">${client.phone}</span></div>
-    </div>
+  const roomRows = roomLabels.map((room, i) =>
+    React.createElement(
+      View,
+      { key: `room-${i}`, style: s.tableRow },
+      React.createElement(Text, { style: [s.tableCell, { width: "30%" }] }, room),
+      React.createElement(Text, { style: [s.tableCell, { width: "20%", textAlign: "center" }] }, "Bon"),
+      React.createElement(Text, { style: [s.tableCell, { width: "50%" }] }, ""),
+    ),
+  );
 
-    ${
+  return React.createElement(
+    Document,
+    null,
+    React.createElement(
+      Page,
+      { size: "A4", style: s.page },
+      React.createElement(DocHeader, { tenantName, docTitle: "État des Lieux", docDate: new Date() }),
+      React.createElement(
+        Section,
+        { title: "Locataire / Occupant" },
+        React.createElement(Row, { label: "Nom complet", value: `${client.firstName} ${client.lastName}` }),
+        React.createElement(Row, { label: "Téléphone", value: client.phone }),
+      ),
       property
-        ? `<div class="section">
-      <div class="section-title">Bien concerné</div>
-      <div class="row"><span class="label">Désignation</span><span class="value">${property.name}</span></div>
-      <div class="row"><span class="label">Type</span><span class="value">${property.type}</span></div>
-      ${property.surface ? `<div class="row"><span class="label">Surface</span><span class="value">${property.surface} m²</span></div>` : ""}
-      ${property.rooms ? `<div class="row"><span class="label">Pièces</span><span class="value">${property.rooms}</span></div>` : ""}
-      ${property.floor !== null && property.floor !== undefined ? `<div class="row"><span class="label">Étage</span><span class="value">${property.floor}</span></div>` : ""}
-      ${property.project ? `<div class="row"><span class="label">Adresse</span><span class="value">${property.project.name}${property.project.address ? ` — ${property.project.address}` : ""}</span></div>` : ""}
-    </div>`
-        : ""
-    }
-
-    <div class="section">
-      <div class="section-title">Constat par pièce</div>
-      <table>
-        <thead>
-          <tr><th>Pièce</th><th style="text-align:center">Murs / Sol</th><th style="text-align:center">Plomberie / Élec.</th><th>Observations</th></tr>
-        </thead>
-        <tbody>${roomRows}</tbody>
-      </table>
-    </div>
-
-    <div class="section">
-      <div class="section-title">Relevés compteurs</div>
-      <div class="row"><span class="label">Électricité</span><span class="value">_______________</span></div>
-      <div class="row"><span class="label">Gaz</span><span class="value">_______________</span></div>
-      <div class="row"><span class="label">Eau</span><span class="value">_______________</span></div>
-    </div>
-
-    <div class="section">
-      <div class="section-title">Observations générales</div>
-      <div style="border:1px solid #e2e8f0;border-radius:6px;padding:12px;min-height:80px;font-size:13px;color:#64748b">
-        À compléter...
-      </div>
-    </div>
-
-    <div class="signature-block">
-      <div class="signature-box"><div class="signature-line">Le locataire / acquéreur</div></div>
-      <div class="signature-box"><div class="signature-line">Le bailleur / vendeur</div></div>
-    </div>
-
-    ${docFooter(tenantName)}
-  </body></html>`;
+        ? React.createElement(
+            Section,
+            { title: "Bien concerné" },
+            React.createElement(Row, { label: "Désignation", value: property.name }),
+            React.createElement(Row, { label: "Type", value: property.type }),
+            property.surface ? React.createElement(Row, { label: "Surface", value: `${property.surface} m²` }) : null,
+            property.rooms ? React.createElement(Row, { label: "Pièces", value: String(property.rooms) }) : null,
+            property.floor !== null && property.floor !== undefined
+              ? React.createElement(Row, { label: "Étage", value: String(property.floor) })
+              : null,
+            property.project
+              ? React.createElement(Row, {
+                  label: "Adresse",
+                  value: property.project.name + (property.project.address ? ` — ${property.project.address}` : ""),
+                })
+              : null,
+          )
+        : null,
+      React.createElement(
+        Section,
+        { title: "Constat par pièce" },
+        React.createElement(
+          View,
+          { style: s.tableHeader },
+          React.createElement(Text, { style: [s.tableHeaderCell, { width: "30%" }] }, "Pièce"),
+          React.createElement(Text, { style: [s.tableHeaderCell, { width: "20%", textAlign: "center" }] }, "État"),
+          React.createElement(Text, { style: [s.tableHeaderCell, { width: "50%" }] }, "Observations"),
+        ),
+        ...roomRows,
+      ),
+      React.createElement(
+        Section,
+        { title: "Relevés compteurs" },
+        React.createElement(Row, { label: "Électricité", value: "__________ kWh" }),
+        React.createElement(Row, { label: "Gaz", value: "__________ m³" }),
+        React.createElement(Row, { label: "Eau", value: "__________ m³" }),
+      ),
+      React.createElement(
+        Section,
+        { title: "Observations générales" },
+        React.createElement(
+          View,
+          { style: s.emptyBox },
+          React.createElement(Text, { style: s.emptyBoxText }, "À compléter..."),
+        ),
+      ),
+      React.createElement(SignatureBlock, { leftLabel: "Le locataire", rightLabel: "Le bailleur" }),
+      React.createElement(DocFooter, { tenantName }),
+    ),
+  );
 }
 
 // ============================================================================
@@ -711,7 +992,7 @@ async function buildContratLocation(
   tenantId: string,
   clientId: string,
   propertyId?: string,
-): Promise<string> {
+): Promise<React.ReactElement> {
   const tenant = await prisma.tenant.findUnique({
     where: { id: tenantId },
     select: { name: true },
@@ -727,82 +1008,94 @@ async function buildContratLocation(
     ? await prisma.property.findFirst({
         where: { id: propertyId, tenantId },
         select: {
-          name: true,
-          type: true,
-          surface: true,
-          rooms: true,
-          floor: true,
-          price: true,
+          name: true, type: true, surface: true, rooms: true, floor: true, price: true,
           project: { select: { name: true, address: true, wilaya: true } },
         },
       })
     : null;
 
-  const monthlyRent = property?.price ? formatPrice(Number(property.price)) : "_______________";
   const tenantName = tenant?.name ?? "CRM IMMO PRO X";
 
-  return `<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><style>${baseStyles()}</style></head><body>
-    ${docHeader(tenantName, "Contrat de Location", new Date())}
-
-    <div class="section">
-      <div class="section-title">Le bailleur</div>
-      <div class="row"><span class="label">Société / Nom</span><span class="value">${tenantName}</span></div>
-    </div>
-
-    <div class="section">
-      <div class="section-title">Le locataire</div>
-      <div class="row"><span class="label">Nom complet</span><span class="value">${client.firstName} ${client.lastName}</span></div>
-      <div class="row"><span class="label">Téléphone</span><span class="value">${client.phone}</span></div>
-      ${client.email ? `<div class="row"><span class="label">Email</span><span class="value">${client.email}</span></div>` : ""}
-    </div>
-
-    ${
+  return React.createElement(
+    Document,
+    null,
+    React.createElement(
+      Page,
+      { size: "A4", style: s.page },
+      React.createElement(DocHeader, { tenantName, docTitle: "Contrat de Location", docDate: new Date() }),
+      React.createElement(
+        Section,
+        { title: "Le bailleur" },
+        React.createElement(Row, { label: "Société / Nom", value: tenantName }),
+      ),
+      React.createElement(
+        Section,
+        { title: "Le locataire" },
+        React.createElement(Row, { label: "Nom complet", value: `${client.firstName} ${client.lastName}` }),
+        React.createElement(Row, { label: "Téléphone", value: client.phone }),
+        client.email ? React.createElement(Row, { label: "Email", value: client.email }) : null,
+      ),
       property
-        ? `<div class="section">
-      <div class="section-title">Objet de la location</div>
-      <div class="row"><span class="label">Désignation</span><span class="value">${property.name}</span></div>
-      <div class="row"><span class="label">Type</span><span class="value">${property.type}</span></div>
-      ${property.surface ? `<div class="row"><span class="label">Surface</span><span class="value">${property.surface} m²</span></div>` : ""}
-      ${property.rooms ? `<div class="row"><span class="label">Pièces</span><span class="value">${property.rooms}</span></div>` : ""}
-      ${property.floor !== null && property.floor !== undefined ? `<div class="row"><span class="label">Étage</span><span class="value">${property.floor}</span></div>` : ""}
-      ${property.project ? `<div class="row"><span class="label">Adresse</span><span class="value">${property.project.name}${property.project.address ? ` — ${property.project.address}` : ""}${property.project.wilaya ? `, ${property.project.wilaya}` : ""}</span></div>` : ""}
-    </div>`
-        : ""
-    }
-
-    <div class="section">
-      <div class="section-title">Conditions financières</div>
-      <div class="row"><span class="label">Loyer mensuel</span><span class="value" style="font-size:16px">${monthlyRent}</span></div>
-      <div class="row"><span class="label">Caution</span><span class="value">_______________</span></div>
-      <div class="row"><span class="label">Charges</span><span class="value">☐ Incluses ☐ En sus</span></div>
-      <div class="row"><span class="label">Paiement le</span><span class="value">______ de chaque mois</span></div>
-    </div>
-
-    <div class="section">
-      <div class="section-title">Durée</div>
-      <div class="row"><span class="label">Date de début</span><span class="value">_______________</span></div>
-      <div class="row"><span class="label">Durée</span><span class="value">☐ 1 an ☐ 2 ans ☐ 3 ans ☐ Autre : ___</span></div>
-      <div class="row"><span class="label">Renouvellement</span><span class="value">☐ Tacite reconduction ☐ Non renouvelable</span></div>
-    </div>
-
-    <div class="section">
-      <div class="section-title">Clauses particulières</div>
-      <div style="border:1px solid #e2e8f0;border-radius:6px;padding:12px;min-height:80px;font-size:13px;color:#64748b">
-        À compléter...
-      </div>
-    </div>
-
-    <p style="font-size:12px;color:#64748b;margin:20px 0">
-      Fait en deux exemplaires originaux, à ________________, le ${formatDate(new Date())}.
-    </p>
-
-    <div class="signature-block">
-      <div class="signature-box"><div class="signature-line">Le locataire</div></div>
-      <div class="signature-box"><div class="signature-line">Le bailleur</div></div>
-    </div>
-
-    ${docFooter(tenantName)}
-  </body></html>`;
+        ? React.createElement(
+            Section,
+            { title: "Bien loué" },
+            React.createElement(Row, { label: "Désignation", value: property.name }),
+            React.createElement(Row, { label: "Type", value: property.type }),
+            property.surface ? React.createElement(Row, { label: "Surface", value: `${property.surface} m²` }) : null,
+            property.rooms ? React.createElement(Row, { label: "Pièces", value: String(property.rooms) }) : null,
+            property.floor !== null && property.floor !== undefined
+              ? React.createElement(Row, { label: "Étage", value: String(property.floor) })
+              : null,
+            property.project
+              ? React.createElement(Row, {
+                  label: "Adresse",
+                  value:
+                    property.project.name +
+                    (property.project.address ? ` — ${property.project.address}` : "") +
+                    (property.project.wilaya ? `, ${property.project.wilaya}` : ""),
+                })
+              : null,
+          )
+        : null,
+      React.createElement(
+        Section,
+        { title: "Conditions financières" },
+        property?.price
+          ? React.createElement(
+              View,
+              { style: s.highlight },
+              React.createElement(Text, { style: s.amount }, formatPrice(Number(property.price))),
+              React.createElement(Text, { style: s.amountSub }, "Loyer mensuel"),
+            )
+          : React.createElement(Text, { style: { fontSize: 11, color: colors.gray } }, "Loyer : à définir"),
+        React.createElement(Row, { label: "Caution", value: "__________ DA" }),
+        React.createElement(Row, { label: "Charges", value: "__________ DA / mois" }),
+      ),
+      React.createElement(
+        Section,
+        { title: "Durée du bail" },
+        React.createElement(Row, { label: "Date de début", value: "____________________" }),
+        React.createElement(Row, { label: "Durée", value: "__________ mois" }),
+        React.createElement(Row, { label: "Renouvellement", value: "Tacite reconduction / À préciser" }),
+      ),
+      React.createElement(
+        Section,
+        { title: "Clauses particulières" },
+        React.createElement(
+          View,
+          { style: s.emptyBox },
+          React.createElement(Text, { style: s.emptyBoxText }, "À compléter..."),
+        ),
+      ),
+      React.createElement(
+        Text,
+        { style: { fontSize: 10, color: colors.gray, marginVertical: 16 } },
+        `Fait en deux exemplaires originaux, à ________________, le ${formatDate(new Date())}.`,
+      ),
+      React.createElement(SignatureBlock, { leftLabel: "Le locataire", rightLabel: "Le bailleur" }),
+      React.createElement(DocFooter, { tenantName }),
+    ),
+  );
 }
 
 // ============================================================================
@@ -814,33 +1107,33 @@ async function buildContratLocation(
  * Retourne un Buffer PDF.
  */
 export async function generateDocument(input: IDocumentInput): Promise<Buffer> {
-  let html: string;
+  let element: React.ReactElement;
 
   switch (input.type) {
     case "BON_RESERVATION":
-      html = await buildBonReservation(input.tenantId, input.clientId, input.propertyId);
+      element = await buildBonReservation(input.tenantId, input.clientId, input.propertyId);
       break;
     case "RECU_PAIEMENT":
-      html = await buildRecuPaiement(input.tenantId, input.clientId, input.paymentId);
+      element = await buildRecuPaiement(input.tenantId, input.clientId, input.paymentId);
       break;
     case "FICHE_VISITE":
-      html = await buildFicheVisite(input.tenantId, input.clientId, input.propertyId, input.visitId);
+      element = await buildFicheVisite(input.tenantId, input.clientId, input.propertyId, input.visitId);
       break;
     case "COMPROMIS_VENTE":
-      html = await buildCompromisVente(input.tenantId, input.clientId, input.propertyId);
+      element = await buildCompromisVente(input.tenantId, input.clientId, input.propertyId);
       break;
     case "BON_COMMANDE":
-      html = await buildBonCommande(input.tenantId, input.clientId, input.propertyId);
+      element = await buildBonCommande(input.tenantId, input.clientId, input.propertyId);
       break;
     case "ETAT_DES_LIEUX":
-      html = await buildEtatDesLieux(input.tenantId, input.clientId, input.propertyId);
+      element = await buildEtatDesLieux(input.tenantId, input.clientId, input.propertyId);
       break;
     case "CONTRAT_LOCATION":
-      html = await buildContratLocation(input.tenantId, input.clientId, input.propertyId);
+      element = await buildContratLocation(input.tenantId, input.clientId, input.propertyId);
       break;
     default:
-      throw new Error(`Type de document inconnu : ${input.type}`);
+      throw new Error(`Type de document inconnu : ${String(input.type)}`);
   }
 
-  return htmlToPdf(html);
+  return renderDocumentToPdf(element);
 }

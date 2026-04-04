@@ -1,5 +1,13 @@
+import React from "react";
+import {
+  Document,
+  Page,
+  View,
+  Text,
+  StyleSheet,
+} from "@react-pdf/renderer";
 import { prisma } from "@/lib/prisma";
-import { htmlToPdf } from "@/lib/pdf-renderer";
+import { renderDocumentToPdf } from "@/lib/pdf-renderer";
 
 // ============================================================================
 // Types
@@ -51,13 +59,11 @@ async function loadReportData(
 ): Promise<IReportData> {
   const { periodStart, periodEnd, compareStart, compareEnd, agentId, projectId } = filters;
 
-  // Tenant info
   const tenant = await prisma.tenant.findUnique({
     where: { id: tenantId },
     select: { name: true },
   });
 
-  // Project name si filtré
   let projectName: string | null = null;
   if (projectId) {
     const project = await prisma.project.findFirst({
@@ -81,7 +87,6 @@ async function loadReportData(
     where: { ...visitWhere, status: "COMPLETED" },
   });
 
-  // Ventes = paiements complétés dans la période
   const paymentWhere = {
     tenantId,
     createdAt: { gte: periodStart, lte: periodEnd },
@@ -170,7 +175,6 @@ async function loadReportData(
       where: { ...agentVisitWhere, status: "COMPLETED" },
     });
 
-    // Ventes par agent = clients assignés à cet agent avec paiements complétés
     const agentPayments = await prisma.payment.aggregate({
       where: {
         tenantId,
@@ -183,22 +187,21 @@ async function loadReportData(
       _sum: { amount: true },
     });
 
-    const agentSales = agentPayments._count;
+    const agentSalesCount = agentPayments._count;
     const agentRevenue = Number(agentPayments._sum.amount ?? 0);
 
     agentStats.push({
       agentId: agent.id,
       agentName: `${agent.firstName} ${agent.lastName}`,
       visits: agentVisits,
-      sales: agentSales,
+      sales: agentSalesCount,
       revenue: agentRevenue,
       conversionRate: agentCompleted > 0
-        ? Math.round((agentSales / agentCompleted) * 100)
+        ? Math.round((agentSalesCount / agentCompleted) * 100)
         : 0,
     });
   }
 
-  // Trier par CA décroissant
   agentStats.sort((a, b) => b.revenue - a.revenue);
 
   return {
@@ -223,7 +226,7 @@ async function loadReportData(
 }
 
 // ============================================================================
-// Helpers HTML
+// Helpers
 // ============================================================================
 
 function formatDate(d: Date): string {
@@ -234,139 +237,331 @@ function formatPrice(n: number): string {
   return new Intl.NumberFormat("fr-DZ", { maximumFractionDigits: 0 }).format(n) + " DA";
 }
 
-function renderDelta(current: number, previous: number | null): string {
+function deltaText(current: number, previous: number | null): string {
   if (previous === null || previous === 0) return "";
   const delta = Math.round(((current - previous) / previous) * 100);
-  const color = delta >= 0 ? "#16a34a" : "#dc2626";
-  const arrow = delta >= 0 ? "&#9650;" : "&#9660;";
-  return `<span style="color:${color};font-size:12px;margin-left:8px">${arrow} ${delta > 0 ? "+" : ""}${delta}%</span>`;
+  return ` (${delta >= 0 ? "+" : ""}${delta}%)`;
+}
+
+function deltaColor(current: number, previous: number | null): string {
+  if (previous === null || previous === 0) return "#1e293b";
+  return current >= previous ? "#16a34a" : "#dc2626";
 }
 
 // ============================================================================
-// Génération HTML du rapport
+// Styles
 // ============================================================================
 
-function buildReportHtml(data: IReportData): string {
+const c = {
+  dark: "#1e293b",
+  gray: "#64748b",
+  lightGray: "#94a3b8",
+  border: "#e2e8f0",
+  bgLight: "#f1f5f9",
+  accent: "#3b82f6",
+};
+
+const rs = StyleSheet.create({
+  page: {
+    padding: 40,
+    fontFamily: "Helvetica",
+    fontSize: 11,
+    color: c.dark,
+    lineHeight: 1.5,
+  },
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+    borderBottomWidth: 2,
+    borderBottomColor: c.accent,
+    paddingBottom: 12,
+    marginBottom: 20,
+  },
+  headerTitle: {
+    fontSize: 20,
+    fontFamily: "Helvetica-Bold",
+    color: c.dark,
+  },
+  headerSub: {
+    fontSize: 12,
+    color: c.gray,
+  },
+  headerRight: {
+    alignItems: "flex-end",
+  },
+  headerDate: {
+    fontSize: 11,
+    fontFamily: "Helvetica-Bold",
+  },
+  headerMeta: {
+    fontSize: 10,
+    color: c.gray,
+    marginTop: 2,
+  },
+  headerSmall: {
+    fontSize: 9,
+    color: c.lightGray,
+    marginTop: 3,
+  },
+  kpiRow: {
+    flexDirection: "row",
+    gap: 10,
+    marginBottom: 20,
+  },
+  kpiCard: {
+    flex: 1,
+    backgroundColor: "#f8fafc",
+    borderWidth: 1,
+    borderColor: c.border,
+    borderRadius: 6,
+    padding: 12,
+    alignItems: "center",
+  },
+  kpiLabel: {
+    fontSize: 9,
+    color: c.gray,
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+  },
+  kpiValue: {
+    fontSize: 20,
+    fontFamily: "Helvetica-Bold",
+    color: c.dark,
+    marginTop: 3,
+  },
+  kpiDelta: {
+    fontSize: 10,
+    marginTop: 2,
+  },
+  sectionTitle: {
+    fontSize: 12,
+    fontFamily: "Helvetica-Bold",
+    color: c.dark,
+    marginBottom: 10,
+  },
+  chartRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 5,
+  },
+  chartLabel: {
+    width: 110,
+    fontSize: 9,
+    color: c.gray,
+  },
+  chartBarBg: {
+    flex: 1,
+    height: 16,
+    backgroundColor: c.border,
+    borderRadius: 3,
+    marginHorizontal: 6,
+  },
+  chartBarFill: {
+    height: 16,
+    backgroundColor: c.accent,
+    borderRadius: 3,
+  },
+  chartAmount: {
+    width: 90,
+    fontSize: 9,
+    fontFamily: "Helvetica-Bold",
+    textAlign: "right",
+  },
+  tableHeader: {
+    flexDirection: "row",
+    backgroundColor: c.bgLight,
+    paddingVertical: 8,
+    paddingHorizontal: 10,
+  },
+  tableHeaderCell: {
+    fontSize: 9,
+    fontFamily: "Helvetica-Bold",
+    color: c.gray,
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+  },
+  tableRow: {
+    flexDirection: "row",
+    paddingVertical: 8,
+    paddingHorizontal: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: c.bgLight,
+  },
+  tableCell: {
+    fontSize: 10,
+  },
+  tableCellBold: {
+    fontSize: 10,
+    fontFamily: "Helvetica-Bold",
+  },
+  footer: {
+    marginTop: 28,
+    paddingTop: 10,
+    borderTopWidth: 1,
+    borderTopColor: c.border,
+    alignItems: "center",
+  },
+  footerText: {
+    fontSize: 9,
+    color: c.lightGray,
+  },
+  emptyText: {
+    fontSize: 11,
+    color: c.lightGray,
+    textAlign: "center",
+    paddingVertical: 16,
+  },
+});
+
+// ============================================================================
+// Build report React-PDF element
+// ============================================================================
+
+function buildReportDocument(data: IReportData): React.ReactElement {
   const { kpis, agentStats } = data;
 
-  const kpiCards = [
+  const kpiItems: Array<{
+    label: string;
+    display: string;
+    raw: number;
+    prev: number | null;
+  }> = [
     { label: "Visites", display: String(kpis.totalVisits), raw: kpis.totalVisits, prev: kpis.prevVisits },
     { label: "Ventes", display: String(kpis.totalSales), raw: kpis.totalSales, prev: kpis.prevSales },
     { label: "Chiffre d'affaires", display: formatPrice(kpis.totalRevenue), raw: kpis.totalRevenue, prev: kpis.prevRevenue },
     { label: "Taux conversion", display: `${kpis.conversionRate}%`, raw: kpis.conversionRate, prev: kpis.prevConversionRate },
   ];
 
-  const kpiHtml = kpiCards
-    .map(
-      (k) => `
-    <div style="flex:1;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:16px;text-align:center">
-      <div style="font-size:12px;color:#64748b;text-transform:uppercase;letter-spacing:0.5px">${k.label}</div>
-      <div style="font-size:24px;font-weight:700;margin-top:4px;color:#1e293b">${k.display}${renderDelta(k.raw, k.prev)}</div>
-    </div>`,
-    )
-    .join("");
-
-  const agentRows = agentStats
-    .map(
-      (a, i) => `
-    <tr style="border-bottom:1px solid #f1f5f9">
-      <td style="padding:10px 12px;font-weight:600">${i + 1}</td>
-      <td style="padding:10px 12px">${a.agentName}</td>
-      <td style="padding:10px 12px;text-align:center">${a.visits}</td>
-      <td style="padding:10px 12px;text-align:center">${a.sales}</td>
-      <td style="padding:10px 12px;text-align:right;font-weight:600">${formatPrice(a.revenue)}</td>
-      <td style="padding:10px 12px;text-align:center">${a.conversionRate}%</td>
-    </tr>`,
-    )
-    .join("");
-
-  // Graphique simple en barres CSS
   const maxRevenue = Math.max(...agentStats.map((a) => a.revenue), 1);
-  const chartBars = agentStats
-    .slice(0, 10)
-    .map(
-      (a) => `
-    <div style="display:flex;align-items:center;margin-bottom:6px">
-      <div style="width:120px;font-size:11px;color:#64748b;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${a.agentName}</div>
-      <div style="flex:1;background:#e2e8f0;border-radius:4px;height:20px;margin:0 8px">
-        <div style="background:#3b82f6;border-radius:4px;height:100%;width:${Math.round((a.revenue / maxRevenue) * 100)}%"></div>
-      </div>
-      <div style="width:100px;font-size:11px;text-align:right;font-weight:600">${formatPrice(a.revenue)}</div>
-    </div>`,
-    )
-    .join("");
 
-  const comparisonSection = data.comparison
-    ? `<p style="font-size:12px;color:#64748b;margin-top:4px">Comparé à : ${formatDate(data.comparison.start)} — ${formatDate(data.comparison.end)}</p>`
-    : "";
+  const kpiCards = kpiItems.map((k, i) =>
+    React.createElement(
+      View,
+      { key: `kpi-${i}`, style: rs.kpiCard },
+      React.createElement(Text, { style: rs.kpiLabel }, k.label),
+      React.createElement(Text, { style: rs.kpiValue }, k.display),
+      k.prev !== null && k.prev !== 0
+        ? React.createElement(
+            Text,
+            { style: [rs.kpiDelta, { color: deltaColor(k.raw, k.prev) }] },
+            deltaText(k.raw, k.prev),
+          )
+        : null,
+    ),
+  );
 
-  const projectFilter = data.projectName
-    ? `<p style="font-size:12px;color:#64748b">Projet : ${data.projectName}</p>`
-    : "";
+  const chartBars = agentStats.slice(0, 10).map((a, i) => {
+    const pct = Math.round((a.revenue / maxRevenue) * 100);
+    return React.createElement(
+      View,
+      { key: `bar-${i}`, style: rs.chartRow },
+      React.createElement(Text, { style: rs.chartLabel }, a.agentName),
+      React.createElement(
+        View,
+        { style: rs.chartBarBg },
+        React.createElement(View, { style: [rs.chartBarFill, { width: `${pct}%` }] }),
+      ),
+      React.createElement(Text, { style: rs.chartAmount }, formatPrice(a.revenue)),
+    );
+  });
 
-  return `<!DOCTYPE html>
-<html lang="fr">
-<head>
-  <meta charset="UTF-8">
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color: #1e293b; line-height: 1.5; }
-    table { width: 100%; border-collapse: collapse; }
-    th { background: #f1f5f9; text-align: left; padding: 10px 12px; font-size: 12px; text-transform: uppercase; color: #64748b; letter-spacing: 0.5px; }
-  </style>
-</head>
-<body>
-  <!-- Header -->
-  <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #3b82f6;padding-bottom:16px;margin-bottom:24px">
-    <div>
-      <h1 style="font-size:22px;font-weight:800;color:#1e293b">${data.tenantName}</h1>
-      <p style="font-size:14px;color:#64748b">Rapport de performance</p>
-    </div>
-    <div style="text-align:right">
-      <p style="font-size:13px;font-weight:600">${formatDate(data.period.start)} — ${formatDate(data.period.end)}</p>
-      ${comparisonSection}
-      ${projectFilter}
-      <p style="font-size:11px;color:#94a3b8;margin-top:4px">Généré le ${formatDate(new Date())}</p>
-    </div>
-  </div>
+  const agentRows = agentStats.map((a, i) =>
+    React.createElement(
+      View,
+      { key: `agent-${i}`, style: rs.tableRow },
+      React.createElement(Text, { style: [rs.tableCellBold, { width: "8%" }] }, String(i + 1)),
+      React.createElement(Text, { style: [rs.tableCell, { width: "27%" }] }, a.agentName),
+      React.createElement(Text, { style: [rs.tableCell, { width: "13%", textAlign: "center" }] }, String(a.visits)),
+      React.createElement(Text, { style: [rs.tableCell, { width: "13%", textAlign: "center" }] }, String(a.sales)),
+      React.createElement(Text, { style: [rs.tableCellBold, { width: "24%", textAlign: "right" }] }, formatPrice(a.revenue)),
+      React.createElement(Text, { style: [rs.tableCell, { width: "15%", textAlign: "center" }] }, `${a.conversionRate}%`),
+    ),
+  );
 
-  <!-- KPI Cards -->
-  <div style="display:flex;gap:12px;margin-bottom:24px">
-    ${kpiHtml}
-  </div>
-
-  <!-- Chart -->
-  <div style="margin-bottom:24px">
-    <h2 style="font-size:14px;font-weight:700;margin-bottom:12px;color:#1e293b">CA par agent</h2>
-    ${chartBars || '<p style="color:#94a3b8;font-size:13px">Aucune donnée</p>'}
-  </div>
-
-  <!-- Agent Table -->
-  <div>
-    <h2 style="font-size:14px;font-weight:700;margin-bottom:12px;color:#1e293b">Détail par agent</h2>
-    <table>
-      <thead>
-        <tr>
-          <th>#</th>
-          <th>Agent</th>
-          <th style="text-align:center">Visites</th>
-          <th style="text-align:center">Ventes</th>
-          <th style="text-align:right">CA</th>
-          <th style="text-align:center">Conversion</th>
-        </tr>
-      </thead>
-      <tbody>
-        ${agentRows || '<tr><td colspan="6" style="padding:20px;text-align:center;color:#94a3b8">Aucun agent</td></tr>'}
-      </tbody>
-    </table>
-  </div>
-
-  <!-- Footer -->
-  <div style="margin-top:32px;padding-top:12px;border-top:1px solid #e2e8f0;text-align:center;font-size:11px;color:#94a3b8">
-    CRM IMMO PRO X — Rapport confidentiel — ${data.tenantName}
-  </div>
-</body>
-</html>`;
+  return React.createElement(
+    Document,
+    null,
+    React.createElement(
+      Page,
+      { size: "A4", style: rs.page },
+      // Header
+      React.createElement(
+        View,
+        { style: rs.header },
+        React.createElement(
+          View,
+          null,
+          React.createElement(Text, { style: rs.headerTitle }, data.tenantName),
+          React.createElement(Text, { style: rs.headerSub }, "Rapport de performance"),
+        ),
+        React.createElement(
+          View,
+          { style: rs.headerRight },
+          React.createElement(
+            Text,
+            { style: rs.headerDate },
+            `${formatDate(data.period.start)} — ${formatDate(data.period.end)}`,
+          ),
+          data.comparison
+            ? React.createElement(
+                Text,
+                { style: rs.headerMeta },
+                `Comparé à : ${formatDate(data.comparison.start)} — ${formatDate(data.comparison.end)}`,
+              )
+            : null,
+          data.projectName
+            ? React.createElement(Text, { style: rs.headerMeta }, `Projet : ${data.projectName}`)
+            : null,
+          React.createElement(
+            Text,
+            { style: rs.headerSmall },
+            `Généré le ${formatDate(new Date())}`,
+          ),
+        ),
+      ),
+      // KPI cards
+      React.createElement(View, { style: rs.kpiRow }, ...kpiCards),
+      // Chart section
+      React.createElement(
+        View,
+        { style: { marginBottom: 20 } },
+        React.createElement(Text, { style: rs.sectionTitle }, "CA par agent"),
+        chartBars.length > 0
+          ? React.createElement(View, null, ...chartBars)
+          : React.createElement(Text, { style: rs.emptyText }, "Aucune donnée"),
+      ),
+      // Agent table
+      React.createElement(
+        View,
+        null,
+        React.createElement(Text, { style: rs.sectionTitle }, "Détail par agent"),
+        React.createElement(
+          View,
+          { style: rs.tableHeader },
+          React.createElement(Text, { style: [rs.tableHeaderCell, { width: "8%" }] }, "#"),
+          React.createElement(Text, { style: [rs.tableHeaderCell, { width: "27%" }] }, "Agent"),
+          React.createElement(Text, { style: [rs.tableHeaderCell, { width: "13%", textAlign: "center" }] }, "Visites"),
+          React.createElement(Text, { style: [rs.tableHeaderCell, { width: "13%", textAlign: "center" }] }, "Ventes"),
+          React.createElement(Text, { style: [rs.tableHeaderCell, { width: "24%", textAlign: "right" }] }, "CA"),
+          React.createElement(Text, { style: [rs.tableHeaderCell, { width: "15%", textAlign: "center" }] }, "Conversion"),
+        ),
+        agentRows.length > 0
+          ? React.createElement(View, null, ...agentRows)
+          : React.createElement(Text, { style: rs.emptyText }, "Aucun agent"),
+      ),
+      // Footer
+      React.createElement(
+        View,
+        { style: rs.footer },
+        React.createElement(
+          Text,
+          { style: rs.footerText },
+          `CRM IMMO PRO X — Rapport confidentiel — ${data.tenantName}`,
+        ),
+      ),
+    ),
+  );
 }
 
 // ============================================================================
@@ -382,6 +577,6 @@ export async function generateReport(
   filters: IReportFilters,
 ): Promise<Buffer> {
   const data = await loadReportData(tenantId, filters);
-  const html = buildReportHtml(data);
-  return htmlToPdf(html);
+  const element = buildReportDocument(data);
+  return renderDocumentToPdf(element);
 }
