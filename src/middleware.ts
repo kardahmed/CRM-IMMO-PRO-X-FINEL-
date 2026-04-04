@@ -11,6 +11,7 @@ const isPublicRoute = createRouteMatcher([
   "/portal/(.*)",
   "/api/v1/portal/:token",
   "/api/v1/webhooks/(.*)",
+  "/api/v1/demo-request",
 ]);
 
 const isDashboardRoute = createRouteMatcher([

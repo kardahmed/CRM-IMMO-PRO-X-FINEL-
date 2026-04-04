@@ -246,14 +246,16 @@ enum AIChannel {
 
 /// Workspace / Organisation — racine du multi-tenant
 model Tenant {
-  id        String        @id @default(uuid())
-  name      String        @map("name")
-  type      WorkspaceType @map("type")
-  plan      PlanType      @default(STARTER) @map("plan")
-  status    TenantStatus  @default(ACTIVE) @map("status")
-  settings  Json          @default("{}") @map("settings")
-  createdAt DateTime      @default(now()) @map("created_at")
-  updatedAt DateTime      @updatedAt @map("updated_at")
+  id             String        @id @default(uuid())
+  name           String        @map("name")
+  type           WorkspaceType @map("type")
+  plan           PlanType      @default(STARTER) @map("plan")
+  status         TenantStatus  @default(ACTIVE) @map("status")
+  settings       Json          @default("{}") @map("settings")
+  demoExpiresAt  DateTime?     @map("demo_expires_at")
+  demoLimits     Json?         @map("demo_limits") // { maxClients: 5, maxProperties: 3, maxUsers: 1 }
+  createdAt      DateTime      @default(now()) @map("created_at")
+  updatedAt      DateTime      @updatedAt @map("updated_at")
 
   // Relations
   users             User[]
@@ -707,18 +709,20 @@ model AIGeneration {
 
 /// Lead de demande de démo depuis le portail public
 model DemoLead {
-  id          String   @id @default(uuid())
-  companyName String   @map("company_name")
-  firstName   String   @map("first_name")
-  lastName    String   @map("last_name")
-  email       String   @map("email")
-  phone       String   @map("phone")
-  jobTitle    String?  @map("job_title")
-  employees   String?  @map("employees")
-  message     String?  @map("message")
-  status      String   @default("NEW") @map("status") // NEW, CONTACTED, QUALIFIED, CLOSED
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
+  id            String   @id @default(uuid())
+  companyName   String   @map("company_name")
+  companyType   String   @map("company_type") // PROMOTION | AGENCY
+  firstName     String   @map("first_name")
+  lastName      String   @map("last_name")
+  email         String   @map("email")
+  phone         String   @map("phone")
+  wilaya        String?  @map("wilaya")
+  agentCount    String?  @map("agent_count") // "1-5", "6-20", "21-50", "50+"
+  message       String?  @map("message")
+  status        String   @default("NEW") @map("status") // NEW, CONTACTED, QUALIFIED, CLOSED
+  tenantId      String?  @map("tenant_id") // Auto-created demo tenant
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
 
   @@index([status])
   @@map("demo_leads")
