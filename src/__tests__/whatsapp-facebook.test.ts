@@ -94,7 +94,7 @@ describe("WhatsApp Service — receiveMessage", () => {
       from: "+213555111111",
       body: "Bonjour, je suis interesse",
       messageId: "msg-001",
-      timestamp: Date.now().toString(),
+      timestamp: Date.now(),
     });
 
     // Should create an interaction
@@ -129,7 +129,7 @@ describe("WhatsApp Service — receiveMessage", () => {
       from: "+213555999999",
       body: "Qui etes vous?",
       messageId: "msg-002",
-      timestamp: Date.now().toString(),
+      timestamp: Date.now(),
     });
 
     // Should notify supervisors/CEO about unknown contact

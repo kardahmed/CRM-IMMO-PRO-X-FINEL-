@@ -77,7 +77,7 @@ export async function upsertAutomationConfig(
   }
 
   // Log
-  await prisma.activityLog.create({
+  await db.activityLog.create({
     data: {
       tenantId: user.tenantId,
       userId: user.userId,
@@ -119,7 +119,7 @@ export async function toggleAutomationConfig(
     data: { isActive },
   });
 
-  await prisma.activityLog.create({
+  await db.activityLog.create({
     data: {
       tenantId: user.tenantId,
       userId: user.userId,

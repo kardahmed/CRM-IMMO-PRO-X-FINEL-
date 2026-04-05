@@ -266,20 +266,14 @@ function DocFooter({ tenantName }: { tenantName: string }) {
   );
 }
 
-function Section({
-  title,
-  children,
-}: {
-  title: string;
-  children: React.ReactNode;
-}) {
+const Section: React.FC<React.PropsWithChildren<{ title: string }>> = ({ title, children }) => {
   return React.createElement(
     View,
     { style: s.section },
     React.createElement(Text, { style: s.sectionTitle }, title),
     children,
   );
-}
+};
 
 function Row({ label, value }: { label: string; value: string }) {
   return React.createElement(

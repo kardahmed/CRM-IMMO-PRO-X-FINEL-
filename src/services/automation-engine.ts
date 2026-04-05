@@ -71,10 +71,10 @@ export async function triggerAutomations(
       notes: task.description || null,
     }));
 
-    await prisma.task.createMany({ data: tasksToCreate });
+    await db.task.createMany({ data: tasksToCreate });
 
     // 5. Log
-    await prisma.activityLog.create({
+    await db.activityLog.create({
       data: {
         tenantId,
         action: "AUTOMATION_TRIGGERED",
@@ -350,7 +350,8 @@ export async function checkOverduePayments(): Promise<number> {
     }
 
     // Marquer comme notifié pour éviter les doublons
-    await prisma.activityLog.create({
+    const dbForPayment = createTenantPrisma(tenantId);
+    await dbForPayment.activityLog.create({
       data: {
         tenantId,
         action: "PAYMENT_OVERDUE_NOTIFIED",

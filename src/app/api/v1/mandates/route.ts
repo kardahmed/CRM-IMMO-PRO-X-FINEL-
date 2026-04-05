@@ -64,6 +64,7 @@ export const POST = apiHandler(
 
     const mandate = await ctx.db.mandate.create({
       data: {
+        tenantId: ctx.tenantId,
         ownerId: body.ownerId,
         propertyId: body.propertyId,
         type: body.type,

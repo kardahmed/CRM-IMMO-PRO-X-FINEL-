@@ -177,7 +177,7 @@ export async function receiveMessage(
       );
 
       // Log le message avec un superviseur valide comme userId
-      await prisma.activityLog.create({
+      await db.activityLog.create({
         data: {
           tenantId,
           userId: supervisors[0].id,

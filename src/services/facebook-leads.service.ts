@@ -59,7 +59,8 @@ export async function processFacebookLead(
     const existing = dedup.duplicates.find((d) => d.type === "PHONE_EXACT");
 
     // Log le doublon
-    await prisma.activityLog.create({
+    const dbForLog = createTenantPrisma(tenantId);
+    await dbForLog.activityLog.create({
       data: {
         tenantId,
         userId: "SYSTEM",
@@ -118,7 +119,7 @@ export async function processFacebookLead(
   }
 
   // 4. Log
-  await prisma.activityLog.create({
+  await db.activityLog.create({
     data: {
       tenantId,
       userId: "SYSTEM",

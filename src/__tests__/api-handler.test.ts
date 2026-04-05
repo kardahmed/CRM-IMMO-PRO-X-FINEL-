@@ -42,7 +42,7 @@ function createRequest(method: string, body?: unknown): NextRequest {
     init.body = JSON.stringify(body);
     init.headers = { "Content-Type": "application/json" };
   }
-  return new NextRequest(url, init);
+  return new NextRequest(url, init as ConstructorParameters<typeof NextRequest>[1]);
 }
 
 async function extractJson(response: Response): Promise<Record<string, unknown>> {

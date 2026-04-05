@@ -372,7 +372,7 @@ export default function ClientsPage() {
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
                 <Label>Source</Label>
-                <Select value={form.source} onValueChange={(v) => setForm({ ...form, source: v })}>
+                <Select value={form.source ?? ""} onValueChange={(v) => setForm({ ...form, source: v ?? "" })}>
                   <SelectTrigger><SelectValue placeholder="Selectionner" /></SelectTrigger>
                   <SelectContent>
                     {SOURCE_OPTIONS.map((o) => (
@@ -383,7 +383,7 @@ export default function ClientsPage() {
               </div>
               <div className="space-y-1.5">
                 <Label>Type de bien souhaite</Label>
-                <Select value={form.desiredType} onValueChange={(v) => setForm({ ...form, desiredType: v })}>
+                <Select value={form.desiredType ?? ""} onValueChange={(v) => setForm({ ...form, desiredType: v ?? "" })}>
                   <SelectTrigger><SelectValue placeholder="Selectionner" /></SelectTrigger>
                   <SelectContent>
                     {TYPE_OPTIONS.map((o) => (

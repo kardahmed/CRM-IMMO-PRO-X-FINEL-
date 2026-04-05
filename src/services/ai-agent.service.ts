@@ -304,7 +304,8 @@ export async function generateMessage(
   });
 
   // 7. Log dans ActivityLog
-  await prisma.activityLog.create({
+  const db = createTenantPrisma(user.tenantId);
+  await db.activityLog.create({
     data: {
       tenantId: user.tenantId,
       userId: user.userId,

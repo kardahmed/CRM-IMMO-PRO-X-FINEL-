@@ -102,7 +102,7 @@ export async function createClient(
   }) as Client;
 
   // 4. Log
-  await prisma.activityLog.create({
+  await db.activityLog.create({
     data: {
       tenantId: user.tenantId,
       userId: user.userId,
@@ -192,7 +192,7 @@ export async function reassignClient(
   });
 
   // Log historique
-  await prisma.activityLog.create({
+  await db.activityLog.create({
     data: {
       tenantId: user.tenantId,
       userId: user.userId,
@@ -281,7 +281,7 @@ export async function changeClientStage(
   });
 
   // Log
-  await prisma.activityLog.create({
+  await db.activityLog.create({
     data: {
       tenantId: user.tenantId,
       userId: user.userId,

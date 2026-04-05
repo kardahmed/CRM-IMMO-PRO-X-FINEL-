@@ -222,7 +222,7 @@ function makeRequest(
     init.body = JSON.stringify(body);
     init.headers = { "Content-Type": "application/json" };
   }
-  return new NextRequest(new URL(url, "http://localhost:3000"), init);
+  return new NextRequest(new URL(url, "http://localhost:3000"), init as ConstructorParameters<typeof NextRequest>[1]);
 }
 
 async function extractJson(response: Response): Promise<Record<string, unknown>> {

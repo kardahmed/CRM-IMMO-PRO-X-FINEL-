@@ -329,7 +329,7 @@ export default function PortfolioPage() {
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
                 <Label>Type *</Label>
-                <Select value={form.type} onValueChange={(v) => setForm({ ...form, type: v })}>
+                <Select value={form.type ?? ""} onValueChange={(v) => setForm({ ...form, type: v ?? "" })}>
                   <SelectTrigger><SelectValue placeholder="Selectionner" /></SelectTrigger>
                   <SelectContent>
                     {TYPE_OPTIONS.map((o) => (
@@ -340,7 +340,7 @@ export default function PortfolioPage() {
               </div>
               <div className="space-y-1.5">
                 <Label>Transaction</Label>
-                <Select value={form.transactionType} onValueChange={(v) => setForm({ ...form, transactionType: v })}>
+                <Select value={form.transactionType ?? ""} onValueChange={(v) => setForm({ ...form, transactionType: v ?? "" })}>
                   <SelectTrigger><SelectValue placeholder="Selectionner" /></SelectTrigger>
                   <SelectContent>
                     {TRANSACTION_OPTIONS.map((o) => (

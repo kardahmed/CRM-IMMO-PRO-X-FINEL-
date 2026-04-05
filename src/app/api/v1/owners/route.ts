@@ -63,6 +63,7 @@ export const POST = apiHandler(
 
     const owner = await ctx.db.ownerMandate.create({
       data: {
+        tenantId: ctx.tenantId,
         firstName: body.firstName,
         lastName: body.lastName,
         phone: body.phone,

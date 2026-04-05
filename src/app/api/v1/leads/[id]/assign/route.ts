@@ -18,7 +18,35 @@ export const POST = apiHandler(
     const clientId = ctx.params.id;
     const { agentId } = getBody<{ agentId: string }>(ctx.req);
 
-    // Vérifier que le client existe et n'est pas déjà assigné
+    // Vérifier que l'agent cible existe et est actif
+    const agent = await ctx.db.user.findFirst({
+      where: { id: agentId, isActive: true },
+      select: { id: true, firstName: true, lastName: true },
+    });
+    if (!agent) {
+      return jsonError("Agent introuvable ou inactif", 404);
+    }
+
+    // Assignation atomique — empêche la race condition TOCTOU
+    // updateMany avec condition assignedAgentId: null garantit qu'un seul thread réussit
+    const result = await ctx.db.client.updateMany({
+      where: { id: clientId, assignedAgentId: null },
+      data: { assignedAgentId: agentId },
+    });
+
+    if (result.count === 0) {
+      // Soit le client n'existe pas, soit il est déjà assigné
+      const existing = await ctx.db.client.findFirst({
+        where: { id: clientId },
+        select: { id: true, assignedAgentId: true },
+      });
+      if (!existing) return jsonError("Lead introuvable", 404);
+      return jsonError(
+        "Ce lead est déjà assigné. Utilisez la réassignation pour changer l'agent.",
+        409,
+      );
+    }
+
     const client = await ctx.db.client.findFirst({
       where: { id: clientId },
       select: {
@@ -30,32 +58,9 @@ export const POST = apiHandler(
         source: true,
       },
     });
+    if (!client) return jsonError("Lead introuvable", 404);
 
-    if (!client) {
-      return jsonError("Lead introuvable", 404);
-    }
-
-    if (client.assignedAgentId) {
-      return jsonError(
-        "Ce lead est déjà assigné. Utilisez la réassignation pour changer l'agent.",
-        409,
-      );
-    }
-
-    // Vérifier que l'agent cible existe et est actif
-    const agent = await ctx.db.user.findFirst({
-      where: { id: agentId, isActive: true },
-      select: { id: true, firstName: true, lastName: true },
-    });
-    if (!agent) {
-      return jsonError("Agent introuvable ou inactif", 404);
-    }
-
-    // Assigner le lead
-    const updated = await ctx.db.client.update({
-      where: { id: clientId },
-      data: { assignedAgentId: agentId },
-    });
+    const updated = client;
 
     // Notification pour l'agent
     await createNotification({
