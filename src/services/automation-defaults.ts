@@ -3,7 +3,13 @@ import type { IAutomationTask } from "@/services/automation-engine";
 
 /**
  * Configurations par défaut des automatisations pour les 9 étapes du pipeline.
- * Chaque étape déclenche des tâches automatisées avec des délais spécifiques.
+ *
+ * Canaux : WhatsApp / SMS / Appel / Document / Meeting uniquement.
+ * Pas d'email — tout passe par WhatsApp, SMS ou appel direct.
+ *
+ * Chaque tâche est liée au client (clientId) et assignée à son agent.
+ * Le superviseur peut activer/désactiver chaque tâche et choisir la cible
+ * (un agent spécifique ou tous les agents du workspace).
  */
 export const DEFAULT_AUTOMATION_CONFIGS: Record<PipelineStage, IAutomationTask[]> = {
   // ============================================================================
@@ -11,22 +17,16 @@ export const DEFAULT_AUTOMATION_CONFIGS: Record<PipelineStage, IAutomationTask[]
   // ============================================================================
   NEW: [
     {
-      title: "Appeler le nouveau lead {clientName}",
-      type: "CALL",
-      delayMinutes: 15, // 15 min après l'entrée du lead
-      description: "Premier contact téléphonique pour qualifier le lead",
-    },
-    {
-      title: "Envoyer SMS de bienvenue à {clientName}",
+      title: "Envoyer WhatsApp de bienvenue à {clientName}",
       type: "OTHER",
       delayMinutes: 5,
-      description: "SMS automatique de bienvenue avec présentation",
+      description: "Message WhatsApp de bienvenue avec présentation de l'agence et catalogue",
     },
     {
-      title: "Envoyer WhatsApp de présentation à {clientName}",
-      type: "OTHER",
-      delayMinutes: 10,
-      description: "Message WhatsApp avec catalogue et coordonnées",
+      title: "Appeler le nouveau lead {clientName}",
+      type: "CALL",
+      delayMinutes: 15,
+      description: "Premier contact téléphonique pour qualifier le lead",
     },
   ],
 
@@ -41,16 +41,22 @@ export const DEFAULT_AUTOMATION_CONFIGS: Record<PipelineStage, IAutomationTask[]
       description: "Appel de qualification : budget, type de bien, localisation souhaitée",
     },
     {
-      title: "Envoyer email récapitulatif à {clientName}",
-      type: "EMAIL",
+      title: "Envoyer WhatsApp récapitulatif à {clientName}",
+      type: "OTHER",
       delayMinutes: 120, // 2h après
-      description: "Email avec récapitulatif de l'échange et prochaines étapes",
+      description: "Message WhatsApp avec récapitulatif de l'échange et prochaines étapes",
     },
     {
-      title: "Relance si pas de réponse de {clientName}",
-      type: "CALL",
+      title: "Relance WhatsApp si pas de réponse de {clientName}",
+      type: "OTHER",
       delayMinutes: 1440, // 24h après
-      description: "Relance téléphonique si le client n'a pas répondu",
+      description: "Message WhatsApp de relance si le client n'a pas répondu",
+    },
+    {
+      title: "Relance appel {clientName}",
+      type: "CALL",
+      delayMinutes: 2880, // 48h après
+      description: "Relance téléphonique si toujours pas de réponse après WhatsApp",
     },
   ],
 
@@ -65,13 +71,13 @@ export const DEFAULT_AUTOMATION_CONFIGS: Record<PipelineStage, IAutomationTask[]
       description: "Sélectionner 3-5 biens correspondant aux critères du client",
     },
     {
-      title: "Envoyer catalogue personnalisé à {clientName}",
-      type: "EMAIL",
+      title: "Envoyer catalogue via WhatsApp à {clientName}",
+      type: "OTHER",
       delayMinutes: 120, // 2h après
-      description: "Email avec les biens sélectionnés et fiches détaillées",
+      description: "Message WhatsApp avec les biens sélectionnés et fiches détaillées",
     },
     {
-      title: "Proposer des dates de visite à {clientName}",
+      title: "Appeler pour proposer des dates de visite à {clientName}",
       type: "CALL",
       delayMinutes: 240, // 4h après
       description: "Appeler pour proposer des créneaux de visite",
@@ -83,22 +89,22 @@ export const DEFAULT_AUTOMATION_CONFIGS: Record<PipelineStage, IAutomationTask[]
   // ============================================================================
   VISIT_SCHEDULED: [
     {
-      title: "Confirmer la visite avec {clientName}",
-      type: "OTHER",
-      delayMinutes: 1440, // 24h avant (J-1)
-      description: "Envoyer rappel WhatsApp/SMS la veille de la visite",
-    },
-    {
       title: "Préparer dossier visite pour {clientName}",
       type: "DOCUMENT",
       delayMinutes: 60,
       description: "Préparer les fiches techniques et plans des biens à visiter",
     },
     {
-      title: "Rappel jour J visite {clientName}",
+      title: "Confirmer la visite via WhatsApp avec {clientName}",
       type: "OTHER",
-      delayMinutes: 2880, // 48h (rappel matin du jour)
-      description: "SMS de rappel le matin de la visite avec l'adresse",
+      delayMinutes: 1440, // J-1
+      description: "Message WhatsApp de confirmation la veille de la visite",
+    },
+    {
+      title: "Rappel SMS jour J visite {clientName}",
+      type: "OTHER",
+      delayMinutes: 2880, // Matin du jour
+      description: "SMS de rappel le matin de la visite avec l'adresse exacte",
     },
   ],
 
@@ -113,10 +119,10 @@ export const DEFAULT_AUTOMATION_CONFIGS: Record<PipelineStage, IAutomationTask[]
       description: "Appeler le client pour connaître ses impressions post-visite",
     },
     {
-      title: "Envoyer récapitulatif visite à {clientName}",
-      type: "EMAIL",
+      title: "Envoyer récap visite via WhatsApp à {clientName}",
+      type: "OTHER",
       delayMinutes: 180, // 3h après
-      description: "Email avec photos, plans et détails des biens visités",
+      description: "Message WhatsApp avec photos, plans et détails des biens visités",
     },
     {
       title: "Relance post-visite {clientName}",
@@ -131,16 +137,16 @@ export const DEFAULT_AUTOMATION_CONFIGS: Record<PipelineStage, IAutomationTask[]
   // ============================================================================
   NEGOTIATION: [
     {
-      title: "Préparer simulation financière pour {clientName}",
-      type: "DOCUMENT",
-      delayMinutes: 60,
-      description: "Calculer le plan de paiement et les conditions financières",
-    },
-    {
       title: "Alerter superviseur — négociation {clientName}",
       type: "OTHER",
       delayMinutes: 5,
       description: "Notification au superviseur qu'une négociation est en cours",
+    },
+    {
+      title: "Préparer simulation financière pour {clientName}",
+      type: "DOCUMENT",
+      delayMinutes: 60,
+      description: "Calculer le plan de paiement et les conditions financières",
     },
     {
       title: "Relance négociation {clientName}",
@@ -155,28 +161,28 @@ export const DEFAULT_AUTOMATION_CONFIGS: Record<PipelineStage, IAutomationTask[]
   // ============================================================================
   RESERVED: [
     {
+      title: "Envoyer WhatsApp de félicitations à {clientName}",
+      type: "OTHER",
+      delayMinutes: 15,
+      description: "Message WhatsApp de félicitations avec les prochaines étapes",
+    },
+    {
       title: "Générer contrat de réservation pour {clientName}",
       type: "DOCUMENT",
       delayMinutes: 30,
       description: "Préparer le contrat de réservation avec les conditions",
     },
     {
-      title: "Envoyer félicitations à {clientName}",
-      type: "EMAIL",
-      delayMinutes: 15,
-      description: "Email de félicitations avec les prochaines étapes",
+      title: "Collecter documents juridiques de {clientName}",
+      type: "DOCUMENT",
+      delayMinutes: 240, // 4h après
+      description: "Demander CIN, extrait de naissance, justificatifs via WhatsApp",
     },
     {
       title: "Planifier rendez-vous notaire {clientName}",
       type: "MEETING",
       delayMinutes: 1440, // 24h après
       description: "Organiser le RDV chez le notaire pour la signature",
-    },
-    {
-      title: "Collecter documents juridiques de {clientName}",
-      type: "DOCUMENT",
-      delayMinutes: 240, // 4h après
-      description: "Demander CIN, extrait de naissance, justificatifs",
     },
   ],
 
@@ -185,22 +191,22 @@ export const DEFAULT_AUTOMATION_CONFIGS: Record<PipelineStage, IAutomationTask[]
   // ============================================================================
   SIGNED: [
     {
+      title: "Mettre à jour statut du bien",
+      type: "OTHER",
+      delayMinutes: 15,
+      description: "Passer le bien en statut RESERVED ou SOLD dans le système",
+    },
+    {
       title: "Confirmer le paiement de {clientName}",
       type: "OTHER",
       delayMinutes: 60,
       description: "Vérifier que le premier versement a été effectué",
     },
     {
-      title: "Envoyer copie signée à {clientName}",
-      type: "EMAIL",
-      delayMinutes: 120,
-      description: "Envoyer par email la copie numérique du contrat signé",
-    },
-    {
-      title: "Mettre à jour statut du bien",
+      title: "Envoyer copie signée via WhatsApp à {clientName}",
       type: "OTHER",
-      delayMinutes: 15,
-      description: "Passer le bien en statut RESERVED ou SOLD dans le système",
+      delayMinutes: 120,
+      description: "Envoyer par WhatsApp la copie numérique du contrat signé",
     },
   ],
 
@@ -209,16 +215,16 @@ export const DEFAULT_AUTOMATION_CONFIGS: Record<PipelineStage, IAutomationTask[]
   // ============================================================================
   CLOSED: [
     {
-      title: "Envoyer email de satisfaction à {clientName}",
-      type: "EMAIL",
-      delayMinutes: 1440, // 24h après la clôture
-      description: "Enquête de satisfaction et demande d'avis",
-    },
-    {
       title: "Remise des clés à {clientName}",
       type: "MEETING",
       delayMinutes: 60,
       description: "Organiser la remise des clés et l'état des lieux",
+    },
+    {
+      title: "Envoyer WhatsApp de satisfaction à {clientName}",
+      type: "OTHER",
+      delayMinutes: 1440, // 24h après la clôture
+      description: "Enquête de satisfaction et demande d'avis via WhatsApp",
     },
     {
       title: "Demander recommandation à {clientName}",
