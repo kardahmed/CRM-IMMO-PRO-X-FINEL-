@@ -46,7 +46,7 @@ const TYPE_ICONS: Record<string, LucideIcon> = {
   OTHER: CheckSquare,
 };
 
-export function TabTaches({ tasks, clientId: _clientId }: { tasks: Task[]; clientId: string }) {
+export function TabTaches({ tasks }: { tasks: Task[]; clientId: string }) {
   const [execModal, setExecModal] = useState<{
     open: boolean;
     task: Task | null;

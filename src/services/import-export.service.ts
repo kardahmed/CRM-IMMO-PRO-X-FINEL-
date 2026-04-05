@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { createTenantPrisma, type TenantPrismaClient } from "@/lib/prisma-tenant";
+import { createTenantPrisma } from "@/lib/prisma-tenant";
 import { checkDuplicates, normalizePhone } from "@/services/client-dedup";
 
 // ============================================================================
@@ -499,7 +499,7 @@ export async function importProperties(
 ): Promise<IImportResult> {
   const db = createTenantPrisma(tenantId);
   let imported = 0;
-  let skipped = 0;
+  const skipped = 0;
   const errors: string[] = [];
 
   // Pre-fetch projects for name → ID resolution

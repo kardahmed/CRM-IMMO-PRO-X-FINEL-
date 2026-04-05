@@ -1,4 +1,3 @@
-import { prisma } from "@/lib/prisma";
 import { createTenantPrisma } from "@/lib/prisma-tenant";
 import {
   checkDuplicates,

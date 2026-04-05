@@ -87,13 +87,13 @@ export function TaskExecutionDialog({ taskId, open, onClose, onExecute }: TaskEx
   const [note, setNote] = useState("");
   const [message, setMessage] = useState("");
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (open && taskId) {
       fetchContext();
       setNote("");
       setMessage("");
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, taskId]);
 
   const fetchContext = async () => {

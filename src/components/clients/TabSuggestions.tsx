@@ -46,15 +46,15 @@ interface TabSuggestionsProps {
   };
 }
 
-export function TabSuggestions({ clientId: _clientId, criteria }: TabSuggestionsProps) {
+export function TabSuggestions({ criteria }: TabSuggestionsProps) {
   const [properties, setProperties] = useState<SuggestedProperty[]>([]);
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [sending, setSending] = useState(false);
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     fetchSuggestions();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchSuggestions = async () => {
