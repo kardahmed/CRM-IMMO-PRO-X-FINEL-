@@ -71,6 +71,7 @@ const DEFAULT_AUTOMATIONS: IAutomationRule[] = [
 
 export default function SettingsPage() {
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [tenant, setTenant] = useState<ITenant | null>(null);
 
@@ -121,6 +122,7 @@ export default function SettingsPage() {
         pageId: s.facebookPageId ?? "",
       });
     } catch {
+      setError("Erreur de chargement des données");
       toast.error("Impossible de charger les parametres");
     } finally {
       setLoading(false);
@@ -211,6 +213,17 @@ export default function SettingsPage() {
     return (
       <div className="flex items-center justify-center h-64">
         <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
+        <p className="text-destructive font-medium">{error}</p>
+        <Button variant="outline" onClick={() => { setError(null); fetchSettings(); }}>
+          Réessayer
+        </Button>
       </div>
     );
   }
