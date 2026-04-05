@@ -18,13 +18,15 @@ import {
   ArrowRight,
   Filter,
   CheckCircle2,
-  Clock
+  Clock,
+  Zap
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
   SelectTrigger,
   SelectValue,
@@ -120,14 +122,26 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <div className="space-y-8 animate-pulse">
-        <Skeleton className="h-10 w-[250px]" />
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {[...Array(4)].map((_, i) => <Skeleton key={i} className="h-32 rounded-xl" />)}
+      <div className="space-y-10 animate-pulse pb-20">
+        <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-8">
+          <div className="space-y-4">
+            <Skeleton className="h-12 w-[300px] rounded-2xl" />
+            <Skeleton className="h-4 w-[200px] rounded-full" />
+          </div>
+          <div className="flex gap-4">
+            <Skeleton className="h-14 w-[320px] rounded-2xl" />
+            <Skeleton className="h-14 w-[180px] rounded-2xl" />
+          </div>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {[...Array(3)].map((_, i) => <Skeleton key={i} className="h-24 rounded-[28px]" />)}
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {[...Array(4)].map((_, i) => <Skeleton key={i} className="h-40 rounded-[20px]" />)}
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <Skeleton className="h-[400px] lg:col-span-2 rounded-xl" />
-          <Skeleton className="h-[400px] rounded-xl" />
+          <Skeleton className="h-[500px] lg:col-span-2 rounded-[32px]" />
+          <Skeleton className="h-[500px] rounded-[32px]" />
         </div>
       </div>
     );
@@ -135,11 +149,14 @@ export default function DashboardPage() {
 
   if (error) {
     return (
-      <div className="flex flex-col items-center justify-center h-[60vh] gap-4">
-        <AlertCircle className="h-12 w-12 text-destructive" />
-        <p className="text-xl font-bold">Impossible de charger le tableau de bord</p>
-        <Button onClick={() => fetchDashboard(period)} variant="outline">
-          <RefreshCw className="h-4 w-4 mr-2" /> Reessayer
+      <div className="flex flex-col items-center justify-center h-[70vh] gap-6 text-center">
+        <div className="p-6 rounded-[32px] bg-rose-50 border border-rose-100 shadow-stripe">
+          <AlertCircle className="h-12 w-12 text-rose-500 mx-auto mb-4" />
+          <h2 className="text-2xl font-black text-neutral-900 tracking-tight uppercase italic mb-2">Erreur Système</h2>
+          <p className="text-muted-foreground font-medium max-w-sm">Le moteur PRO-X n&apos;a pas pu synchroniser les données du dashboard.</p>
+        </div>
+        <Button onClick={() => fetchDashboard(period)} variant="outline" className="h-14 px-10 rounded-full font-black uppercase tracking-widest border-neutral-100 shadow-stripe hover:bg-neutral-50">
+          <RefreshCw className="h-4 w-4 mr-3" /> Forcer la Synchronisation
         </Button>
       </div>
     );
@@ -150,47 +167,53 @@ export default function DashboardPage() {
   if (data.role === "CEO" || data.role === "ADMIN") {
     const ceoStats = data.stats as ICeoStats;
     return (
-      <div className="space-y-8 pb-10">
+      <div className="space-y-10 pb-20 animate-in fade-in duration-700">
         {/* Superior Header */}
-        <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-6">
-          <header>
-            <h1 className="text-4xl font-black tracking-tight text-neutral-900 dark:text-neutral-100 uppercase flex items-center gap-3">
-              Dashboard
-              <span className="text-primary italic text-2xl lowercase font-medium tracking-normal opacity-70">executive</span>
+        <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-8">
+          <header className="space-y-1">
+            <h1 className="text-5xl font-black tracking-tighter text-neutral-900 flex items-center gap-3">
+              Tableau de bord
+              <span className="text-primary italic text-3xl font-medium tracking-normal opacity-40">pro-x</span>
             </h1>
-            <p className="text-muted-foreground mt-1 font-bold text-sm uppercase tracking-widest opacity-60">
-              {data.welcomeMessage || "Analyse des performances immobilières"}
+            <p className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.3em] opacity-60">
+              {data.welcomeMessage || "Intelligence Immobilière & Flux de Performance"}
             </p>
           </header>
 
-          <div className="flex flex-wrap items-center gap-3">
-            <div className="relative flex-1 min-w-[280px]">
-              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/60" />
+          <div className="flex flex-wrap items-center gap-4">
+            <div className="relative flex-1 min-w-[320px] group">
+              <div className="absolute inset-0 bg-primary/5 blur-xl opacity-0 group-focus-within:opacity-100 transition-opacity" />
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-primary/40 group-focus-within:text-primary transition-colors" />
               <Input 
-                placeholder="Rechercher client, agent, projet..." 
+                placeholder="Rechercher dossiers, agents ou projets..." 
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="pl-10 h-12 bg-white dark:bg-neutral-900 border-none ring-2 ring-neutral-100 dark:ring-neutral-800 focus:ring-primary rounded-2xl transition-all shadow-sm"
+                className="pl-11 h-14 bg-white border-neutral-100 shadow-stripe focus:border-primary/30 focus:ring-4 focus:ring-primary/5 rounded-2xl transition-all font-medium text-neutral-900"
               />
             </div>
             
             <Select value={period} onValueChange={(v) => setPeriod(v ?? "30d")}>
-              <SelectTrigger className="w-[160px] h-12 bg-white dark:bg-neutral-900 border-none ring-2 ring-neutral-100 dark:ring-neutral-800 rounded-2xl font-black uppercase text-[10px] tracking-widest shadow-sm">
+              <SelectTrigger className="w-[180px] h-14 bg-white border-neutral-100 shadow-stripe rounded-2xl font-black uppercase text-[10px] tracking-widest text-neutral-600 hover:bg-neutral-50 transition-all">
                 <Filter className="h-3.5 w-3.5 mr-2 text-primary" />
                 <SelectValue placeholder="Période" />
               </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="7d">7 derniers jours</SelectItem>
-                <SelectItem value="30d">30 derniers jours</SelectItem>
-                <SelectItem value="90d">90 derniers jours</SelectItem>
-                <SelectItem value="all">Tout le temps</SelectItem>
+              <SelectContent className="rounded-2xl border-neutral-100 shadow-stripe-lg">
+                <SelectGroup>
+                  <SelectItem value="7d" className="text-[10px] font-black uppercase tracking-widest">7 derniers jours</SelectItem>
+                  <SelectItem value="30d" className="text-[10px] font-black uppercase tracking-widest">30 derniers jours</SelectItem>
+                  <SelectItem value="90d" className="text-[10px] font-black uppercase tracking-widest">90 derniers jours</SelectItem>
+                  <SelectItem value="all" className="text-[10px] font-black uppercase tracking-widest">Tout le temps</SelectItem>
+                </SelectGroup>
               </SelectContent>
             </Select>
 
             <Button 
               variant="outline" 
               size="icon" 
-              className="h-12 w-12 rounded-2xl border-none ring-2 ring-neutral-100 dark:ring-neutral-800 bg-white dark:bg-neutral-900 text-primary shadow-sm active:scale-95 transition-all"
+              className={cn(
+                "h-14 w-14 rounded-2xl border-neutral-100 bg-white text-primary shadow-stripe hover:shadow-stripe-lg active:scale-95 transition-all outline-none",
+                loading && "animate-pulse"
+              )}
               onClick={() => fetchDashboard(period)}
             >
               <RefreshCw className={cn("h-4 w-4", loading && "animate-spin")} />
@@ -199,27 +222,27 @@ export default function DashboardPage() {
         </div>
 
         {/* Quick Actions */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {[
-            { label: "Nouveau Client", sub: "Ajouter un prospect", icon: Users, href: "/clients/new", color: "text-blue-500 bg-blue-50" },
-            { label: "Nouvelle Visite", sub: "Planifier sur le calendrier", icon: Calendar, href: "/visits", color: "text-emerald-500 bg-emerald-50" },
-            { label: "Pipeline", sub: "Gérer le tunnel de vente", icon: ArrowRight, href: "/pipeline", color: "text-purple-500 bg-purple-50" },
+            { label: "Nouveau Client", sub: "Propulser un prospect", icon: Users, href: "/clients/new", color: "text-primary bg-primary/5 border-primary/10" },
+            { label: "Nouvelle Visite", sub: "Planifier le succès", icon: Calendar, href: "/visits", color: "text-emerald-600 bg-emerald-500/5 border-emerald-500/10" },
+            { label: "Pipeline 360°", sub: "Gérer le tunnel", icon: ArrowRight, href: "/pipeline", color: "text-emerald-700 bg-emerald-700/5 border-emerald-700/10" },
           ].map((action, i) => (
             <button
               key={i}
               onClick={() => window.location.href = action.href}
-              className="group flex items-center justify-between p-5 rounded-3xl bg-white dark:bg-neutral-900 border-2 border-neutral-50 dark:border-neutral-800 hover:border-primary/20 hover:shadow-xl hover:-translate-y-1 transition-all duration-500"
+              className="group flex items-center justify-between p-6 rounded-[28px] bg-white border border-neutral-100 shadow-stripe hover:shadow-stripe-lg hover:-translate-y-1 transition-all duration-500 text-left"
             >
-              <div className="flex items-center gap-4">
-                <div className={cn("p-3 rounded-2xl transition-transform group-hover:scale-110 duration-500", action.color)}>
+              <div className="flex items-center gap-5">
+                <div className={cn("p-4 rounded-2xl border transition-all duration-500 group-hover:scale-110 group-hover:rotate-3", action.color)}>
                   <action.icon className="h-6 w-6" />
                 </div>
-                <div className="text-left">
-                  <p className="font-black uppercase tracking-tight text-sm">{action.label}</p>
-                  <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{action.sub}</p>
+                <div>
+                  <p className="font-black italic uppercase tracking-tighter text-base text-neutral-900">{action.label}</p>
+                  <p className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] opacity-60">{action.sub}</p>
                 </div>
               </div>
-              <PlusCircle className="h-5 w-5 text-muted-foreground/30 group-hover:text-primary transition-colors" />
+              <PlusCircle className="h-5 w-5 text-neutral-200 group-hover:text-primary transition-colors" />
             </button>
           ))}
         </div>
@@ -227,46 +250,52 @@ export default function DashboardPage() {
         <DashboardCardsGrid stats={buildCeoCards(ceoStats, period)} />
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2 space-y-8">
+          <div className="lg:col-span-2 space-y-10">
+            {/* Health & Inventory Control (REPOSITIONED & IMPROVED) */}
+            <div className="p-8 md:p-10 rounded-[40px] bg-white border border-neutral-100 shadow-stripe-lg relative overflow-hidden group">
+              <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 blur-[100px] -translate-y-1/2 translate-x-1/2" />
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-8 mb-10">
+                <div className="space-y-1">
+                  <h3 className="font-black text-3xl uppercase tracking-tighter italic flex items-center gap-3 text-neutral-900">
+                    Santé de l&apos;Inventaire
+                    <div className="h-2.5 w-2.5 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_10px_rgba(16,185,129,0.5)]" />
+                  </h3>
+                  <p className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.3em]">Répartition des stocks & Disponibilité PRO-X</p>
+                </div>
+                <div className="px-6 py-2 rounded-full bg-emerald-500/5 border border-emerald-500/10 flex items-center gap-3">
+                  <CheckCircle2 className="h-4 w-4 text-emerald-500" />
+                  <span className="text-[10px] font-black uppercase tracking-widest text-emerald-700">Stock Optimal</span>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+                {(data.propertyDistribution ?? []).map((p, i) => (
+                  <div key={i} className="space-y-4">
+                    <div className="flex justify-between items-end">
+                      <span className="text-[11px] font-black uppercase tracking-[0.2em] text-neutral-500">{p.name}</span>
+                      <span className="text-3xl font-black tabular-nums tracking-tighter text-neutral-900">{p.value}%</span>
+                    </div>
+                    <div className="h-3 w-full bg-neutral-50 rounded-full overflow-hidden p-0.5 border border-neutral-100/50">
+                      <div 
+                        className="h-full bg-primary rounded-full shadow-[0_0_15px_rgba(25,185,129,0.2)] transition-all duration-1000 ease-out" 
+                        style={{ width: `${p.value}%` }} 
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
             <MultiComparisonChart data={data.comparisonData ?? []} />
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                <PipelineChart data={data.pipelineData ?? []} />
                <TopAgents agents={data.topAgents ?? []} />
             </div>
           </div>
 
-          <div className="space-y-8">
+          <div className="space-y-10">
              <DailyVisits visits={data.todayVisits ?? []} />
-
-             <div className="p-8 rounded-[32px] bg-neutral-900 text-white shadow-2xl relative overflow-hidden group">
-               <div className="absolute top-0 right-0 w-32 h-32 bg-primary/20 blur-[64px] group-hover:bg-primary/40 transition-all" />
-               <h3 className="font-black text-xl uppercase tracking-tighter mb-6 relative z-10 flex items-center gap-2">
-                 Répartition Biens
-                 <div className="h-1.5 w-1.5 rounded-full bg-primary animate-ping" />
-               </h3>
-               <div className="space-y-6 relative z-10">
-                 {(data.propertyDistribution ?? []).map((p, i) => (
-                   <div key={i} className="flex flex-col gap-2">
-                     <div className="flex justify-between items-end">
-                       <span className="text-[11px] font-black uppercase tracking-widest text-neutral-400">{p.name}</span>
-                       <span className="text-lg font-black tabular-nums">{p.value}%</span>
-                     </div>
-                     <div className="h-2 w-full bg-white/5 rounded-full overflow-hidden">
-                       <div className="h-full bg-primary rounded-full group-hover:shadow-[0_0_12px_rgba(var(--primary),0.5)] transition-all" style={{ width: `${p.value}%` }} />
-                     </div>
-                   </div>
-                 ))}
-               </div>
-               
-               <div className="mt-8 pt-6 border-t border-white/5 flex items-center justify-between">
-                 <div className="flex items-center gap-2">
-                   <CheckCircle2 className="h-4 w-4 text-primary" />
-                   <span className="text-[10px] font-black uppercase tracking-widest opacity-60">Inventaire à jour</span>
-                 </div>
-                 <Clock className="h-4 w-4 text-neutral-500" />
-               </div>
-             </div>
           </div>
         </div>
       </div>
@@ -276,25 +305,30 @@ export default function DashboardPage() {
   // AGENT VIEW
   const agentStats = data.stats as IAgentStats;
   return (
-    <div className="max-w-5xl mx-auto space-y-8 pb-10">
+    <div className="max-w-6xl mx-auto space-y-10 pb-20 animate-in fade-in duration-700">
       <AgentOverview
         welcomeMessage={data.welcomeMessage ?? ""}
         stats={agentStats}
         tasks={data.tasks ?? []}
       />
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
          <DailyVisits visits={data.todayVisits ?? []} />
-         <div className="p-8 rounded-2xl bg-neutral-900 text-white flex flex-col justify-between overflow-hidden relative group">
-           <RefreshCw className="absolute -right-4 -bottom-4 h-32 w-32 text-white/5 group-hover:rotate-180 transition-transform duration-1000" />
-           <div className="relative">
-             <h3 className="text-xl font-bold mb-2">Relances du jour</h3>
-             <p className="text-neutral-400 text-sm">Vous avez {agentStats.todayFollowUps} clients a recontacter aujourd&apos;hui.</p>
+         <div className="p-10 rounded-[40px] bg-neutral-900 border border-neutral-800 text-white flex flex-col justify-between overflow-hidden relative shadow-stripe-lg group">
+           <RefreshCw className="absolute -right-6 -bottom-6 h-48 w-48 text-white/5 group-hover:rotate-180 transition-transform duration-1000" />
+           <div className="relative space-y-4">
+             <div className="h-14 w-14 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center">
+               <RefreshCw className="h-6 w-6 text-primary" />
+             </div>
+             <h3 className="text-3xl font-black tracking-tighter italic uppercase text-white">Relances du jour</h3>
+             <p className="text-neutral-400 text-lg font-medium leading-relaxed">
+               Optimisez votre flux client. Vous avez <span className="text-primary font-black underline decoration-primary/30 underline-offset-4">{agentStats.todayFollowUps} prospects</span> prioritaires à recontacter.
+             </p>
            </div>
            <Button
-             className="mt-8 bg-white text-black hover:bg-neutral-200 font-bold relative"
+             className="mt-10 h-16 bg-primary text-white hover:opacity-90 font-black text-xl rounded-full shadow-stripe transition-all active:scale-95 relative z-10 uppercase tracking-tight italic"
              onClick={() => window.location.href = "/clients"}
            >
-             Commencer la session
+             Activez la Session Client
            </Button>
          </div>
       </div>

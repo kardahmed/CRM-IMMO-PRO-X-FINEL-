@@ -16,6 +16,7 @@ import {
   Settings2,
   BarChart3,
   Pencil,
+  PlusCircle,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -30,6 +31,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { cn } from "@/lib/utils";
+import { VerticalFlowConnector } from "@/components/automations/FlowConnector";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -62,32 +65,32 @@ interface TeamMember {
 // Pipeline stage labels & colors
 // ---------------------------------------------------------------------------
 const STAGE_META: Record<string, { label: string; color: string; order: number }> = {
-  NEW: { label: "Nouveau", color: "bg-blue-500/15 text-blue-700", order: 1 },
-  CONTACTED: { label: "Contacté", color: "bg-cyan-500/15 text-cyan-700", order: 2 },
-  QUALIFIED: { label: "Qualifié", color: "bg-violet-500/15 text-violet-700", order: 3 },
-  VISIT_SCHEDULED: { label: "Visite planifiée", color: "bg-indigo-500/15 text-indigo-700", order: 4 },
-  VISITED: { label: "Visite effectuée", color: "bg-sky-500/15 text-sky-700", order: 5 },
-  NEGOTIATION: { label: "Négociation", color: "bg-amber-500/15 text-amber-700", order: 6 },
-  RESERVED: { label: "Réservé", color: "bg-orange-500/15 text-orange-700", order: 7 },
-  SIGNED: { label: "Signé", color: "bg-emerald-500/15 text-emerald-700", order: 8 },
-  CLOSED: { label: "Clôturé", color: "bg-green-500/15 text-green-700", order: 9 },
+  NEW: { label: "Nouveau", color: "bg-blue-500/10 text-blue-600 border-blue-500/20", order: 1 },
+  CONTACTED: { label: "Contacté", color: "bg-cyan-500/10 text-cyan-600 border-cyan-500/20", order: 2 },
+  QUALIFIED: { label: "Qualified", color: "bg-violet-500/10 text-violet-600 border-violet-500/20", order: 3 },
+  VISIT_SCHEDULED: { label: "Visite planifiée", color: "bg-indigo-500/10 text-indigo-600 border-indigo-500/20", order: 4 },
+  VISITED: { label: "Visite effectuée", color: "bg-sky-500/10 text-sky-600 border-sky-500/20", order: 5 },
+  NEGOTIATION: { label: "Négociation", color: "bg-amber-500/10 text-amber-600 border-amber-500/20", order: 6 },
+  RESERVED: { label: "Réservé", color: "bg-orange-500/10 text-orange-600 border-orange-500/20", order: 7 },
+  SIGNED: { label: "Signé", color: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20", order: 8 },
+  CLOSED: { label: "Clôturé", color: "bg-green-500/10 text-green-600 border-green-500/20", order: 9 },
 };
 
 // ---------------------------------------------------------------------------
 // Task type metadata
 // ---------------------------------------------------------------------------
 const TYPE_META: Record<string, { label: string; icon: string; color: string }> = {
-  CALL: { label: "Appel", icon: "Phone", color: "bg-green-100 text-green-700" },
-  OTHER: { label: "WhatsApp/SMS", icon: "MessageCircle", color: "bg-emerald-100 text-emerald-700" },
-  DOCUMENT: { label: "Document", icon: "FileText", color: "bg-blue-100 text-blue-700" },
-  MEETING: { label: "Rendez-vous", icon: "Calendar", color: "bg-purple-100 text-purple-700" },
+  CALL: { label: "Appel", icon: "Phone", color: "bg-emerald-50 text-emerald-600 border-emerald-100" },
+  OTHER: { label: "WhatsApp/SMS", icon: "MessageCircle", color: "bg-emerald-50 text-emerald-600 border-emerald-100" },
+  DOCUMENT: { label: "Document", icon: "FileText", color: "bg-blue-50 text-blue-600 border-blue-100" },
+  MEETING: { label: "Rendez-vous", icon: "Calendar", color: "bg-purple-50 text-purple-600 border-purple-100" },
 };
 
 const TYPE_ICONS: Record<string, React.ReactNode> = {
-  Phone: <Phone className="h-3.5 w-3.5" />,
-  MessageCircle: <MessageCircle className="h-3.5 w-3.5" />,
-  FileText: <FileText className="h-3.5 w-3.5" />,
-  Calendar: <Calendar className="h-3.5 w-3.5" />,
+  Phone: <Phone className="h-4 w-4" />,
+  MessageCircle: <MessageCircle className="h-4 w-4" />,
+  FileText: <FileText className="h-4 w-4" />,
+  Calendar: <Calendar className="h-4 w-4" />,
 };
 
 // ---------------------------------------------------------------------------
@@ -143,7 +146,7 @@ export default function AutomationsPage() {
         setAgents(json.data.members);
       }
     } catch {
-      // Silently fail — agent list is optional
+      // Silently fail
     }
   }, []);
 
@@ -152,25 +155,16 @@ export default function AutomationsPage() {
     fetchAgents();
   }, [fetchConfigs, fetchAgents]);
 
-  // -------------------------------------------------------------------------
-  // Toggle expand/collapse
-  // -------------------------------------------------------------------------
-  const toggleExpand = useCallback((stage: string) => {
+  const toggleExpand = (stage: string) => {
     setExpandedStages((prev) => {
       const next = new Set(prev);
-      if (next.has(stage)) {
-        next.delete(stage);
-      } else {
-        next.add(stage);
-      }
+      if (next.has(stage)) next.delete(stage);
+      else next.add(stage);
       return next;
     });
-  }, []);
+  };
 
-  // -------------------------------------------------------------------------
-  // Master toggle
-  // -------------------------------------------------------------------------
-  const handleMasterToggle = useCallback(async (pipelineStage: string, isActive: boolean) => {
+  const handleMasterToggle = async (pipelineStage: string, isActive: boolean) => {
     setConfigs((prev) =>
       prev.map((c) => (c.pipelineStage === pipelineStage ? { ...c, isActive } : c))
     );
@@ -181,22 +175,17 @@ export default function AutomationsPage() {
         body: JSON.stringify({ pipelineStage, isActive }),
       });
       const json = await res.json();
-      if (!json.success) {
-        throw new Error(json.error ?? "Erreur");
-      }
-      toast.success(`Automatisation "${STAGE_META[pipelineStage]?.label ?? pipelineStage}" ${isActive ? "activée" : "désactivée"}`);
+      if (!json.success) throw new Error(json.error);
+      toast.success(`Flux "${STAGE_META[pipelineStage]?.label ?? pipelineStage}" ${isActive ? "mis en route" : "suspendu"}`);
     } catch {
       setConfigs((prev) =>
         prev.map((c) => (c.pipelineStage === pipelineStage ? { ...c, isActive: !isActive } : c))
       );
-      toast.error("Erreur lors de la mise à jour");
+      toast.error("Erreur technique de synchronisation");
     }
-  }, []);
+  };
 
-  // -------------------------------------------------------------------------
-  // Task toggle
-  // -------------------------------------------------------------------------
-  const handleTaskToggle = useCallback((pipelineStage: string, taskIndex: number, isActive: boolean) => {
+  const handleTaskToggle = (pipelineStage: string, taskIndex: number, isActive: boolean) => {
     setConfigs((prev) =>
       prev.map((c) => {
         if (c.pipelineStage !== pipelineStage) return c;
@@ -206,12 +195,9 @@ export default function AutomationsPage() {
         return { ...c, tasks: updatedTasks };
       })
     );
-  }, []);
+  };
 
-  // -------------------------------------------------------------------------
-  // Task agent targeting
-  // -------------------------------------------------------------------------
-  const handleTaskAgentChange = useCallback((pipelineStage: string, taskIndex: number, agentId: string | null) => {
+  const handleTaskAgentChange = (pipelineStage: string, taskIndex: number, agentId: string | null) => {
     setConfigs((prev) =>
       prev.map((c) => {
         if (c.pipelineStage !== pipelineStage) return c;
@@ -221,7 +207,7 @@ export default function AutomationsPage() {
         return { ...c, tasks: updatedTasks };
       })
     );
-  }, []);
+  };
 
   // -------------------------------------------------------------------------
   // Task message template
@@ -247,19 +233,13 @@ export default function AutomationsPage() {
       const res = await fetch("/api/v1/automations/config", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          pipelineStage: config.pipelineStage,
-          isActive: config.isActive,
-          tasks: config.tasks,
-        }),
+        body: JSON.stringify(config),
       });
       const json = await res.json();
-      if (!json.success) {
-        throw new Error(json.error ?? "Erreur");
-      }
-      toast.success(`Tâches "${STAGE_META[config.pipelineStage]?.label ?? config.pipelineStage}" sauvegardées`);
+      if (!json.success) throw new Error(json.error);
+      toast.success(`Flux "${STAGE_META[config.pipelineStage]?.label ?? config.pipelineStage}" optimisé`);
     } catch {
-      toast.error("Erreur lors de la sauvegarde des tâches");
+      toast.error("Erreur d'enregistrement");
     } finally {
       setSavingStages((prev) => {
         const next = new Set(prev);
@@ -267,293 +247,239 @@ export default function AutomationsPage() {
         return next;
       });
     }
-  }, []);
+  }, [setSavingStages]);
 
-  // -------------------------------------------------------------------------
-  // Sort configs by stage order
-  // -------------------------------------------------------------------------
   const sortedConfigs = [...configs].sort((a, b) => {
-    const orderA = STAGE_META[a.pipelineStage]?.order ?? 99;
-    const orderB = STAGE_META[b.pipelineStage]?.order ?? 99;
-    return orderA - orderB;
+    return (STAGE_META[a.pipelineStage]?.order ?? 99) - (STAGE_META[b.pipelineStage]?.order ?? 99);
   });
 
-  // -------------------------------------------------------------------------
-  // Render
-  // -------------------------------------------------------------------------
   return (
-    <div className="flex flex-col gap-6 max-w-4xl">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <div className="p-3 rounded-xl bg-primary/10 text-primary">
-            <Settings2 className="h-7 w-7" />
+    <div className="space-y-12 pb-20 max-w-5xl mx-auto px-4 italic-none">
+      {/* Executive Header */}
+      <div className="flex flex-col md:flex-row items-center justify-between gap-6 bg-white p-8 rounded-[32px] shadow-stripe border border-neutral-100 animate-page-enter">
+        <div className="flex items-center gap-6">
+          <div className="h-16 w-16 rounded-2xl bg-emerald-500/10 flex items-center justify-center text-emerald-600 shadow-sm border border-emerald-500/20">
+            <Zap className="h-8 w-8 fill-emerald-500/20" />
           </div>
           <div>
-            <h1 className="text-2xl font-black tracking-tight uppercase">
-              Automatisations
+            <h1 className="text-4xl font-black tracking-tighter text-neutral-900 flex items-center gap-2">
+              Automations
+              <span className="text-primary italic text-xl font-medium tracking-normal opacity-40 lowercase">engine</span>
             </h1>
-            <p className="text-sm text-muted-foreground font-medium mt-0.5">
-              Panneau de controle des actions automatiques par etape du pipeline.
+            <p className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.3em] opacity-60 mt-1">
+              Architecture des Flux & Propulseurs d'Activite
             </p>
           </div>
         </div>
         <Link href="/dashboard/automations/dashboard">
-          <Button variant="outline" className="gap-2 font-bold">
-            <BarChart3 className="h-4 w-4" />
-            Tableau de bord
+          <Button variant="outline" className="h-14 px-8 rounded-full font-black uppercase text-[10px] tracking-[0.2em] shadow-stripe border-neutral-100 hover:bg-neutral-50 gap-3 group transition-all">
+            <BarChart3 className="h-4 w-4 text-primary group-hover:rotate-12 transition-transform" />
+            Performance Hub
           </Button>
         </Link>
       </div>
 
-      {/* Loading state */}
-      {loading && (
-        <div className="flex flex-col gap-4">
-          {Array.from({ length: 5 }).map((_, i) => (
-            <Card key={i}>
-              <CardHeader className="pb-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <Skeleton className="h-6 w-28 rounded-full" />
-                    <Skeleton className="h-4 w-40" />
-                  </div>
-                  <Skeleton className="h-6 w-11 rounded-full" />
-                </div>
-              </CardHeader>
-            </Card>
-          ))}
+      {loading ? (
+        <div className="space-y-10">
+          {[...Array(4)].map((_, i) => <Skeleton key={i} className="h-32 rounded-[32px] w-full" />)}
         </div>
-      )}
-
-      {/* Error state */}
-      {!loading && error && (
-        <Card>
-          <CardContent className="flex flex-col items-center justify-center py-12 gap-3 text-muted-foreground">
-            <XCircle className="h-10 w-10 text-red-400" />
-            <p>{error}</p>
-            <Button variant="outline" size="sm" onClick={fetchConfigs}>
-              Réessayer
-            </Button>
-          </CardContent>
+      ) : error ? (
+        <Card className="rounded-[32px] border-none shadow-stripe bg-rose-50/50 p-12 text-center">
+          <XCircle className="h-16 w-16 text-rose-500 mx-auto mb-4 opacity-50" />
+          <p className="text-lg font-black text-rose-900 tracking-tight">{error}</p>
+          <Button onClick={fetchConfigs} variant="outline" className="mt-6 rounded-full h-12 px-8">Réessayer</Button>
         </Card>
-      )}
+      ) : (
+        <div className="space-y-16 relative">
+          {/* Vertical Visual Guide Line */}
+          <div className="absolute left-[39px] top-10 bottom-0 w-[2px] bg-neutral-100/50 hidden lg:block" />
 
-      {/* Empty state */}
-      {!loading && !error && configs.length === 0 && (
-        <Card>
-          <CardContent className="flex flex-col items-center justify-center py-12 gap-3 text-muted-foreground">
-            <Zap className="h-10 w-10" />
-            <p>Aucune automatisation configurée</p>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Stage cards */}
-      {!loading && !error && sortedConfigs.length > 0 && (
-        <div className="flex flex-col gap-4">
           {sortedConfigs.map((config) => {
-            const meta = STAGE_META[config.pipelineStage] ?? {
-              label: config.pipelineStage,
-              color: "bg-muted text-muted-foreground",
-              order: 99,
-            };
-            const tasks: AutomationTask[] = Array.isArray(config.tasks) ? config.tasks : [];
+            const meta = STAGE_META[config.pipelineStage] ?? { label: config.pipelineStage, color: "bg-muted text-muted-foreground", order: 99 };
             const isExpanded = expandedStages.has(config.pipelineStage);
             const isSaving = savingStages.has(config.pipelineStage);
-            const activeTaskCount = tasks.filter((t) => t.isActive !== false).length;
+            const tasks = config.tasks || [];
+            const activeTaskCount = tasks.filter(t => t.isActive !== false).length;
 
             return (
-              <Card
-                key={config.id}
-                className={`transition-colors ${!config.isActive ? "opacity-60" : ""}`}
-              >
-                {/* Stage header */}
-                <CardHeader className="pb-3">
-                  <div className="flex items-center justify-between gap-4">
-                    <button
-                      type="button"
-                      className="flex items-center gap-3 flex-1 min-w-0 text-left cursor-pointer hover:opacity-80 transition-opacity"
-                      onClick={() => toggleExpand(config.pipelineStage)}
-                    >
-                      {isExpanded ? (
-                        <ChevronDown className="h-4 w-4 text-muted-foreground shrink-0" />
-                      ) : (
-                        <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
-                      )}
-                      <Badge variant="secondary" className={`${meta.color} shrink-0`}>
-                        {meta.label}
-                      </Badge>
-                      <span className="text-xs text-muted-foreground truncate">
-                        {activeTaskCount}/{tasks.length} tâche{tasks.length !== 1 ? "s" : ""} active{activeTaskCount !== 1 ? "s" : ""}
-                      </span>
-                    </button>
+              <div key={config.id} className="relative animate-page-enter">
+                {/* TRIGGER NODE */}
+                <div className="relative z-10 flex items-start gap-4 lg:gap-8 group">
+                   <div className={cn(
+                     "flex-shrink-0 h-[80px] w-[80px] rounded-full flex items-center justify-center transition-all duration-700 shadow-stripe-lg border-4 border-white",
+                     config.isActive ? "bg-emerald-500 text-white scale-110" : "bg-neutral-100 text-neutral-400 grayscale"
+                   )}>
+                     <Zap className={cn("h-8 w-8", config.isActive && "animate-pulse")} />
+                   </div>
+                   
+                   <div className={cn(
+                     "flex-1 bg-white p-8 rounded-[32px] border transition-all duration-500 shadow-stripe hover:shadow-stripe-lg",
+                     config.isActive ? "border-emerald-500/10" : "border-neutral-100 opacity-60"
+                   )}>
+                      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+                        <div className="space-y-1">
+                           <div className="flex items-center gap-3">
+                             <span className="text-[10px] font-black uppercase tracking-[0.25em] text-primary">Déclencheur Système</span>
+                             <Badge className={cn("rounded-full px-4 py-1 text-[10px] font-black uppercase border", meta.color)}>
+                               {meta.label}
+                             </Badge>
+                           </div>
+                           <h3 className="text-2xl font-black tracking-tight text-neutral-900 transition-colors group-hover:text-primary">
+                             Prospect entre dans l'étape
+                           </h3>
+                           <p className="text-sm text-muted-foreground font-medium italic">
+                             Actionne automatiquement {tasks.length} propulseur{tasks.length > 1 ? "s" : ""} logistique{tasks.length > 1 ? "s" : ""}.
+                           </p>
+                        </div>
 
-                    <div className="flex items-center gap-3 shrink-0">
-                      <span className="text-xs font-medium text-muted-foreground">
-                        {config.isActive ? "Activé" : "Désactivé"}
-                      </span>
-                      <Switch
-                        checked={config.isActive}
-                        onCheckedChange={(checked: boolean) =>
-                          handleMasterToggle(config.pipelineStage, checked)
-                        }
-                        aria-label={`Activer ${meta.label}`}
-                      />
-                    </div>
-                  </div>
-                </CardHeader>
+                        <div className="flex items-center gap-6 self-start lg:self-center bg-neutral-50 px-6 py-4 rounded-2xl border border-neutral-100">
+                          <div className="text-right">
+                             <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">{config.isActive ? "Actif" : "Suspendu"}</p>
+                             <p className="text-xs font-black uppercase text-neutral-900">{activeTaskCount} actif{activeTaskCount > 1 ? "s" : ""}</p>
+                          </div>
+                          <Switch
+                            checked={config.isActive}
+                            onCheckedChange={(checked) => handleMasterToggle(config.pipelineStage, checked)}
+                            className="data-[state=checked]:bg-emerald-500"
+                          />
+                        </div>
+                      </div>
 
-                {/* Expanded task list */}
+                      {/* Expand / Visual Flow Control */}
+                      <Button 
+                        variant="ghost" 
+                        onClick={() => toggleExpand(config.pipelineStage)}
+                        className="mt-6 w-full h-12 bg-neutral-50/50 hover:bg-neutral-100 border border-neutral-100 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground transition-all rounded-xl gap-2"
+                      >
+                        {isExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                        {isExpanded ? "Masquer le pipeline visuel" : "Déployer le flux Zapier"}
+                      </Button>
+                   </div>
+                </div>
+
+                {/* VISUAL FLOW - ACTION NODES */}
                 {isExpanded && (
-                  <CardContent className="pt-0">
-                    <div className="border-t pt-4">
-                      {tasks.length === 0 ? (
-                        <p className="text-sm text-muted-foreground text-center py-4">
-                          Aucune tâche configurée pour cette étape
-                        </p>
-                      ) : (
-                        <div className="flex flex-col gap-3">
-                          {tasks.map((task, taskIndex) => {
-                            const typeMeta = TYPE_META[task.type] ?? {
-                              label: task.type,
-                              icon: "FileText",
-                              color: "bg-gray-100 text-gray-700",
-                            };
-                            const icon = TYPE_ICONS[typeMeta.icon] ?? (
-                              <FileText className="h-3.5 w-3.5" />
-                            );
+                  <div className="mt-4 ml-[39px] flex flex-col items-center lg:items-start lg:ml-[39px] animate-in fade-in slide-in-from-top-4 duration-500 w-full lg:w-auto">
+                    {tasks.map((task, idx) => {
+                      const typeMeta = TYPE_META[task.type] ?? { label: task.type, icon: "FileText", color: "bg-gray-100 text-gray-700" };
+                      const IconNode = TYPE_ICONS[typeMeta.icon] ?? <FileText className="h-4 w-4" />;
 
-                            const templateKey = `${config.pipelineStage}-${taskIndex}`;
-                            const isEditingTemplate = editingTemplate === templateKey;
+                      return (
+                        <div key={idx} className="flex flex-col items-center lg:items-start w-full">
+                          <VerticalFlowConnector active={config.isActive && task.isActive !== false} className="lg:w-20 lg:ml-[-10px]" />
+                          
+                          <div className="flex items-start gap-6 lg:gap-8 w-full group/task">
+                            {/* Action Pulse Point */}
+                            <div className={cn(
+                              "flex-shrink-0 h-4 w-4 rounded-full mt-10 transition-all duration-700 relative",
+                              task.isActive !== false ? "bg-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.5)] scale-125" : "bg-neutral-200"
+                            )}>
+                              {task.isActive !== false && <div className="absolute inset-0 rounded-full bg-emerald-500 animate-ping opacity-25" />}
+                            </div>
 
-                            return (
-                              <div key={taskIndex} className="flex flex-col gap-0">
-                                <div
-                                  className={`flex items-center gap-4 p-3 rounded-lg border transition-colors ${
-                                    task.isActive === false
-                                      ? "bg-muted/30 border-muted"
-                                      : "bg-background border-border"
-                                  } ${isEditingTemplate ? "rounded-b-none" : ""}`}
-                                >
-                                  {/* Task info */}
-                                  <div className="flex-1 min-w-0">
-                                    <div className="flex items-center gap-2 flex-wrap">
-                                      <span className="text-sm font-medium truncate">
-                                        {task.name}
-                                      </span>
-                                      <Badge
-                                        variant="secondary"
-                                        className={`${typeMeta.color} text-xs gap-1 shrink-0`}
-                                      >
-                                        {icon}
-                                        {typeMeta.label}
-                                      </Badge>
-                                      {task.delayMinutes != null && task.delayMinutes > 0 && (
-                                        <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
-                                          <Clock className="h-3 w-3" />
-                                          {formatDelay(task.delayMinutes)}
-                                        </span>
+                            {/* Action Card */}
+                            <div className={cn(
+                              "flex-1 bg-white border p-6 rounded-[24px] shadow-stripe hover:shadow-stripe-lg transition-all duration-500",
+                              task.isActive !== false ? "border-emerald-500/5" : "opacity-50 border-neutral-100"
+                            )}>
+                              <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                                <div className="flex items-center gap-4">
+                                  <div className={cn("h-12 w-12 rounded-[14px] flex items-center justify-center border shadow-sm transition-transform group-hover/task:rotate-3", typeMeta.color)}>
+                                    {IconNode}
+                                  </div>
+                                  <div>
+                                    <div className="flex items-center gap-2 mb-0.5">
+                                      <span className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground/60 italic">Propulseur #{idx + 1}</span>
+                                      {task.delayMinutes && task.delayMinutes > 0 && (
+                                        <Badge variant="outline" className="text-[9px] font-black uppercase py-0 px-2 flex items-center gap-1 border-neutral-100">
+                                          <Clock className="h-2.5 w-2.5" />
+                                          Délai : {formatDelay(task.delayMinutes)}
+                                        </Badge>
                                       )}
                                       {task.type === "OTHER" && (
                                         <button
                                           type="button"
-                                          className="inline-flex items-center justify-center h-6 w-6 rounded hover:bg-muted transition-colors"
+                                          className="inline-flex items-center justify-center h-6 w-6 rounded hover:bg-neutral-100 transition-colors"
                                           title="Modifier le template WhatsApp"
-                                          onClick={() =>
-                                            setEditingTemplate(isEditingTemplate ? null : templateKey)
-                                          }
+                                          onClick={() => {
+                                            const templateKey = `${config.pipelineStage}-${idx}`;
+                                            setEditingTemplate(editingTemplate === templateKey ? null : templateKey);
+                                          }}
                                         >
                                           <Pencil className="h-3 w-3 text-muted-foreground" />
                                         </button>
                                       )}
                                     </div>
+                                    <h4 className="text-lg font-black tracking-tight text-neutral-900">{task.name}</h4>
                                   </div>
-
-                                {/* Agent selector */}
-                                <div className="shrink-0 w-44">
-                                  <Select
-                                    value={task.targetAgentId ?? "all"}
-                                    onValueChange={(value) =>
-                                      handleTaskAgentChange(
-                                        config.pipelineStage,
-                                        taskIndex,
-                                        !value || value === "all" ? null : value
-                                      )
-                                    }
-                                  >
-                                    <SelectTrigger className="h-8 text-xs">
-                                      <Users className="h-3 w-3 mr-1 shrink-0" />
-                                      <SelectValue placeholder="Agent cible" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                      <SelectItem value="all">
-                                        Tous les agents
-                                      </SelectItem>
-                                      {agents.map((agent) => (
-                                        <SelectItem key={agent.id} value={agent.id}>
-                                          {agent.firstName} {agent.lastName}
-                                        </SelectItem>
-                                      ))}
-                                    </SelectContent>
-                                  </Select>
                                 </div>
 
-                                {/* Task toggle */}
-                                <Switch
-                                  checked={task.isActive !== false}
-                                  onCheckedChange={(checked: boolean) =>
-                                    handleTaskToggle(config.pipelineStage, taskIndex, checked)
-                                  }
-                                  aria-label={`Activer la tâche ${task.name}`}
-                                  className="shrink-0"
-                                />
+                                <div className="flex items-center gap-4 w-full md:w-auto">
+                                  <div className="flex-1 min-w-[160px]">
+                                    <Select
+                                      value={task.targetAgentId ?? "all"}
+                                      onValueChange={(v) => handleTaskAgentChange(config.pipelineStage, idx, v === "all" ? null : v)}
+                                    >
+                                      <SelectTrigger className="h-10 text-[10px] font-black uppercase tracking-widest border-neutral-100 rounded-xl bg-neutral-50/50">
+                                        <Users className="h-3 w-3 mr-2 text-primary" />
+                                        <SelectValue placeholder="Assigne à..." />
+                                      </SelectTrigger>
+                                      <SelectContent className="rounded-xl border-neutral-100 shadow-stripe-lg">
+                                        <SelectItem value="all" className="text-[10px] font-black uppercase">Flux Collectif</SelectItem>
+                                        {agents.map((a) => (
+                                          <SelectItem key={a.id} value={a.id} className="text-[10px] font-black uppercase">{a.firstName} {a.lastName}</SelectItem>
+                                        ))}
+                                      </SelectContent>
+                                    </Select>
+                                  </div>
+                                  <Switch
+                                    checked={task.isActive !== false}
+                                    onCheckedChange={(c) => handleTaskToggle(config.pipelineStage, idx, c)}
+                                    className="data-[state=checked]:bg-emerald-500 scale-90"
+                                  />
+                                </div>
                               </div>
 
                               {/* WhatsApp template editor */}
-                              {isEditingTemplate && task.type === "OTHER" && (
-                                <div className="border border-t-0 rounded-b-lg p-3 bg-muted/20 flex flex-col gap-2">
-                                  <label className="text-xs font-semibold text-foreground">
+                              {editingTemplate === `${config.pipelineStage}-${idx}` && task.type === "OTHER" && (
+                                <div className="mt-4 border-t border-neutral-100 pt-4 animate-in fade-in slide-in-from-top-2 duration-300">
+                                  <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground block mb-2">
                                     Template de message WhatsApp
                                   </label>
                                   <textarea
-                                    className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 resize-y min-h-[80px]"
+                                    className="w-full rounded-xl border border-neutral-100 bg-neutral-50/50 px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all resize-none min-h-[100px] font-medium text-neutral-900"
                                     rows={3}
                                     maxLength={2000}
-                                    placeholder="Pas de template personnalise"
+                                    placeholder="Pas de template personnalisé"
                                     value={task.messageTemplate ?? ""}
-                                    onChange={(e) =>
-                                      handleTaskTemplateChange(
-                                        config.pipelineStage,
-                                        taskIndex,
-                                        e.target.value
-                                      )
-                                    }
+                                    onChange={(e) => handleTaskTemplateChange(config.pipelineStage, idx, e.target.value)}
                                   />
-                                  <p className="text-[11px] text-muted-foreground">
-                                    Variables disponibles : <code className="bg-muted px-1 rounded">{"{clientName}"}</code> <code className="bg-muted px-1 rounded">{"{agentName}"}</code> <code className="bg-muted px-1 rounded">{"{propertyName}"}</code> <code className="bg-muted px-1 rounded">{"{budget}"}</code> <code className="bg-muted px-1 rounded">{"{date}"}</code>
-                                  </p>
+                                  <div className="mt-2 flex flex-wrap gap-1.5">
+                                    {["{clientName}", "{agentName}", "{propertyName}", "{budget}", "{date}"].map(v => (
+                                      <span key={v} className="px-2 py-0.5 rounded-md bg-neutral-100 text-[9px] font-bold text-neutral-500 border border-neutral-200/50">{v}</span>
+                                    ))}
+                                  </div>
                                 </div>
                               )}
-                              </div>
-                            );
-                          })}
-
-                          {/* Save button */}
-                          <div className="flex justify-end pt-2">
-                            <Button
-                              size="sm"
-                              onClick={() => handleSaveTasks(config)}
-                              disabled={isSaving}
-                            >
-                              {isSaving ? "Enregistrement..." : "Enregistrer les modifications"}
-                            </Button>
+                            </div>
                           </div>
                         </div>
-                      )}
+                      );
+                    })}
+
+                    <div className="mt-8 self-end pr-0 lg:pr-8 animate-in fade-in duration-1000">
+                      <Button
+                        size="lg"
+                        onClick={() => handleSaveTasks(config)}
+                        disabled={isSaving}
+                        className="h-14 px-10 rounded-full font-black uppercase text-[10px] tracking-[0.25em] bg-neutral-900 text-white shadow-stripe-lg hover:bg-neutral-800 transition-all active:scale-95 italic"
+                      >
+                        {isSaving ? "Synchronisation..." : "Optimiser ce flux"}
+                      </Button>
                     </div>
-                  </CardContent>
+                  </div>
                 )}
-              </Card>
+              </div>
             );
           })}
         </div>

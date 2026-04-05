@@ -31,23 +31,31 @@ export function DashboardCard({ label, value, trend, trendDescription, color }: 
   const isPositive = trend.startsWith("+");
 
   return (
-    <Card className="hover:shadow-xl hover:-translate-y-1 transition-all duration-500 border-neutral-100 dark:border-neutral-800 bg-white/50 dark:bg-neutral-900/50 backdrop-blur-sm group overflow-hidden">
-      <div className={cn("absolute top-0 right-0 w-24 h-24 -mr-8 -mt-8 rounded-full opacity-5 group-hover:opacity-10 transition-opacity", colorMap[color])} />
-      <CardHeader className="flex flex-row items-center justify-between pb-2">
-        <CardTitle className="text-xs font-black uppercase tracking-widest text-muted-foreground/80">{label}</CardTitle>
-        <div className={cn("p-2.5 rounded-xl shadow-sm group-hover:scale-110 transition-transform duration-500", colorMap[color])}>
+    <Card className="border-none shadow-stripe hover:shadow-stripe-lg transition-all duration-500 rounded-[20px] bg-white group hover:-translate-y-1 relative overflow-hidden">
+      <div className={cn("absolute top-0 right-0 w-32 h-32 -mr-16 -mt-16 rounded-full opacity-[0.03] group-hover:opacity-[0.08] transition-opacity duration-700", colorMap[color])} />
+      <CardHeader className="flex flex-row items-center justify-between pb-2 px-6 pt-6 relative z-10">
+        <CardTitle className="text-[10px] font-black uppercase tracking-[0.25em] text-muted-foreground/60 transition-colors group-hover:text-primary">
+          {label}
+        </CardTitle>
+        <div className={cn("p-2 rounded-[14px] shadow-sm transition-all duration-500 group-hover:scale-110 group-hover:rotate-3", colorMap[color])}>
           <Icon className="h-4 w-4" />
         </div>
       </CardHeader>
-      <CardContent>
-        <div className="text-3xl font-black tracking-tighter tabular-nums">{value}</div>
-        <div className={cn(
-          "flex items-center gap-1 mt-2 text-[10px] font-black uppercase tracking-tighter",
-          isPositive ? "text-emerald-500" : "text-rose-500"
-        )}>
-          {isPositive ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
-          <span>{trend}</span>
-          <span className="text-muted-foreground/60 font-bold ml-1">{trendDescription || "vs période précédente"}</span>
+      <CardContent className="px-6 pb-6 relative z-10">
+        <div className="text-4xl font-black tracking-tighter tabular-nums text-neutral-900 group-hover:text-primary transition-colors duration-500">
+          {value}
+        </div>
+        <div className="flex items-center gap-2 mt-3">
+          <div className={cn(
+            "flex items-center gap-1 text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full",
+            isPositive ? "bg-emerald-500/10 text-emerald-600" : "bg-rose-500/10 text-rose-600"
+          )}>
+            {isPositive ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
+            {trend}
+          </div>
+          <span className="text-[10px] font-black uppercase tracking-tight text-muted-foreground/40 italic">
+            {trendDescription || "vs période précédente"}
+          </span>
         </div>
       </CardContent>
     </Card>

@@ -13,9 +13,12 @@ import {
   Settings,
   Rocket,
   ShieldAlert,
-  LogOut
+  LogOut,
+  ChevronRight,
+  Database
 } from "lucide-react";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Logo } from "@/components/ui/Logo";
 
 export default function SuperAdminLayout({
   children,
@@ -24,10 +27,11 @@ export default function SuperAdminLayout({
 }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { role, isLoaded } = useSupabaseAuth();
+  const { role, isLoaded, user, email } = useSupabaseAuth();
 
-  // Guard: seul SUPER_ADMIN ou ADMIN peut accéder
-  const isAllowed = role === "SUPER_ADMIN" || role === "ADMIN";
+  // Guard: seul SUPER_ADMIN ou ADMIN (ou bypass email) peut accéder
+  const isSuperAdminEmail = email === "contact@sensium-x.com";
+  const isAllowed = role === "SUPER_ADMIN" || role === "ADMIN" || isSuperAdminEmail;
   useEffect(() => {
     if (isLoaded && !isAllowed) {
       router.replace("/");
@@ -36,44 +40,52 @@ export default function SuperAdminLayout({
 
   if (!isLoaded || !isAllowed) {
     return (
-      <div className="flex h-screen items-center justify-center bg-neutral-950 text-neutral-50">
-        <p className="text-sm text-neutral-400">Vérification des accès...</p>
+      <div className="flex h-screen items-center justify-center bg-white text-neutral-900">
+        <div className="flex flex-col items-center gap-4">
+          <Logo width={48} height={48} showText={false} className="animate-pulse" />
+          <p className="text-xs font-black uppercase tracking-[0.3em] text-neutral-400">Vérification PRO-X HQ...</p>
+        </div>
       </div>
     );
   }
 
   const navItems = [
-    { href: "/super-admin", icon: BarChart, label: "Dashboard" },
+    { href: "/super-admin", icon: BarChart, label: "Vue d'ensemble" },
     { href: "/super-admin/entreprises", icon: Building2, label: "Workspaces" },
     { href: "/super-admin/ai", icon: Sparkles, label: "Moteur IA" },
     { href: "/super-admin/demo", icon: Users, label: "Leads Démo" },
-    { href: "/super-admin/settings", icon: Settings, label: "Configuration" },
+    { href: "/super-admin/settings", icon: Settings, label: "Config Système" },
   ];
 
   return (
-    <div className="flex h-screen overflow-hidden bg-neutral-950 text-neutral-50 font-sans selection:bg-indigo-500/30">
-      {/* Sidebar - Dark Mode Forced */}
-      <aside className="w-64 border-r border-neutral-800 bg-neutral-950 flex flex-col shrink-0">
-        <div className="h-16 flex items-center px-6 border-b border-neutral-800">
-          <div className="flex items-center gap-2 text-indigo-400">
-            <Rocket className="h-5 w-5" />
-            <span className="font-black tracking-tight text-white">IMMO PRO-X</span>
+    <div className="flex h-screen overflow-hidden bg-[#fafafa] text-neutral-900 font-sans selection:bg-primary/20">
+      {/* Sidebar - White Modern Sidebar */}
+      <aside className="w-72 border-r border-neutral-100 bg-white flex flex-col shrink-0 shadow-[4px_0_24px_rgba(0,0,0,0.02)] z-50">
+        <div className="h-20 flex items-center px-8 border-b border-neutral-50/50">
+          <Logo width={32} height={32} />
+        </div>
+
+        {/* Admin Identity Card */}
+        <div className="px-6 py-8">
+          <div className="p-4 rounded-[24px] bg-neutral-900 text-white shadow-stripe relative overflow-hidden group">
+             <div className="absolute top-0 right-0 w-24 h-24 bg-primary/20 blur-[40px] group-hover:bg-primary/30 transition-all" />
+             <div className="flex items-center gap-4 relative z-10">
+                <Avatar className="h-12 w-12 border-2 border-white/10">
+                  <AvatarImage src={user?.user_metadata?.avatar_url} />
+                  <AvatarFallback className="bg-primary text-white font-black text-xs">HQ</AvatarFallback>
+                </Avatar>
+                <div>
+                  <p className="text-sm font-black italic uppercase tracking-tighter leading-tight">Master Admin</p>
+                  <p className="text-[10px] text-primary font-black uppercase tracking-[0.2em] mt-1 flex items-center gap-1.5">
+                    <ShieldAlert className="h-3 w-3" /> Accès Système
+                  </p>
+                </div>
+             </div>
           </div>
         </div>
 
-        <div className="px-4 py-4 flex items-center gap-3">
-          <Avatar className="h-10 w-10 border border-indigo-500/30 shadow-[0_0_15px_rgba(99,102,241,0.2)]">
-            <AvatarFallback className="bg-neutral-900 text-indigo-400 font-black text-xs">SA</AvatarFallback>
-          </Avatar>
-          <div>
-            <p className="text-sm font-bold text-white leading-tight">Super Admin</p>
-            <p className="text-[10px] text-neutral-400 flex items-center gap-1 font-medium mt-0.5">
-              <ShieldAlert className="h-3 w-3 text-red-400" /> Accès God Mode
-            </p>
-          </div>
-        </div>
-
-        <nav className="flex-1 px-4 py-4 space-y-1 overflow-y-auto">
+        <nav className="flex-1 px-4 space-y-1.5 overflow-y-auto pb-10">
+          <p className="px-4 mb-4 text-[10px] font-black text-neutral-400 uppercase tracking-[0.3em]">Menu Principal</p>
           {navItems.map((item) => {
             const isActive = pathname === item.href || (pathname.startsWith(item.href) && item.href !== "/super-admin");
             const Icon = item.icon;
@@ -83,37 +95,49 @@ export default function SuperAdminLayout({
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
+                  "flex items-center justify-between px-4 py-3 rounded-2xl text-sm transition-all duration-300 group",
                   isActive 
-                    ? "bg-indigo-500/10 text-indigo-400" 
-                    : "text-neutral-400 hover:text-white hover:bg-neutral-900"
+                    ? "bg-primary/5 text-primary font-black shadow-[inset_0_0_12px_rgba(var(--primary),0.05)]" 
+                    : "text-neutral-500 hover:text-neutral-900 hover:bg-neutral-50"
                 )}
               >
-                <Icon className={cn("h-4 w-4", isActive ? "text-indigo-400" : "text-neutral-500")} />
-                {item.label}
+                <div className="flex items-center gap-4">
+                  <Icon className={cn("h-4 w-4", isActive ? "text-primary" : "text-neutral-400 group-hover:text-neutral-600 transition-colors")} />
+                  <span className="tracking-tight">{item.label}</span>
+                </div>
+                {isActive && <ChevronRight className="h-3.5 w-3.5 animate-in slide-in-from-left-2 duration-300" />}
               </Link>
             );
           })}
         </nav>
 
-        <div className="p-4 mt-auto border-t border-neutral-800">
+        {/* System Footer */}
+        <div className="p-6 mt-auto border-t border-neutral-50">
           <Link href="/">
-            <button className="flex w-full items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-neutral-400 hover:text-white hover:bg-neutral-900 transition-colors">
-              <LogOut className="h-4 w-4 text-neutral-500" />
-              Sortir du God Mode
+            <button className="flex w-full items-center justify-center gap-3 px-4 py-4 rounded-2xl bg-neutral-50 text-[10px] font-black text-neutral-500 hover:text-red-500 hover:bg-red-50 transition-all uppercase tracking-[0.15em] border border-transparent hover:border-red-100">
+              <LogOut className="h-3.5 w-3.5" />
+              Sortir de l&apos;Accès Système
             </button>
           </Link>
         </div>
       </aside>
 
       {/* Main Content Area */}
-      <main className="flex-1 flex flex-col min-w-0 bg-neutral-950 overflow-hidden">
-        <header className="h-16 flex items-center px-8 border-b border-neutral-800 shrink-0">
-          <h1 className="text-sm font-medium text-neutral-400">
-            Interface Système — Ne pas communiquer les identifiants en dehors de l&apos;équipe fondatrice.
-          </h1>
+      <main className="flex-1 flex flex-col min-w-0 bg-[#fafafa] overflow-hidden">
+        <header className="h-20 flex items-center justify-between px-10 border-b border-neutral-100/50 bg-white/50 backdrop-blur-xl shrink-0">
+          <div className="flex items-center gap-3">
+             <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+             <h2 className="text-[10px] font-black text-neutral-400 uppercase tracking-[0.4em]">Système en ligne • v1.4.0</h2>
+          </div>
+          <div className="flex items-center gap-6">
+             <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-500/5 border border-amber-500/10">
+                <Database className="h-3 w-3 text-amber-500" />
+                <span className="text-[10px] font-black text-amber-700 uppercase tracking-widest">Main Cluster</span>
+             </div>
+          </div>
         </header>
-        <div className="flex-1 overflow-y-auto p-8">
+        
+        <div className="flex-1 overflow-y-auto p-10 scrollbar-hide">
           <div className="max-w-7xl mx-auto w-full">
             {children}
           </div>

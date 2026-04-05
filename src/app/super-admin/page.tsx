@@ -5,9 +5,14 @@ import {
   CreditCard, 
   Activity,
   ArrowUpRight,
-  ArrowDownRight
+  ArrowDownRight,
+  TrendingUp,
+  Globe,
+  Zap,
+  ShieldCheck
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 
 export default function SuperAdminDashboard() {
   const metrics = [
@@ -17,114 +22,142 @@ export default function SuperAdminDashboard() {
       change: "+12.5%",
       isPositive: true,
       icon: CreditCard,
-      color: "text-indigo-400"
+      color: "text-emerald-600",
+      bg: "bg-emerald-500/5",
+      border: "border-emerald-500/10"
     },
     {
-      title: "Workspaces Actifs",
+      title: "Workspaces PRO-X",
       value: "42",
       change: "+3 ce mois",
       isPositive: true,
       icon: Building2,
-      color: "text-cyan-400"
+      color: "text-primary",
+      bg: "bg-primary/5",
+      border: "border-primary/10"
     },
     {
-      title: "Utilisateurs (Agents)",
+      title: "Utilisateurs Actifs",
       value: "356",
       change: "+18 ce mois",
       isPositive: true,
       icon: Users,
-      color: "text-emerald-400"
+      color: "text-emerald-700",
+      bg: "bg-emerald-700/5",
+      border: "border-emerald-700/10"
     },
     {
-      title: "Taux d'Attrition (Churn)",
+      title: "Taux de Churn",
       value: "1.2%",
       change: "-0.4%",
       isPositive: true, // true because decrease in churn is good
       icon: Activity,
-      color: "text-rose-400"
+      color: "text-neutral-900",
+      bg: "bg-neutral-500/5",
+      border: "border-neutral-500/10"
     }
   ];
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500">
-      <div>
-        <h1 className="text-3xl font-black text-white tracking-tight">IMMO PRO-X HQ</h1>
-        <p className="text-neutral-400 mt-1">Vue globale de la performance du CRM SaaS.</p>
-      </div>
+    <div className="space-y-12 animate-in fade-in duration-700 slide-in-from-bottom-4">
+      <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-4 border-b border-neutral-100/50">
+        <div className="space-y-1">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/5 border border-primary/10 text-primary text-[10px] font-black uppercase tracking-[0.2em] mb-2">
+            <Zap className="h-3 w-3" /> HQ Control Panel
+          </div>
+          <h1 className="text-5xl font-black text-neutral-900 tracking-tighter italic uppercase underline decoration-primary decoration-8 underline-offset-8 text-nowrap">Performance</h1>
+        </div>
+        <div className="flex items-center gap-4 text-right">
+           <div>
+             <p className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.25em]">Dernière Sync</p>
+             <p className="text-sm font-bold text-neutral-900">À l&apos;instant</p>
+           </div>
+        </div>
+      </header>
 
       {/* Metrics Row */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         {metrics.map((metric) => (
-          <Card key={metric.title} className="bg-neutral-900/50 border-neutral-800 backdrop-blur-sm">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-xs font-bold text-neutral-400 uppercase tracking-wider">
+          <Card key={metric.title} className="bg-white border-neutral-100 shadow-stripe hover:shadow-stripe-lg hover:-translate-y-1 transition-all duration-500 rounded-[28px] group">
+            <CardHeader className="flex flex-row items-center justify-between pb-4">
+              <CardTitle className="text-[10px] font-black text-neutral-400 uppercase tracking-[0.3em]">
                 {metric.title}
               </CardTitle>
-              <metric.icon className={`h-4 w-4 ${metric.color}`} />
+              <div className={cn("p-2.5 rounded-xl border transition-all duration-500 group-hover:scale-110 group-hover:rotate-3", metric.bg, metric.border, metric.color)}>
+                <metric.icon className="h-4 w-4" />
+              </div>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-black text-white">{metric.value}</div>
-              <p className="text-xs mt-1 flex items-center font-medium">
+              <div className="text-3xl font-black text-neutral-900 tracking-tighter tabular-nums">{metric.value}</div>
+              <p className="text-[10px] mt-2 flex items-center font-black uppercase tracking-widest">
                 {metric.isPositive ? (
-                  <span className="text-emerald-400 flex items-center">
-                    <ArrowUpRight className="h-3 w-3 mr-1" />
+                  <span className="text-emerald-500 flex items-center bg-emerald-50 px-2 py-0.5 rounded-full">
+                    <TrendingUp className="h-3.5 w-3.5 mr-1" />
                     {metric.change}
                   </span>
                 ) : (
-                  <span className="text-rose-400 flex items-center">
-                    <ArrowDownRight className="h-3 w-3 mr-1" />
+                  <span className="text-rose-500 flex items-center bg-rose-50 px-2 py-0.5 rounded-full">
+                    <ArrowDownRight className="h-3.5 w-3.5 mr-1" />
                     {metric.change}
                   </span>
                 )}
-                <span className="text-neutral-500 ml-2">vs mois précédent</span>
+                <span className="text-neutral-400 ml-3">Croissance</span>
               </p>
             </CardContent>
           </Card>
         ))}
       </div>
 
-      {/* Main Charts Area */}
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        <Card className="col-span-2 bg-neutral-900/50 border-neutral-800">
-          <CardHeader>
-            <CardTitle className="text-lg font-bold text-white">Croissance des Workspaces</CardTitle>
+      <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+        <Card className="col-span-2 bg-white border-neutral-100 shadow-stripe-lg rounded-[32px] overflow-hidden">
+          <CardHeader className="p-8 border-b border-neutral-50 bg-[#fafafa]/50">
+            <div className="flex items-center justify-between">
+              <div className="space-y-1">
+                <CardTitle className="text-xl font-black text-neutral-900 italic uppercase">Monétisation & Workspaces</CardTitle>
+                <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Volume analytique global</p>
+              </div>
+              <Globe className="h-5 w-5 text-primary/30" />
+            </div>
           </CardHeader>
-          <CardContent className="h-[300px] flex items-center justify-center border-t border-neutral-800/50">
-            <p className="text-neutral-500 text-sm">Zone Graphique (Recharts) - En attente d&apos;intégration API</p>
+          <CardContent className="h-[400px] flex items-center justify-center relative bg-white">
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--primary)_0%,_transparent_1%)] [background-size:24px_24px] opacity-10" />
+            <div className="text-center space-y-4 z-10">
+               <div className="h-16 w-16 rounded-full bg-primary/5 border border-primary/10 flex items-center justify-center mx-auto mb-6">
+                 <Activity className="h-8 w-8 text-primary/40 animate-pulse" />
+               </div>
+               <p className="text-[10px] font-black text-neutral-400 uppercase tracking-[0.4em]">Visualisation Recharts v2.0</p>
+               <p className="text-xs font-bold text-neutral-900">En attente de connexion au flux API Phoenix</p>
+            </div>
           </CardContent>
         </Card>
         
-        <Card className="bg-neutral-900/50 border-neutral-800">
-          <CardHeader>
-            <CardTitle className="text-lg font-bold text-white">Répartition par Plan</CardTitle>
+        <Card className="bg-neutral-900 text-white border-none shadow-stripe-lg rounded-[32px] p-2 relative overflow-hidden group">
+          <div className="absolute top-0 right-0 w-48 h-48 bg-primary/20 blur-[80px] group-hover:bg-primary/30 transition-all duration-1000" />
+          <CardHeader className="p-8">
+            <CardTitle className="text-xl font-black italic uppercase tracking-tight flex items-center gap-3">
+              Distribution Plans
+              <ShieldCheck className="h-5 w-5 text-primary" />
+            </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4 pt-4 border-t border-neutral-800/50">
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Badge variant="outline" className="border-emerald-500/30 text-emerald-400 bg-emerald-500/10">ENTERPRISE</Badge>
-                <span className="text-white font-bold">12%</span>
+          <CardContent className="space-y-8 p-8 relative z-10">
+            {[
+              { label: "ENTERPRISE", value: 12, color: "bg-emerald-400" },
+              { label: "BUSINESS", value: 38, color: "bg-primary" },
+              { label: "ESSENTIAL", value: 50, color: "bg-white" },
+            ].map((plan, i) => (
+              <div key={i} className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-black text-neutral-400 uppercase tracking-[0.25em]">{plan.label}</span>
+                  <span className="text-xl font-black tabular-nums">{plan.value}%</span>
+                </div>
+                <div className="h-2.5 w-full bg-white/5 rounded-full overflow-hidden p-0.5 border border-white/5">
+                  <div className={cn("h-full rounded-full transition-all duration-1000", plan.color)} style={{ width: `${plan.value}%` }}></div>
+                </div>
               </div>
-              <div className="w-full bg-neutral-800 rounded-full h-1.5">
-                <div className="bg-emerald-500 h-1.5 rounded-full w-[12%]"></div>
-              </div>
-            </div>
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Badge variant="outline" className="border-indigo-500/30 text-indigo-400 bg-indigo-500/10">BUSINESS</Badge>
-                <span className="text-white font-bold">38%</span>
-              </div>
-              <div className="w-full bg-neutral-800 rounded-full h-1.5">
-                <div className="bg-indigo-500 h-1.5 rounded-full w-[38%]"></div>
-              </div>
-            </div>
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Badge variant="outline" className="border-cyan-500/30 text-cyan-400 bg-cyan-500/10">PRO</Badge>
-                <span className="text-white font-bold">50%</span>
-              </div>
-              <div className="w-full bg-neutral-800 rounded-full h-1.5">
-                <div className="bg-cyan-500 h-1.5 rounded-full w-[50%]"></div>
-              </div>
+            ))}
+            
+            <div className="mt-8 pt-8 border-t border-white/5 text-center">
+               <p className="text-[10px] font-black text-primary uppercase tracking-[0.3em] animate-pulse">Tous les serveurs sont opérationnels</p>
             </div>
           </CardContent>
         </Card>
