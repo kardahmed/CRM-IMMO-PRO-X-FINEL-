@@ -319,8 +319,8 @@ export default function AutomationsPage() {
                       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
                         <div className="space-y-1">
                            <div className="flex items-center gap-3">
-                             <span className="text-xs font-black uppercase tracking-[0.25em] text-primary">Déclencheur Système</span>
-                             <Badge className={cn("rounded-full px-4 py-1 text-xs font-black uppercase border", meta.color)}>
+                             <span className="text-xs font-bold uppercase tracking-[0.25em] text-primary">Déclencheur Système</span>
+                             <Badge className={cn("rounded-full px-4 py-1 text-xs font-bold uppercase border", meta.color)}>
                                {meta.label}
                              </Badge>
                            </div>
@@ -334,8 +334,8 @@ export default function AutomationsPage() {
 
                         <div className="flex items-center gap-6 self-start lg:self-center bg-accent px-6 py-4 rounded-2xl border border-border">
                           <div className="text-right">
-                             <p className="text-xs font-black uppercase tracking-widest text-muted-foreground/60">{config.isActive ? "Actif" : "Suspendu"}</p>
-                             <p className="text-xs font-black uppercase text-foreground">{activeTaskCount} actif{activeTaskCount > 1 ? "s" : ""}</p>
+                             <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground/60">{config.isActive ? "Actif" : "Suspendu"}</p>
+                             <p className="text-xs font-bold uppercase text-foreground">{activeTaskCount} actif{activeTaskCount > 1 ? "s" : ""}</p>
                           </div>
                           <Switch
                             checked={config.isActive}
@@ -349,7 +349,7 @@ export default function AutomationsPage() {
                       <Button 
                         variant="ghost" 
                         onClick={() => toggleExpand(config.pipelineStage)}
-                        className="mt-6 w-full h-12 bg-accent/50 hover:bg-accent border border-border text-xs font-black uppercase tracking-[0.2em] text-muted-foreground transition-all rounded-xl gap-2"
+                        className="mt-6 w-full h-12 bg-accent/50 hover:bg-accent border border-border text-xs font-bold uppercase tracking-[0.2em] text-muted-foreground transition-all rounded-xl gap-2"
                       >
                         {isExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
                         {isExpanded ? "Masquer le pipeline visuel" : "Déployer le flux Zapier"}
@@ -389,9 +389,9 @@ export default function AutomationsPage() {
                                   </div>
                                   <div>
                                     <div className="flex items-center gap-2 mb-0.5">
-                                      <span className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground/60 italic">Propulseur #{idx + 1}</span>
+                                      <span className="text-xs font-bold uppercase tracking-[0.2em] text-muted-foreground/60 italic">Propulseur #{idx + 1}</span>
                                       {task.delayMinutes && task.delayMinutes > 0 && (
-                                        <Badge variant="outline" className="text-xs font-black uppercase py-0 px-2 flex items-center gap-1 border-border">
+                                        <Badge variant="outline" className="text-xs font-bold uppercase py-0 px-2 flex items-center gap-1 border-border">
                                           <Clock className="h-2.5 w-2.5" />
                                           Délai : {formatDelay(task.delayMinutes)}
                                         </Badge>
@@ -410,7 +410,7 @@ export default function AutomationsPage() {
                                         </button>
                                       )}
                                     </div>
-                                    <h4 className="text-lg font-black tracking-tight text-foreground">{task.name}</h4>
+                                    <h4 className="text-lg font-bold tracking-tight text-foreground">{task.name}</h4>
                                   </div>
                                 </div>
 
@@ -420,14 +420,14 @@ export default function AutomationsPage() {
                                       value={task.targetAgentId ?? "all"}
                                       onValueChange={(v) => handleTaskAgentChange(config.pipelineStage, idx, v === "all" ? null : v)}
                                     >
-                                      <SelectTrigger className="h-10 text-xs font-black uppercase tracking-widest border-border rounded-xl bg-accent/50">
+                                      <SelectTrigger className="h-10 text-xs font-bold uppercase tracking-widest border-border rounded-xl bg-accent/50">
                                         <Users className="h-3 w-3 mr-2 text-primary" />
                                         <SelectValue placeholder="Assigne à..." />
                                       </SelectTrigger>
                                       <SelectContent className="rounded-xl border-border shadow-stripe-lg">
-                                        <SelectItem value="all" className="text-xs font-black uppercase">Flux Collectif</SelectItem>
+                                        <SelectItem value="all" className="text-xs font-bold uppercase">Flux Collectif</SelectItem>
                                         {agents.map((a) => (
-                                          <SelectItem key={a.id} value={a.id} className="text-xs font-black uppercase">{a.firstName} {a.lastName}</SelectItem>
+                                          <SelectItem key={a.id} value={a.id} className="text-xs font-bold uppercase">{a.firstName} {a.lastName}</SelectItem>
                                         ))}
                                       </SelectContent>
                                     </Select>
