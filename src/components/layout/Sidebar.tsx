@@ -41,7 +41,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Logo } from "@/components/ui/Logo";
 import { LogOut } from "lucide-react";
-import { useClerk } from "@clerk/nextjs";
+import { useSupabaseAuth } from "@/hooks/useSupabaseAuth";
 
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   kanban: Kanban,
@@ -136,7 +136,7 @@ function SidebarNav({ collapsed, onNavigate }: { collapsed: boolean; onNavigate?
 
 function SidebarContent({ collapsed, onNavigate }: { collapsed: boolean; onNavigate?: () => void }) {
   const { toggleCollapse } = useSidebar();
-  const { signOut } = useClerk();
+  const { signOut } = useSupabaseAuth();
 
   return (
     <>

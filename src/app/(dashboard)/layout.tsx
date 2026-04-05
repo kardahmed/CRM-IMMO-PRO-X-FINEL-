@@ -6,6 +6,7 @@ import { DemoBanner } from "@/components/shared/demo-banner";
 import { createSupabaseServerClient } from "@/lib/supabase-server";
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
+import { getSimulatedContext } from "@/lib/simulation-server";
 
 interface ITenantInfo {
   isDemo: boolean;
@@ -21,14 +22,24 @@ async function getTenantInfo(): Promise<ITenantInfo | null> {
     const userId = authUser?.id;
     if (!userId) return null;
 
-    const dbUser = await prisma.user.findFirst({
-      where: { clerkId: userId, isActive: true },
-      select: { tenantId: true },
-    });
-    if (!dbUser) return null;
+    // Check for simulated context (Super Admin only)
+    const sim = await getSimulatedContext();
+    let tenantIdToFetch: string | null = null;
+
+    if (sim.isSimulating && sim.tenantId) {
+      tenantIdToFetch = sim.tenantId;
+    } else {
+      const dbUser = await prisma.user.findFirst({
+        where: { clerkId: userId, isActive: true },
+        select: { tenantId: true },
+      });
+      tenantIdToFetch = dbUser?.tenantId ?? null;
+    }
+
+    if (!tenantIdToFetch) return null;
 
     const tenant = await prisma.tenant.findUnique({
-      where: { id: dbUser.tenantId },
+      where: { id: tenantIdToFetch },
       select: { status: true, settings: true },
     });
     if (!tenant) return null;
@@ -54,6 +65,8 @@ async function getTenantInfo(): Promise<ITenantInfo | null> {
     return null;
   }
 }
+
+import { SuperSwitcher } from "@/components/admin/SuperSwitcher";
 
 export default async function DashboardLayout({
   children,
@@ -86,6 +99,7 @@ export default async function DashboardLayout({
           </main>
         </div>
       </div>
+      <SuperSwitcher />
       <Toaster richColors position="top-right" toastOptions={{ className: "font-sans" }} />
     </SidebarProvider>
   );
