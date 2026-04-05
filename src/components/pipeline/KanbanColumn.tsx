@@ -196,7 +196,7 @@ export function KanbanColumn({
             {clients.length === 0 && !snapshot.isDraggingOver && (
               <div className="flex flex-col items-center justify-center h-32 opacity-30 grayscale group">
                 <LayoutDashboard className="h-8 w-8 mb-2 animate-pulse" />
-                <div className="text-xs font-black uppercase tracking-widest text-center">
+                <div className="text-xs font-bold uppercase tracking-widest text-center">
                   Aucun prospect <br/> dans cette étape
                 </div>
               </div>

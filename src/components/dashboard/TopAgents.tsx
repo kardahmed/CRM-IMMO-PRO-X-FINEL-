@@ -22,7 +22,7 @@ export function TopAgents({ agents }: { agents: Agent[] }) {
   return (
     <Card className="h-full border-border shadow-sm transition-all hover:shadow-lg">
       <CardHeader>
-        <CardTitle className="text-lg font-black uppercase tracking-tight">Top Performance</CardTitle>
+        <CardTitle className="text-lg font-bold uppercase tracking-tight">Top Performance</CardTitle>
         <CardDescription>Les meilleurs agents par volume de transactions</CardDescription>
       </CardHeader>
       <CardContent>
@@ -41,11 +41,11 @@ export function TopAgents({ agents }: { agents: Agent[] }) {
                 </div>
                 <div>
                   <p className="text-sm font-bold truncate max-w-[120px]">{agent.name}</p>
-                  <p className="text-xs text-muted-foreground font-black uppercase tracking-tighter">{agent.sales} Transactions</p>
+                  <p className="text-xs text-muted-foreground font-bold uppercase tracking-tighter">{agent.sales} Transactions</p>
                 </div>
               </div>
               <div className="text-right">
-                <Badge variant="outline" className="text-xs font-black border-primary/20 text-primary bg-primary/5 uppercase">
+                <Badge variant="outline" className="text-xs font-bold border-primary/20 text-primary bg-primary/5 uppercase">
                   Rang #{i + 1}
                 </Badge>
               </div>
@@ -55,7 +55,7 @@ export function TopAgents({ agents }: { agents: Agent[] }) {
           {agents.length === 0 && (
             <div className="text-center py-8 opacity-20 grayscale">
               <Trophy className="h-12 w-12 mx-auto mb-2" />
-              <p className="text-xs font-black uppercase tracking-widest">Aucune donnée</p>
+              <p className="text-xs font-bold uppercase tracking-widest">Aucune donnée</p>
             </div>
           )}
         </div>
