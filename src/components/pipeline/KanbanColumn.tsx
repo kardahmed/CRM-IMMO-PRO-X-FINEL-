@@ -3,7 +3,21 @@
 import { Droppable } from "@hello-pangea/dnd";
 import { KanbanCard, type PipelineClient } from "./KanbanCard";
 import { cn } from "@/lib/utils";
-
+import { Badge } from "@/components/ui/badge";
+import { 
+  MoreHorizontal, 
+  Plus, 
+  ArrowUpDown,
+  TrendingUp,
+  LayoutDashboard
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export interface StageDefinition {
   id: string;
@@ -41,7 +55,7 @@ export const PIPELINE_STAGES: StageDefinition[] = [
   },
   {
     id: "VISIT_SCHEDULED",
-    label: "Visite planifiée",
+    label: "Prospection",
     color: "text-cyan-700",
     bgColor: "bg-cyan-50 dark:bg-cyan-950/30",
     borderColor: "border-cyan-200 dark:border-cyan-800",
@@ -81,13 +95,20 @@ export const PIPELINE_STAGES: StageDefinition[] = [
   },
   {
     id: "CLOSED",
-    label: "Clôturé",
+    label: "Perdu",
     color: "text-gray-700",
     bgColor: "bg-gray-50 dark:bg-gray-950/30",
     borderColor: "border-gray-200 dark:border-gray-800",
     dotColor: "bg-gray-500",
   },
 ];
+
+function formatColumnBudget(budget: number): string {
+  if (budget >= 1_000_000) {
+    return `${(budget / 1_000_000).toFixed(1)}M DA`;
+  }
+  return `${(budget / 1_000).toFixed(0)}k DA`;
+}
 
 export function KanbanColumn({
   stage,
@@ -96,31 +117,62 @@ export function KanbanColumn({
   stage: StageDefinition;
   clients: PipelineClient[];
 }) {
+  const totalBudget = clients.reduce((acc, c) => acc + (c.budget || 0), 0);
+
   return (
     <div
       className={cn(
-        "flex flex-col rounded-xl border min-w-[240px] w-[240px] md:min-w-[280px] md:w-[280px] shrink-0",
+        "flex flex-col rounded-2xl border-2 transition-all duration-300 min-w-[280px] w-[280px] md:min-w-[320px] md:w-[320px] shrink-0",
         stage.borderColor,
-        stage.bgColor,
+        "bg-neutral-50/50 dark:bg-neutral-900/50 backdrop-blur-sm",
+        "shadow-sm hover:shadow-md"
       )}
     >
       {/* Column Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-inherit">
-        <div className="flex items-center gap-2">
-          <div className={cn("h-2.5 w-2.5 rounded-full", stage.dotColor)} />
-          <h3 className={cn("text-sm font-black uppercase tracking-tight", stage.color)}>
-            {stage.label}
-          </h3>
+      <div className="flex flex-col gap-2 p-4 border-b-2 border-inherit">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <div className={cn("h-3 w-3 rounded-full ring-4 ring-white dark:ring-neutral-900", stage.dotColor)} />
+            <h3 className={cn("text-xs font-black uppercase tracking-widest", stage.color)}>
+              {stage.label}
+            </h3>
+            <Badge variant="outline" className={cn("text-[10px] font-black h-5 px-1.5 rounded-md", stage.color, "bg-white/50 border-inherit")}>
+              {clients.length}
+            </Badge>
+          </div>
+          
+          <DropdownMenu>
+            <DropdownMenuTrigger>
+              <div className="p-1 px-2 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-md text-muted-foreground hover:text-foreground">
+                <MoreHorizontal className="h-4 w-4" />
+              </div>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem className="text-xs font-bold uppercase tracking-tight">
+                <ArrowUpDown className="mr-2 h-3.5 w-3.5" /> Trier par budget
+              </DropdownMenuItem>
+              <DropdownMenuItem className="text-xs font-bold uppercase tracking-tight">
+                <LayoutDashboard className="mr-2 h-3.5 w-3.5" /> Trier par date
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
-        <span
-          className={cn(
-            "text-[11px] font-black px-2 py-0.5 rounded-full",
-            "bg-white/70 dark:bg-black/20",
-            stage.color,
-          )}
-        >
-          {clients.length}
-        </span>
+
+        <div className="flex items-center justify-between mt-1">
+          <div className="flex items-center gap-1.5">
+            <TrendingUp className={cn("h-3.5 w-3.5", stage.color)} />
+            <span className={cn("text-sm font-black tabular-nums tracking-tighter", stage.color)}>
+              {formatColumnBudget(totalBudget)}
+            </span>
+          </div>
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className={cn("h-7 w-7 rounded-full bg-white/50 dark:bg-black/20 hover:scale-110 transition-transform", stage.color)}
+          >
+            <Plus className="h-3.5 w-3.5" />
+          </Button>
+        </div>
       </div>
 
       {/* Droppable Zone */}
@@ -130,8 +182,9 @@ export function KanbanColumn({
             ref={provided.innerRef}
             {...provided.droppableProps}
             className={cn(
-              "flex-1 overflow-y-auto p-2 space-y-2 min-h-[120px] max-h-[calc(100vh-220px)] transition-colors duration-200",
-              snapshot.isDraggingOver && "bg-primary/5 ring-2 ring-inset ring-primary/10 rounded-b-xl",
+              "flex-1 overflow-y-auto p-3 space-y-3 min-h-[120px] max-h-[calc(100vh-280px)] transition-all duration-300",
+              snapshot.isDraggingOver && "bg-white/40 dark:bg-black/10 rounded-b-2xl",
+              "scrollbar-thin scrollbar-thumb-neutral-200 dark:scrollbar-thumb-neutral-800"
             )}
           >
             {clients.map((client, index) => (
@@ -140,8 +193,11 @@ export function KanbanColumn({
             {provided.placeholder}
 
             {clients.length === 0 && !snapshot.isDraggingOver && (
-              <div className="flex items-center justify-center h-20 text-xs text-muted-foreground/50 font-medium italic">
-                Aucun prospect
+              <div className="flex flex-col items-center justify-center h-32 opacity-30 grayscale group">
+                <LayoutDashboard className="h-8 w-8 mb-2 animate-pulse" />
+                <div className="text-[10px] font-black uppercase tracking-widest text-center">
+                  Aucun prospect <br/> dans cette étape
+                </div>
               </div>
             )}
           </div>

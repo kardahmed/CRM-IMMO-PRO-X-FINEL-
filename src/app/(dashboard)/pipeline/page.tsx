@@ -8,10 +8,18 @@ import {
 } from "@hello-pangea/dnd";
 import { KanbanColumn, PIPELINE_STAGES } from "@/components/pipeline/KanbanColumn";
 import { PipelineFilters } from "@/components/pipeline/PipelineFilters";
+import { PipelineSummary } from "@/components/pipeline/PipelineSummary";
 import { LossReasonModal } from "@/components/pipeline/LossReasonModal";
 import type { PipelineClient } from "@/components/pipeline/KanbanCard";
-import { Kanban, Loader2, AlertCircle } from "lucide-react";
+import { Kanban, Loader2, AlertCircle, RefreshCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
+
+interface FilterOption {
+  id: string;
+  label: string;
+}
 
 // ============================================================================
 // Map API client data to PipelineClient shape
@@ -26,6 +34,7 @@ interface ApiClient {
   pipelineStage: string;
   desiredType: string | null;
   desiredWilaya: string | null;
+  source: string;
   createdAt: string;
   updatedAt: string;
   assignedAgent: {
@@ -57,6 +66,7 @@ function mapApiClientToPipeline(c: ApiClient): PipelineClient {
     lastInteraction: updatedAt,
     overdueTasks: 0,
     stage: c.pipelineStage,
+    source: c.source,
   };
 }
 
@@ -70,27 +80,70 @@ export default function PipelinePage() {
   const [search, setSearch] = useState("");
   const [agent, setAgent] = useState("all");
   const [project, setProject] = useState("all");
+  const [source, setSource] = useState("all");
+  const [minBudget, setMinBudget] = useState("");
+
+  const activeFiltersCount = useMemo(() => {
+    let count = 0;
+    if (search) count++;
+    if (agent !== "all") count++;
+    if (project !== "all") count++;
+    if (source !== "all") count++;
+    if (minBudget) count++;
+    return count;
+  }, [search, agent, project, source, minBudget]);
+
+  const resetFilters = useCallback(() => {
+    setSearch("");
+    setAgent("all");
+    setProject("all");
+    setSource("all");
+    setMinBudget("");
+  }, []);
+
+  const fetchClients = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const res = await fetch("/api/v1/clients?limit=250");
+      if (!res.ok) throw new Error(`Erreur ${res.status}`);
+      const json = await res.json();
+      if (!json.success) throw new Error(json.error || "Erreur inconnue");
+      const mapped = (json.data.clients as ApiClient[]).map(mapApiClientToPipeline);
+      setClients(mapped);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Erreur lors du chargement");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  // Extract dynamic filters from clients
+  const agents = useMemo<FilterOption[]>(() => {
+    const unique = new Set<string>();
+    clients.forEach(c => {
+      if (c.agentName && c.agentName !== "Non assigné") unique.add(c.agentName);
+    });
+    return Array.from(unique).sort().map(name => ({ id: name, label: name }));
+  }, [clients]);
+
+  const projects = useMemo<FilterOption[]>(() => {
+    const unique = new Set<string>();
+    clients.forEach(c => {
+      if (c.property && c.property !== "Non renseigné") {
+        // Extract project name (it's often the second part or the whole thing)
+        // For simplicity, we use the property string as is or split by ' - '
+        const p = c.property.split(" - ")[1] || c.property.split(" - ")[0];
+        if (p) unique.add(p);
+      }
+    });
+    return Array.from(unique).sort().map(name => ({ id: name, label: name }));
+  }, [clients]);
 
   // Fetch clients from API
   useEffect(() => {
-    async function fetchClients() {
-      try {
-        setLoading(true);
-        setError(null);
-        const res = await fetch("/api/v1/clients?limit=100");
-        if (!res.ok) throw new Error(`Erreur ${res.status}`);
-        const json = await res.json();
-        if (!json.success) throw new Error(json.error || "Erreur inconnue");
-        const mapped = (json.data.clients as ApiClient[]).map(mapApiClientToPipeline);
-        setClients(mapped);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Erreur lors du chargement");
-      } finally {
-        setLoading(false);
-      }
-    }
     fetchClients();
-  }, []);
+  }, [fetchClients]);
 
   // Loss reason modal state
   const [lossModal, setLossModal] = useState<{
@@ -125,9 +178,16 @@ export default function PipelinePage() {
       const matchProject =
         project === "all" ||
         c.property.toLowerCase().includes(project.toLowerCase());
-      return matchSearch && matchAgent && matchProject;
+      const matchSource = 
+        source === "all" || 
+        c.source === source;
+      const matchBudget = 
+        !minBudget || 
+        c.budget >= Number(minBudget);
+        
+      return matchSearch && matchAgent && matchProject && matchSource && matchBudget;
     });
-  }, [clients, search, agent, project]);
+  }, [clients, search, agent, project, source, minBudget]);
 
   // Group by stage
   const clientsByStage = useMemo(() => {
@@ -227,24 +287,49 @@ export default function PipelinePage() {
             <Kanban className="h-6 w-6" />
           </div>
           <div>
-            <h1 className="text-2xl font-black tracking-tight uppercase">
+            <h1 className="text-2xl font-black tracking-tight uppercase flex items-center gap-2">
               Pipeline
+              <Badge variant="outline" className="ml-2 font-black border-primary/20 text-primary bg-primary/5">UNIFIÉ</Badge>
             </h1>
             <p className="text-sm text-muted-foreground font-medium">
-              {clients.length} prospects · {PIPELINE_STAGES.length} étapes
+              {filteredClients.length} prospects filtrés · {PIPELINE_STAGES.length} étapes
             </p>
           </div>
         </div>
 
-        <PipelineFilters
-          search={search}
-          onSearchChange={setSearch}
-          agent={agent}
-          onAgentChange={setAgent}
-          project={project}
-          onProjectChange={setProject}
-        />
+        <div className="flex items-center gap-2">
+          <Button 
+             variant="outline" 
+             size="icon" 
+             onClick={fetchClients} 
+             disabled={loading}
+             className="rounded-xl border-2 hover:bg-neutral-50 dark:hover:bg-neutral-900"
+          >
+            <RefreshCcw className={cn("h-4 w-4", loading && "animate-spin")} />
+          </Button>
+          <PipelineFilters
+            search={search}
+            onSearchChange={setSearch}
+            agent={agent}
+            onAgentChange={setAgent}
+            project={project}
+            onProjectChange={setProject}
+            source={source}
+            onSourceChange={setSource}
+            minBudget={minBudget}
+            onMinBudgetChange={setMinBudget}
+            activeFiltersCount={activeFiltersCount}
+            onReset={resetFilters}
+            agents={agents}
+            projects={projects}
+          />
+        </div>
       </div>
+
+      {/* Summary Dashboard */}
+      {!loading && !error && (
+        <PipelineSummary clients={filteredClients} />
+      )}
 
       {/* Loading */}
       {loading && (

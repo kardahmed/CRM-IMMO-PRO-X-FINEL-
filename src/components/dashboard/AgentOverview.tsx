@@ -47,12 +47,12 @@ export function AgentOverview({ welcomeMessage, stats, tasks }: AgentOverviewPro
           <CardContent className="space-y-4 pt-2 relative">
             <div className="flex justify-between items-end">
               <span className="text-4xl font-black text-primary">{stats.monthlyGoal}%</span>
-              <span className="text-sm font-medium text-muted-foreground p-1 px-2 border rounded-full bg-background/50">Objectif: 12 ventes</span>
+              <span className="text-sm font-medium text-muted-foreground p-1 px-2 border rounded-full bg-background/50">Progression Mensuelle</span>
             </div>
             <Progress value={stats.monthlyGoal} className="h-3 shadow-inner" />
             <div className="flex justify-between text-xs font-semibold text-muted-foreground uppercase opacity-80">
-              <span className="flex items-center gap-1"><CheckCircle2 className="h-3 w-3 text-green-500" /> 9 Réalisées</span>
-              <span className="flex items-center gap-1"><Circle className="h-3 w-3 text-primary/30" /> 3 Restantes</span>
+              <span className="flex items-center gap-1"><CheckCircle2 className="h-3 w-3 text-green-500" /> Objectifs en cours</span>
+              <span className="flex items-center gap-1"><Circle className="h-3 w-3 text-primary/30" /> Reste à accomplir</span>
             </div>
           </CardContent>
         </Card>

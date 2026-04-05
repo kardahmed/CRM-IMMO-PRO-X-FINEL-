@@ -9,7 +9,6 @@ import { Trophy, Medal, Star } from "lucide-react";
 interface Agent {
   name: string;
   sales: number;
-  revenue: string;
   avatar: string;
 }
 
@@ -24,7 +23,7 @@ export function TopAgents({ agents }: { agents: Agent[] }) {
     <Card className="h-full border-neutral-100 dark:border-neutral-800 shadow-sm transition-all hover:shadow-lg">
       <CardHeader>
         <CardTitle className="text-lg font-black uppercase tracking-tight">Top Performance</CardTitle>
-        <CardDescription>Les 3 meilleurs agents ce mois-ci</CardDescription>
+        <CardDescription>Les meilleurs agents par volume de transactions</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
@@ -42,16 +41,23 @@ export function TopAgents({ agents }: { agents: Agent[] }) {
                 </div>
                 <div>
                   <p className="text-sm font-bold truncate max-w-[120px]">{agent.name}</p>
-                  <p className="text-[10px] text-muted-foreground font-black uppercase tracking-tighter">{agent.sales} Ventes</p>
+                  <p className="text-[10px] text-muted-foreground font-black uppercase tracking-tighter">{agent.sales} Transactions</p>
                 </div>
               </div>
               <div className="text-right">
                 <Badge variant="outline" className="text-[10px] font-black border-primary/20 text-primary bg-primary/5 uppercase">
-                  {agent.revenue} CA
+                  Rang #{i + 1}
                 </Badge>
               </div>
             </div>
           ))}
+
+          {agents.length === 0 && (
+            <div className="text-center py-8 opacity-20 grayscale">
+              <Trophy className="h-12 w-12 mx-auto mb-2" />
+              <p className="text-xs font-black uppercase tracking-widest">Aucune donnée</p>
+            </div>
+          )}
         </div>
       </CardContent>
     </Card>
