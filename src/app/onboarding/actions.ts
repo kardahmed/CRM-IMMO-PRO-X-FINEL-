@@ -90,7 +90,7 @@ export async function createWorkspace(formData: FormData) {
 
       const user = await tx.user.create({
         data: {
-          clerkId: supabaseId,
+          supabaseId: supabaseId,
           tenantId: tenant.id,
           firstName,
           lastName,

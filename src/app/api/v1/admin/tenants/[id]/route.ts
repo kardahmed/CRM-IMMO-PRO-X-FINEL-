@@ -64,7 +64,7 @@ export async function GET(
  * PUT /api/v1/admin/tenants/[id]
  *
  * Update tenant status, plan, name, etc.
- * When changing status from DEMO to ACTIVE, also updates Clerk metadata for all users.
+ * When changing status from DEMO to ACTIVE, also updates Supabase metadata for all users.
  */
 export async function PUT(
   req: NextRequest,
@@ -154,13 +154,13 @@ export async function PUT(
     if (data.plan && data.plan !== existing.plan) {
       const tenantUsers = await prisma.user.findMany({
         where: { tenantId: id, isActive: true },
-        select: { clerkId: true },
+        select: { supabaseId: true },
       });
 
       const supabaseAdmin = createSupabaseAdminClient();
       await Promise.allSettled(
         tenantUsers.map((u) =>
-          supabaseAdmin.auth.admin.updateUserById(u.clerkId, {
+          supabaseAdmin.auth.admin.updateUserById(u.supabaseId, {
             user_metadata: { plan: data.plan },
           }),
         ),
@@ -177,7 +177,7 @@ export async function PUT(
 /**
  * DELETE /api/v1/admin/tenants/[id]
  *
- * Delete a workspace: deactivate all users, clear Clerk metadata, then delete the tenant.
+ * Delete a workspace: deactivate all users, clear Supabase metadata, then delete the tenant.
  * Cascading deletes in Prisma schema handle clients, properties, projects, etc.
  */
 export async function DELETE(
@@ -206,14 +206,14 @@ export async function DELETE(
     // 1. Get all users of this tenant
     const tenantUsers = await prisma.user.findMany({
       where: { tenantId: id },
-      select: { id: true, clerkId: true },
+      select: { id: true, supabaseId: true },
     });
 
     // 2. Clear Supabase user_metadata for all users (remove tenantId, role, plan)
     const supabaseAdmin = createSupabaseAdminClient();
     await Promise.allSettled(
       tenantUsers.map((u) =>
-        supabaseAdmin.auth.admin.updateUserById(u.clerkId, {
+        supabaseAdmin.auth.admin.updateUserById(u.supabaseId, {
           user_metadata: {
             tenantId: null,
             role: null,

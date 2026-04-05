@@ -30,7 +30,7 @@ export async function getCurrentUser(): Promise<ICurrentUser> {
 
   const dbUser = await prisma.user.findFirst({
     where: {
-      clerkId: authUser.id, // clerkId field repurposed for supabaseId
+      supabaseId: authUser.id,
       isActive: true,
     },
   });
@@ -77,7 +77,7 @@ export async function getAdminUser(): Promise<{ supabaseId: string; role: UserRo
   if (!authUser) return null;
 
   const dbUser = await prisma.user.findFirst({
-    where: { clerkId: authUser.id, isActive: true },
+    where: { supabaseId: authUser.id, isActive: true },
     select: { role: true },
   });
 

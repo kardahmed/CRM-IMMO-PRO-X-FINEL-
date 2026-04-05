@@ -3,7 +3,7 @@
 -- Supabase PostgreSQL
 --
 -- Chaque table (sauf tenants) est protégée par RLS.
--- Le tenant_id est extrait du JWT Clerk via : auth.jwt()->>'tenant_id'
+-- Le tenant_id est extrait du JWT Supabase via : auth.jwt()->>'tenant_id'
 -- ============================================================================
 
 -- ============================================================================

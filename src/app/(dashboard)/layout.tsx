@@ -30,7 +30,7 @@ async function getTenantInfo(): Promise<ITenantInfo | null> {
       tenantIdToFetch = sim.tenantId;
     } else {
       const dbUser = await prisma.user.findFirst({
-        where: { clerkId: userId, isActive: true },
+        where: { supabaseId: userId, isActive: true },
         select: { tenantId: true },
       });
       tenantIdToFetch = dbUser?.tenantId ?? null;
