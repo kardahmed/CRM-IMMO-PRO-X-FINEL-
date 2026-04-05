@@ -26,6 +26,7 @@ import {
   Loader2,
   ShieldCheck,
 } from "lucide-react";
+import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { triggerDemoSeeding } from "@/app/admin/demo/actions";
@@ -124,16 +125,27 @@ export function SuperSwitcher() {
               <Monitor className="h-4 w-4 text-primary" />
               HQ Simulator
             </h3>
-            {isSimulating && (
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                onClick={stopSimulation}
-                className="text-[10px] uppercase font-black text-destructive hover:text-destructive hover:bg-destructive/10 h-7"
-              >
-                Reset simulation
-              </Button>
-            )}
+            <div className="flex items-center gap-2">
+              <Link href="/super-admin">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="text-[10px] uppercase font-black border-primary/20 text-primary hover:bg-primary/5 h-7 px-3 rounded-full"
+                >
+                  Back Office
+                </Button>
+              </Link>
+              {isSimulating && (
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={stopSimulation}
+                  className="text-[10px] uppercase font-black text-destructive hover:text-destructive hover:bg-destructive/10 h-7"
+                >
+                  Reset
+                </Button>
+              )}
+            </div>
           </div>
 
           <div className="space-y-5">

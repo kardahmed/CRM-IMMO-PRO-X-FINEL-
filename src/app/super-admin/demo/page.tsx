@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import {
   Users,
   Clock,
@@ -72,20 +73,22 @@ export default function SuperAdminDemoLeads() {
   const newCount = leads.filter((l) => l.status === "NEW").length;
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-8">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-black text-white tracking-tight flex items-center gap-2">
-            <Users className="h-6 w-6 text-rose-400" />
+          <h1 className="text-3xl font-black text-foreground tracking-tight flex items-center gap-3">
+            <div className="h-10 w-10 rounded-2xl bg-primary/10 flex items-center justify-center">
+              <Users className="h-5 w-5 text-primary" />
+            </div>
             Demandes de Demo
             {newCount > 0 && (
-              <Badge className="bg-rose-500/10 text-rose-400 border-none ml-2">
-                {newCount} nouveau{newCount > 1 ? "x" : ""}
+              <Badge className="bg-rose-500/10 text-rose-500 border-rose-500/20 ml-2 px-3 py-1 rounded-full text-[10px] font-black">
+                {newCount} NOUVEAU{newCount > 1 ? "X" : ""}
               </Badge>
             )}
           </h1>
-          <p className="text-sm text-neutral-400 mt-1">
-            Toutes les demandes soumises via le formulaire /demo. Un tenant DEMO est cree automatiquement.
+          <p className="text-sm text-muted-foreground mt-2 font-medium">
+            Toutes les demandes soumises via le formulaire public. Un tenant DEMO est crée automatiquement.
           </p>
         </div>
         <Button
@@ -93,116 +96,133 @@ export default function SuperAdminDemoLeads() {
           size="sm"
           onClick={fetchLeads}
           disabled={loading}
-          className="border-neutral-800 text-neutral-300 hover:text-white hover:bg-neutral-900 gap-2"
+          className="rounded-2xl border-border bg-background shadow-sm hover:bg-accent gap-2 h-11 px-5 font-bold"
         >
-          <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
-          Actualiser
+          <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : "text-primary"}`} />
+          Actualiser la liste
         </Button>
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <StatCard label="Total" value={leads.length} color="text-white" />
-        <StatCard label="Nouveaux" value={newCount} color="text-rose-400" />
-        <StatCard label="Contactes" value={leads.filter((l) => l.status === "CONTACTED").length} color="text-cyan-400" />
-        <StatCard label="Qualifies" value={leads.filter((l) => l.status === "QUALIFIED").length} color="text-emerald-400" />
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+        <StatCard label="Total Leads" value={leads.length} color="text-foreground" />
+        <StatCard label="Nouveaux" value={newCount} color="text-rose-500" />
+        <StatCard label="Contactés" value={leads.filter((l) => l.status === "CONTACTED").length} color="text-cyan-500" />
+        <StatCard label="Qualifiés" value={leads.filter((l) => l.status === "QUALIFIED").length} color="text-emerald-500" />
       </div>
 
       {/* Loading / Error / Empty */}
       {loading && leads.length === 0 && (
-        <div className="flex items-center justify-center py-20">
-          <Loader2 className="h-8 w-8 animate-spin text-neutral-500" />
+        <div className="flex flex-col items-center justify-center py-32 space-y-4">
+          <div className="h-12 w-12 rounded-full border-4 border-primary/10 border-t-primary animate-spin" />
+          <p className="text-sm font-bold text-muted-foreground animate-pulse uppercase tracking-widest">Récupération des leads...</p>
         </div>
       )}
 
       {error && (
-        <div className="p-4 rounded-lg bg-red-500/10 border border-red-500/20 flex items-center gap-2 text-sm text-red-400">
-          <AlertCircle className="h-4 w-4 shrink-0" />
-          {error}
+        <div className="p-6 rounded-[24px] bg-destructive/5 border border-destructive/10 flex items-center gap-4 text-sm text-destructive shadow-sm">
+          <AlertCircle className="h-5 w-5 shrink-0" />
+          <span className="font-bold">{error}</span>
         </div>
       )}
 
       {!loading && !error && leads.length === 0 && (
-        <div className="text-center py-20 text-neutral-500">
-          <Users className="h-12 w-12 mx-auto mb-4 opacity-30" />
-          <p className="font-bold">Aucune demande de demo</p>
-          <p className="text-sm mt-1">Les demandes apparaitront ici lorsque des prospects rempliront le formulaire /demo</p>
+        <div className="text-center py-32 bg-card rounded-[32px] border-2 border-dashed border-border/50">
+          <div className="h-20 w-20 bg-muted rounded-full flex items-center justify-center mx-auto mb-6">
+            <Users className="h-10 w-10 text-muted-foreground/30" />
+          </div>
+          <p className="font-black text-xl text-foreground tracking-tight">Aucune demande de démo</p>
+          <p className="text-sm text-muted-foreground mt-2 max-w-xs mx-auto">
+            Les demandes apparaîtront ici dès que des prospects rempliront le formulaire sur la landing page.
+          </p>
         </div>
       )}
 
       {/* Lead Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {leads.map((lead) => {
           const badge = STATUS_BADGES[lead.status] || STATUS_BADGES.NEW;
 
           return (
             <Card
               key={lead.id}
-              className="bg-neutral-900/50 border-neutral-800 backdrop-blur-sm hover:border-neutral-700 transition-colors"
+              className="bg-card border-border shadow-stripe hover:shadow-stripe-lg hover:-translate-y-1 transition-all duration-300 rounded-[32px] overflow-hidden group"
             >
-              <CardContent className="p-5 relative">
-                <div className="absolute top-5 right-5">
-                  <Badge className={badge.className}>{badge.label}</Badge>
+              <CardContent className="p-6 relative">
+                <div className="absolute top-6 right-6">
+                  <Badge className={cn("px-3 py-1 rounded-full", badge.className)}>{badge.label}</Badge>
                 </div>
 
-                <div className="space-y-4">
+                <div className="space-y-6">
                   <div>
-                    <h3 className="font-black text-lg text-white flex items-center gap-2">
-                      <Building className="h-4 w-4 text-neutral-500" />
+                    <h3 className="font-black text-xl text-foreground tracking-tight flex items-center gap-2 group-hover:text-primary transition-colors">
+                      <Building className="h-5 w-5 text-muted-foreground/50" />
                       {lead.companyName}
                     </h3>
-                    <p className="text-sm text-neutral-400 font-medium">
-                      Par {lead.firstName} {lead.lastName}
+                    <p className="text-sm text-muted-foreground font-bold mt-1">
+                      {lead.firstName} {lead.lastName}
                     </p>
-                    <div className="flex items-center gap-2 mt-1">
+                    <div className="flex items-center gap-2 mt-3">
                       <Badge
                         variant="outline"
-                        className={
+                        className={cn(
+                          "rounded-full px-3 py-0.5 font-bold uppercase text-[9px] border-none shadow-sm",
                           lead.companyType === "PROMOTION"
-                            ? "border-violet-500/30 text-violet-400 bg-violet-500/10 text-[10px]"
-                            : "border-cyan-500/30 text-cyan-400 bg-cyan-500/10 text-[10px]"
-                        }
+                            ? "bg-violet-500/10 text-violet-600"
+                            : "bg-cyan-500/10 text-cyan-600"
+                        )}
                       >
-                        {lead.companyType === "PROMOTION" ? "Promotion" : "Agence"}
+                        {lead.companyType === "PROMOTION" ? "Promoteur" : "Agence"}
                       </Badge>
                       {lead.agentCount && (
-                        <span className="text-[10px] text-neutral-500 flex items-center gap-1">
-                          <UserCheck className="h-3 w-3" /> {lead.agentCount} agents
+                        <span className="text-[10px] text-muted-foreground font-black flex items-center gap-1 bg-muted px-2 py-0.5 rounded-full">
+                          <UserCheck className="h-3 w-3 text-primary" /> {lead.agentCount} AGENTS
                         </span>
                       )}
                     </div>
                   </div>
 
-                  <div className="space-y-1.5 text-xs">
-                    <p className="flex items-center gap-2 text-neutral-300">
-                      <Mail className="h-3 w-3 text-neutral-500" /> {lead.email}
+                  <div className="grid grid-cols-1 gap-3 p-4 rounded-2xl bg-accent/50 border border-border/50">
+                    <p className="flex items-center gap-3 text-xs font-bold text-foreground">
+                      <div className="h-6 w-6 rounded-lg bg-background flex items-center justify-center shadow-sm">
+                        <Mail className="h-3.5 w-3.5 text-muted-foreground" />
+                      </div>
+                      {lead.email}
                     </p>
-                    <p className="flex items-center gap-2 text-neutral-300">
-                      <Phone className="h-3 w-3 text-neutral-500" /> {lead.phone}
+                    <p className="flex items-center gap-3 text-xs font-bold text-foreground">
+                       <div className="h-6 w-6 rounded-lg bg-background flex items-center justify-center shadow-sm">
+                        <Phone className="h-3.5 w-3.5 text-muted-foreground" />
+                      </div>
+                      {lead.phone}
                     </p>
                     {lead.wilaya && (
-                      <p className="flex items-center gap-2 text-neutral-300">
-                        <MapPin className="h-3 w-3 text-neutral-500" /> {lead.wilaya}
+                      <p className="flex items-center gap-3 text-xs font-bold text-foreground">
+                        <div className="h-6 w-6 rounded-lg bg-background flex items-center justify-center shadow-sm">
+                          <MapPin className="h-3.5 w-3.5 text-muted-foreground" />
+                        </div>
+                        {lead.wilaya}
                       </p>
                     )}
-                    {lead.message && (
-                      <p className="text-neutral-500 italic mt-2 line-clamp-2">
-                        &ldquo;{lead.message}&rdquo;
-                      </p>
-                    )}
-                    <p className="flex items-center gap-2 text-neutral-500 font-medium pt-2">
-                      <Clock className="h-3 w-3 text-neutral-600" />
-                      Il y a {formatDistanceToNow(new Date(lead.createdAt), { locale: fr })}
-                    </p>
                   </div>
 
-                  {lead.tenantId && (
-                    <div className="pt-2 border-t border-neutral-800">
-                      <p className="text-[10px] text-neutral-500 font-mono truncate">
-                        Tenant: {lead.tenantId}
-                      </p>
+                  {lead.message && (
+                    <div className="p-4 rounded-2xl bg-primary/5 italic text-sm text-muted-foreground border-l-4 border-primary/20 line-clamp-3">
+                      &ldquo;{lead.message}&rdquo;
                     </div>
                   )}
+
+                  <div className="flex items-center justify-between pt-4 border-t border-border/50 mt-4">
+                    <div className="flex items-center gap-2 text-xs font-bold text-muted-foreground/60 uppercase tracking-tighter">
+                      <Clock className="h-3.5 w-3.5" />
+                      {formatDistanceToNow(new Date(lead.createdAt), { locale: fr, addSuffix: true })}
+                    </div>
+                    {lead.tenantId && (
+                      <div className="flex items-center gap-1 px-2 py-1 bg-emerald-500/5 text-emerald-600 rounded-lg">
+                         <div className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                         <span className="text-[9px] font-black font-mono">TENANT OK</span>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -215,10 +235,12 @@ export default function SuperAdminDemoLeads() {
 
 function StatCard({ label, value, color }: { label: string; value: number; color: string }) {
   return (
-    <Card className="bg-neutral-900/50 border-neutral-800">
-      <CardContent className="p-4 text-center">
-        <p className={`text-2xl font-black ${color}`}>{value}</p>
-        <p className="text-xs text-neutral-500 font-bold uppercase tracking-wider mt-1">{label}</p>
+    <Card className="bg-card border-border shadow-stripe rounded-[24px] group hover:scale-[1.02] transition-transform">
+      <CardContent className="p-6 text-center">
+        <p className={cn("text-4xl font-black tracking-tighter", color)}>{value}</p>
+        <p className="text-[10px] text-muted-foreground font-black uppercase tracking-[0.2em] mt-2 opacity-60 group-hover:opacity-100 transition-opacity">
+          {label}
+        </p>
       </CardContent>
     </Card>
   );
