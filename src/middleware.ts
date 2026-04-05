@@ -98,6 +98,11 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(signInUrl);
   }
 
+  // Super admin — skip onboarding entirely
+  if (isOnboardingRoute(pathname) && user.email === "contact@sensium-x.com") {
+    return NextResponse.redirect(new URL("/super-admin", req.url));
+  }
+
   // Onboarding — redirect to dashboard if user already has a tenant
   // (We check user_metadata for tenantId set during workspace creation)
   if (isOnboardingRoute(pathname)) {
@@ -108,10 +113,13 @@ export async function middleware(req: NextRequest) {
     return supabaseResponse;
   }
 
+  // Super admin bypass — never redirect to onboarding
+  const isSuperAdmin = user.email === "contact@sensium-x.com";
+
   // Dashboard & Super Admin — require tenant (except super admin)
   if (isDashboardRoute(pathname) || isSuperAdminRoute(pathname)) {
     const tenantId = user.user_metadata?.tenantId as string | undefined;
-    if (!tenantId && !isSuperAdminRoute(pathname)) {
+    if (!tenantId && !isSuperAdminRoute(pathname) && !isSuperAdmin) {
       return NextResponse.redirect(new URL("/onboarding", req.url));
     }
     return supabaseResponse;
