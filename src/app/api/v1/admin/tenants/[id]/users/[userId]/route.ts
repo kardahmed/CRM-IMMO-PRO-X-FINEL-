@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { currentUser, clerkClient } from "@clerk/nextjs/server";
+import { getAdminUser } from "@/lib/auth";
+import { createSupabaseAdminClient } from "@/lib/supabase-server";
 import { prisma } from "@/lib/prisma";
 import { rateLimit, getClientIp, RATE_LIMITS } from "@/lib/rate-limit";
-import type { UserRole } from "@prisma/client";
 import * as Sentry from "@sentry/nextjs";
 
 /**
@@ -20,12 +20,12 @@ export async function PATCH(
     return NextResponse.json({ success: false, error: "Trop de requetes" }, { status: 429 });
   }
 
-  const user = await currentUser();
-  if (!user) {
+  const admin = await getAdminUser();
+  if (!admin) {
     return NextResponse.json({ success: false, error: "Non authentifie" }, { status: 401 });
   }
 
-  const role = user.publicMetadata?.role as UserRole | undefined;
+  const role = admin.role;
   if (role !== "SUPER_ADMIN" && role !== "ADMIN") {
     return NextResponse.json({ success: false, error: "Acces refuse" }, { status: 403 });
   }
@@ -57,12 +57,12 @@ export async function PATCH(
       select: { id: true, firstName: true, lastName: true, email: true, role: true, isActive: true },
     });
 
-    // Sync Clerk metadata
-    const clerk = await clerkClient();
+    // Sync Supabase user_metadata
+    const supabaseAdmin = createSupabaseAdminClient();
     if (!body.isActive) {
       // Deactivating — clear tenantId so user gets redirected to onboarding
-      await clerk.users.updateUserMetadata(dbUser.clerkId, {
-        publicMetadata: {
+      await supabaseAdmin.auth.admin.updateUserById(dbUser.clerkId, {
+        user_metadata: {
           tenantId: null,
           role: null,
           workspaceType: null,
@@ -75,8 +75,8 @@ export async function PATCH(
         where: { id: tenantId },
         select: { type: true, plan: true },
       });
-      await clerk.users.updateUserMetadata(dbUser.clerkId, {
-        publicMetadata: {
+      await supabaseAdmin.auth.admin.updateUserById(dbUser.clerkId, {
+        user_metadata: {
           tenantId,
           role: updated.role,
           workspaceType: tenant?.type ?? null,
@@ -107,12 +107,12 @@ export async function DELETE(
     return NextResponse.json({ success: false, error: "Trop de requetes" }, { status: 429 });
   }
 
-  const user = await currentUser();
-  if (!user) {
+  const admin = await getAdminUser();
+  if (!admin) {
     return NextResponse.json({ success: false, error: "Non authentifie" }, { status: 401 });
   }
 
-  const role = user.publicMetadata?.role as UserRole | undefined;
+  const role = admin.role;
   if (role !== "SUPER_ADMIN") {
     return NextResponse.json({ success: false, error: "Acces refuse — SUPER_ADMIN requis" }, { status: 403 });
   }
@@ -129,10 +129,10 @@ export async function DELETE(
       return NextResponse.json({ success: false, error: "Utilisateur introuvable" }, { status: 404 });
     }
 
-    // 1. Clear Clerk metadata
-    const clerk = await clerkClient();
-    await clerk.users.updateUserMetadata(dbUser.clerkId, {
-      publicMetadata: {
+    // 1. Clear Supabase user_metadata
+    const supabaseAdmin = createSupabaseAdminClient();
+    await supabaseAdmin.auth.admin.updateUserById(dbUser.clerkId, {
+      user_metadata: {
         tenantId: null,
         role: null,
         workspaceType: null,

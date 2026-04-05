@@ -3,7 +3,7 @@ import { Header } from "@/components/layout/Header";
 import { SidebarProvider } from "@/hooks/useSidebar";
 import { Toaster } from "sonner";
 import { DemoBanner } from "@/components/shared/demo-banner";
-import { auth } from "@clerk/nextjs/server";
+import { createSupabaseServerClient } from "@/lib/supabase-server";
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
 
@@ -16,17 +16,19 @@ interface ITenantInfo {
 
 async function getTenantInfo(): Promise<ITenantInfo | null> {
   try {
-    const { userId } = await auth();
+    const supabase = await createSupabaseServerClient();
+    const { data: { user: authUser } } = await supabase.auth.getUser();
+    const userId = authUser?.id;
     if (!userId) return null;
 
-    const user = await prisma.user.findFirst({
+    const dbUser = await prisma.user.findFirst({
       where: { clerkId: userId, isActive: true },
       select: { tenantId: true },
     });
-    if (!user) return null;
+    if (!dbUser) return null;
 
     const tenant = await prisma.tenant.findUnique({
-      where: { id: user.tenantId },
+      where: { id: dbUser.tenantId },
       select: { status: true, settings: true },
     });
     if (!tenant) return null;

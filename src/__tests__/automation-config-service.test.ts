@@ -36,7 +36,7 @@ vi.mock("@/lib/prisma", () => ({
   },
 }));
 
-vi.mock("@clerk/nextjs/server", () => ({
+vi.mock("@/lib/auth", () => ({
   auth: vi.fn(),
   currentUser: vi.fn(),
 }));
@@ -62,7 +62,7 @@ function makeUser(): ICurrentUser {
     userId: "user-001",
     tenantId: "tenant-001",
     role: "CEO",
-    clerkId: "clerk-001",
+    supabaseId: "sb-001",
     firstName: "CEO",
     lastName: "Test",
     email: "ceo@test.com",

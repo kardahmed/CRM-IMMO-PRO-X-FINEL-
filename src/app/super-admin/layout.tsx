@@ -3,7 +3,7 @@
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useUser } from "@clerk/nextjs";
+import { useSupabaseAuth } from "@/hooks/useSupabaseAuth";
 import { useEffect } from "react";
 import {
   BarChart,
@@ -24,10 +24,9 @@ export default function SuperAdminLayout({
 }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { user, isLoaded } = useUser();
+  const { role, isLoaded } = useSupabaseAuth();
 
   // Guard: seul SUPER_ADMIN ou ADMIN peut accéder
-  const role = user?.publicMetadata?.role as string | undefined;
   const isAllowed = role === "SUPER_ADMIN" || role === "ADMIN";
   useEffect(() => {
     if (isLoaded && !isAllowed) {

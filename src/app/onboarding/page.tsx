@@ -24,7 +24,8 @@ import {
   Check,
   Sparkles,
 } from "lucide-react";
-import { useUser } from "@clerk/nextjs";
+import { useSupabaseAuth } from "@/hooks/useSupabaseAuth";
+import { createSupabaseBrowserClient } from "@/lib/supabase-browser";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
@@ -57,7 +58,7 @@ export default function OnboardingPage() {
   const [currentStep, setCurrentStep] = useState(0);
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
-  const { user } = useUser();
+  const { user } = useSupabaseAuth();
   const router = useRouter();
 
   // Step 2 state
@@ -110,7 +111,9 @@ export default function OnboardingPage() {
         const res = await createWorkspace(formData);
         if (res.success) {
           toast.success("Espace de travail cree avec succes !");
-          if (user) await user.reload();
+          // Force refresh the session to pick up updated user_metadata
+          const supabase = createSupabaseBrowserClient();
+          await supabase.auth.refreshSession();
           goNext();
         } else {
           setError(res.error);

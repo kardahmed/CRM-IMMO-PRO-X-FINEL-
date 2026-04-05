@@ -1,7 +1,5 @@
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
-import { ClerkProvider } from "@clerk/nextjs";
-import { frFR } from "@clerk/localizations";
 import { AuthHeader } from "@/components/shared/auth-header";
 import { I18nProvider } from "@/lib/i18n/provider";
 import "./globals.css";
@@ -87,12 +85,10 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <ClerkProvider localization={frFR}>
-          <I18nProvider>
-            <AuthHeader />
-            {children}
-          </I18nProvider>
-        </ClerkProvider>
+        <I18nProvider>
+          <AuthHeader />
+          {children}
+        </I18nProvider>
       </body>
     </html>
   );

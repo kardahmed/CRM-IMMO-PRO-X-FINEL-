@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { currentUser, clerkClient } from "@clerk/nextjs/server";
+import { getAdminUser } from "@/lib/auth";
+import { createSupabaseAdminClient } from "@/lib/supabase-server";
 import { prisma } from "@/lib/prisma";
 import { rateLimit, getClientIp, RATE_LIMITS } from "@/lib/rate-limit";
 import { z } from "zod";
-import type { UserRole } from "@prisma/client";
 import * as Sentry from "@sentry/nextjs";
 
 const updateTenantSchema = z.object({
@@ -26,12 +26,12 @@ export async function GET(
     return NextResponse.json({ success: false, error: "Trop de requetes" }, { status: 429 });
   }
 
-  const user = await currentUser();
-  if (!user) {
+  const admin = await getAdminUser();
+  if (!admin) {
     return NextResponse.json({ success: false, error: "Non authentifie" }, { status: 401 });
   }
 
-  const role = user.publicMetadata?.role as UserRole | undefined;
+  const role = admin.role;
   if (role !== "SUPER_ADMIN" && role !== "ADMIN") {
     return NextResponse.json({ success: false, error: "Acces refuse" }, { status: 403 });
   }
@@ -76,12 +76,12 @@ export async function PUT(
     return NextResponse.json({ success: false, error: "Trop de requetes" }, { status: 429 });
   }
 
-  const user = await currentUser();
-  if (!user) {
+  const admin = await getAdminUser();
+  if (!admin) {
     return NextResponse.json({ success: false, error: "Non authentifie" }, { status: 401 });
   }
 
-  const role = user.publicMetadata?.role as UserRole | undefined;
+  const role = admin.role;
   if (role !== "SUPER_ADMIN" && role !== "ADMIN") {
     return NextResponse.json({ success: false, error: "Acces refuse" }, { status: 403 });
   }
@@ -150,18 +150,18 @@ export async function PUT(
       data: updateData,
     });
 
-    // If plan changed, update Clerk metadata for all tenant users
+    // If plan changed, update Supabase user_metadata for all tenant users
     if (data.plan && data.plan !== existing.plan) {
       const tenantUsers = await prisma.user.findMany({
         where: { tenantId: id, isActive: true },
         select: { clerkId: true },
       });
 
-      const clerk = await clerkClient();
+      const supabaseAdmin = createSupabaseAdminClient();
       await Promise.allSettled(
         tenantUsers.map((u) =>
-          clerk.users.updateUserMetadata(u.clerkId, {
-            publicMetadata: { plan: data.plan },
+          supabaseAdmin.auth.admin.updateUserById(u.clerkId, {
+            user_metadata: { plan: data.plan },
           }),
         ),
       );
@@ -190,12 +190,12 @@ export async function DELETE(
     return NextResponse.json({ success: false, error: "Trop de requetes" }, { status: 429 });
   }
 
-  const user = await currentUser();
-  if (!user) {
+  const admin = await getAdminUser();
+  if (!admin) {
     return NextResponse.json({ success: false, error: "Non authentifie" }, { status: 401 });
   }
 
-  const role = user.publicMetadata?.role as UserRole | undefined;
+  const role = admin.role;
   if (role !== "SUPER_ADMIN") {
     return NextResponse.json({ success: false, error: "Acces refuse — SUPER_ADMIN requis" }, { status: 403 });
   }
@@ -209,12 +209,12 @@ export async function DELETE(
       select: { id: true, clerkId: true },
     });
 
-    // 2. Clear Clerk metadata for all users (remove tenantId, role, plan)
-    const clerk = await clerkClient();
+    // 2. Clear Supabase user_metadata for all users (remove tenantId, role, plan)
+    const supabaseAdmin = createSupabaseAdminClient();
     await Promise.allSettled(
       tenantUsers.map((u) =>
-        clerk.users.updateUserMetadata(u.clerkId, {
-          publicMetadata: {
+        supabaseAdmin.auth.admin.updateUserById(u.clerkId, {
+          user_metadata: {
             tenantId: null,
             role: null,
             workspaceType: null,

@@ -1,6 +1,6 @@
 "use server";
 
-import { auth, clerkClient, currentUser } from "@clerk/nextjs/server";
+import { createSupabaseServerClient, createSupabaseAdminClient } from "@/lib/supabase-server";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 import * as Sentry from "@sentry/nextjs";
@@ -36,10 +36,12 @@ const createWorkspaceSchema = z.object({
  * to avoid dependency on DB columns that may not have been migrated yet.
  */
 export async function createWorkspace(formData: FormData) {
-  const { userId: clerkId } = await auth();
-  if (!clerkId) {
+  const supabase = await createSupabaseServerClient();
+  const { data: { user: authUser } } = await supabase.auth.getUser();
+  if (!authUser) {
     return { success: false as const, error: "Non authentifie" };
   }
+  const supabaseId = authUser.id;
 
   const parsed = createWorkspaceSchema.safeParse({
     name: formData.get("name"),
@@ -55,19 +57,15 @@ export async function createWorkspace(formData: FormData) {
 
   const { name, type, wilaya, phone: workspacePhone } = parsed.data;
 
-  const clerkUser = await currentUser();
-  if (!clerkUser) {
-    return { success: false as const, error: "Utilisateur Clerk introuvable" };
-  }
-
   // Already has a workspace
-  const existingMetadata = clerkUser.publicMetadata as { tenantId?: string };
-  if (existingMetadata.tenantId) {
+  if (authUser.user_metadata?.tenantId) {
     return { success: false as const, error: "Vous avez deja un espace de travail" };
   }
 
-  const email = clerkUser.emailAddresses?.[0]?.emailAddress || "";
-  const phone = clerkUser.phoneNumbers?.[0]?.phoneNumber || null;
+  const email = authUser.email || "";
+  const phone = authUser.phone || null;
+  const firstName = authUser.user_metadata?.firstName || "";
+  const lastName = authUser.user_metadata?.lastName || "";
 
   try {
     const expiresAt = new Date();
@@ -90,12 +88,12 @@ export async function createWorkspace(formData: FormData) {
         },
       });
 
-      await tx.user.create({
+      const user = await tx.user.create({
         data: {
-          clerkId,
+          clerkId: supabaseId,
           tenantId: tenant.id,
-          firstName: clerkUser.firstName || "",
-          lastName: clerkUser.lastName || "",
+          firstName,
+          lastName,
           email,
           phone,
           role: "CEO",
@@ -103,7 +101,7 @@ export async function createWorkspace(formData: FormData) {
         },
       });
 
-      return { tenant };
+      return { tenant, userId: user.id };
     });
 
     // 2. Create DemoLead for super admin tracking (non-critical)
@@ -112,8 +110,8 @@ export async function createWorkspace(formData: FormData) {
         data: {
           companyName: name,
           companyType: type,
-          firstName: clerkUser.firstName || "",
-          lastName: clerkUser.lastName || "",
+          firstName,
+          lastName,
           email,
           phone: phone || "",
           tenantId: result.tenant.id,
@@ -132,14 +130,15 @@ export async function createWorkspace(formData: FormData) {
       Sentry.captureException(err, { tags: { context: "seedAutomationConfigs" } });
     }
 
-    // 3. Update Clerk metadata — unlocks dashboard access
-    const client = await clerkClient();
-    await client.users.updateUserMetadata(clerkId, {
-      publicMetadata: {
+    // 3. Update Supabase user metadata — unlocks dashboard access
+    const supabaseAdmin = createSupabaseAdminClient();
+    await supabaseAdmin.auth.admin.updateUserById(supabaseId, {
+      user_metadata: {
         tenantId: result.tenant.id,
         role: "CEO",
         workspaceType: type,
         plan: "STARTER",
+        dbUserId: result.userId,
       },
     });
 

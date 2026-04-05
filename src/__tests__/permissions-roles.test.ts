@@ -120,7 +120,7 @@ vi.mock("@/lib/prisma", () => ({
   },
 }));
 
-vi.mock("@clerk/nextjs/server", () => ({
+vi.mock("@/lib/auth", () => ({
   auth: vi.fn(),
   currentUser: vi.fn(),
 }));
@@ -151,7 +151,7 @@ function makeUser(overrides: Partial<ICurrentUser> & { role: ICurrentUser["role"
   return {
     userId: "user-001",
     tenantId: "tenant-001",
-    clerkId: "clerk-001",
+    supabaseId: "sb-001",
     firstName: "Test",
     lastName: "User",
     email: "test@test.com",

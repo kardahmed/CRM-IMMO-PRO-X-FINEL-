@@ -20,7 +20,7 @@ vi.mock("@/lib/prisma", () => ({
   prisma: { $extends: vi.fn() },
 }));
 
-vi.mock("@clerk/nextjs/server", () => ({
+vi.mock("@/lib/auth", () => ({
   auth: vi.fn(),
   currentUser: vi.fn(),
 }));

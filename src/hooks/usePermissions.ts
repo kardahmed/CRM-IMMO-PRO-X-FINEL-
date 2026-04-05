@@ -1,7 +1,7 @@
 "use client";
 
-import { useUser } from "@clerk/nextjs";
 import { useMemo } from "react";
+import { useSupabaseAuth } from "@/hooks/useSupabaseAuth";
 import type { UserRole, WorkspaceType, PlanType } from "@prisma/client";
 import type { ModuleId } from "@/lib/modules";
 import type { PermissionAction } from "@/lib/permissions-matrix";
@@ -20,24 +20,15 @@ interface IPermissionsContext {
 
 /**
  * Hook pour vérifier les permissions côté client.
- * Lit le rôle et le type de workspace depuis publicMetadata Clerk.
+ * Lit le rôle et le type de workspace depuis useSupabaseAuth.
  */
 export function usePermissions(): IPermissionsContext {
-  const { user, isLoaded } = useUser();
+  const { isLoaded, tenantId: rawTenantId, role: rawRole, workspaceType: rawWorkspaceType, plan: rawPlan } = useSupabaseAuth();
 
-  const metadata = user?.publicMetadata as
-    | {
-        tenantId?: string;
-        role?: UserRole;
-        workspaceType?: WorkspaceType;
-        plan?: PlanType;
-      }
-    | undefined;
-
-  const role = metadata?.role ?? null;
-  const tenantId = metadata?.tenantId ?? null;
-  const workspaceType = metadata?.workspaceType ?? null;
-  const plan = metadata?.plan ?? null;
+  const role = (rawRole as UserRole) ?? null;
+  const tenantId = rawTenantId ?? null;
+  const workspaceType = (rawWorkspaceType as WorkspaceType) ?? null;
+  const plan = (rawPlan as PlanType) ?? null;
 
   const modules = useMemo(() => {
     if (!workspaceType || !plan) return [];

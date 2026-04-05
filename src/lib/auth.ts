@@ -1,4 +1,4 @@
-import { auth, currentUser } from "@clerk/nextjs/server";
+import { createSupabaseServerClient } from "@/lib/supabase-server";
 import { prisma } from "@/lib/prisma";
 import type { UserRole } from "@prisma/client";
 
@@ -6,42 +6,28 @@ export interface ICurrentUser {
   userId: string;
   tenantId: string;
   role: UserRole;
-  clerkId: string;
+  supabaseId: string;
   firstName: string;
   lastName: string;
   email: string;
 }
 
 /**
- * Récupère l'utilisateur courant depuis Clerk + DB.
- * Le tenantId et le role sont stockés dans publicMetadata côté Clerk.
- * On fait aussi un lookup DB pour avoir les données complètes.
+ * Récupère l'utilisateur courant depuis Supabase Auth + DB.
+ * La session Supabase fournit le supabaseId (auth.uid).
+ * On fait un lookup DB pour avoir tenantId, role et les données complètes.
  */
 export async function getCurrentUser(): Promise<ICurrentUser> {
-  const { userId: clerkId } = await auth();
+  const supabase = await createSupabaseServerClient();
+  const { data: { user: authUser }, error } = await supabase.auth.getUser();
 
-  if (!clerkId) {
+  if (error || !authUser) {
     throw new Error("Non authentifié");
-  }
-
-  const clerkUser = await currentUser();
-  if (!clerkUser) {
-    throw new Error("Utilisateur Clerk introuvable");
-  }
-
-  const metadata = clerkUser.publicMetadata as {
-    tenantId?: string;
-    role?: UserRole;
-  };
-
-  if (!metadata.tenantId) {
-    throw new Error("Aucun tenant associé à cet utilisateur");
   }
 
   const dbUser = await prisma.user.findFirst({
     where: {
-      clerkId,
-      tenantId: metadata.tenantId,
+      clerkId: authUser.id, // clerkId field repurposed for supabaseId
       isActive: true,
     },
   });
@@ -50,13 +36,37 @@ export async function getCurrentUser(): Promise<ICurrentUser> {
     throw new Error("Utilisateur introuvable en base de données");
   }
 
+  if (!dbUser.tenantId) {
+    throw new Error("Aucun tenant associé à cet utilisateur");
+  }
+
   return {
     userId: dbUser.id,
     tenantId: dbUser.tenantId,
     role: dbUser.role,
-    clerkId: dbUser.clerkId,
+    supabaseId: authUser.id,
     firstName: dbUser.firstName,
     lastName: dbUser.lastName,
     email: dbUser.email,
   };
+}
+
+/**
+ * Vérifie si l'utilisateur courant est un Super Admin.
+ * Utilisé dans les routes admin qui ne passent pas par apiHandler.
+ */
+export async function getAdminUser(): Promise<{ supabaseId: string; role: UserRole } | null> {
+  const supabase = await createSupabaseServerClient();
+  const { data: { user: authUser } } = await supabase.auth.getUser();
+
+  if (!authUser) return null;
+
+  const dbUser = await prisma.user.findFirst({
+    where: { clerkId: authUser.id, isActive: true },
+    select: { role: true },
+  });
+
+  if (!dbUser) return null;
+
+  return { supabaseId: authUser.id, role: dbUser.role };
 }

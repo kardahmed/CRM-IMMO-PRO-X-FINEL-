@@ -85,7 +85,7 @@ vi.mock("@/lib/prisma", () => {
   return { prisma: mockPrisma };
 });
 
-vi.mock("@clerk/nextjs/server", () => ({
+vi.mock("@/lib/auth", () => ({
   auth: vi.fn(),
   currentUser: vi.fn(),
 }));
@@ -292,7 +292,7 @@ describe("Agent Isolation Logic", () => {
       userId: "agent-1",
       tenantId: "tenant-1",
       role: "AGENT" as const,
-      clerkId: "clerk-1",
+      supabaseId: "sb-1",
       firstName: "Agent",
       lastName: "Test",
       email: "agent@test.com",
@@ -310,7 +310,7 @@ describe("Agent Isolation Logic", () => {
       userId: "assistant-1",
       tenantId: "tenant-1",
       role: "ASSISTANT" as const,
-      clerkId: "clerk-2",
+      supabaseId: "sb-2",
       firstName: "Assistant",
       lastName: "Test",
       email: "assistant@test.com",
@@ -328,7 +328,7 @@ describe("Agent Isolation Logic", () => {
       userId: "assistant-1",
       tenantId: "tenant-1",
       role: "ASSISTANT" as const,
-      clerkId: "clerk-2",
+      supabaseId: "sb-2",
       firstName: "Assistant",
       lastName: "Test",
       email: "assistant@test.com",
@@ -344,7 +344,7 @@ describe("Agent Isolation Logic", () => {
       userId: "ceo-1",
       tenantId: "tenant-1",
       role: "CEO" as const,
-      clerkId: "clerk-3",
+      supabaseId: "sb-3",
       firstName: "CEO",
       lastName: "Test",
       email: "ceo@test.com",

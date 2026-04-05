@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { currentUser } from "@clerk/nextjs/server";
+import { getAdminUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { rateLimit, getClientIp, RATE_LIMITS } from "@/lib/rate-limit";
-import type { UserRole } from "@prisma/client";
 import * as Sentry from "@sentry/nextjs";
 
 /**
@@ -17,12 +16,12 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     return NextResponse.json({ success: false, error: "Trop de requetes" }, { status: 429 });
   }
 
-  const user = await currentUser();
-  if (!user) {
+  const admin = await getAdminUser();
+  if (!admin) {
     return NextResponse.json({ success: false, error: "Non authentifie" }, { status: 401 });
   }
 
-  const role = user.publicMetadata?.role as UserRole | undefined;
+  const role = admin.role;
   if (role !== "SUPER_ADMIN" && role !== "ADMIN") {
     return NextResponse.json({ success: false, error: "Acces refuse" }, { status: 403 });
   }

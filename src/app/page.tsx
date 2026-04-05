@@ -22,9 +22,12 @@ import {
   Shield,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { SignedIn, SignedOut } from "@clerk/nextjs";
+import { useSupabaseAuth } from "@/hooks/useSupabaseAuth";
 
 export default function LandingPage() {
+  const { user, isLoaded } = useSupabaseAuth();
+  const isSignedIn = isLoaded && !!user;
+
   return (
     <div className="min-h-screen bg-neutral-950 text-neutral-50 font-sans selection:bg-indigo-500/30 overflow-x-hidden">
       {/* Background Gradients */}
@@ -54,25 +57,26 @@ export default function LandingPage() {
           </div>
 
           <div className="flex items-center gap-4">
-            <SignedOut>
-              <Link href="/sign-in">
-                <Button variant="ghost" className="text-neutral-300 hover:text-white font-bold text-sm">
-                  Connexion
-                </Button>
-              </Link>
-              <Link href="/sign-up">
-                <Button className="bg-white text-black hover:bg-neutral-200 font-black text-sm px-6 rounded-full">
-                  Essai Gratuit
-                </Button>
-              </Link>
-            </SignedOut>
-            <SignedIn>
+            {!isSignedIn ? (
+              <>
+                <Link href="/sign-in">
+                  <Button variant="ghost" className="text-neutral-300 hover:text-white font-bold text-sm">
+                    Connexion
+                  </Button>
+                </Link>
+                <Link href="/sign-up">
+                  <Button className="bg-white text-black hover:bg-neutral-200 font-black text-sm px-6 rounded-full">
+                    Essai Gratuit
+                  </Button>
+                </Link>
+              </>
+            ) : (
               <Link href="/dashboard">
                 <Button className="bg-indigo-600 hover:bg-indigo-700 text-white font-black text-sm px-6 rounded-full gap-2 shadow-lg shadow-indigo-600/20">
                   Dashboard <ArrowRight className="h-4 w-4" />
                 </Button>
               </Link>
-            </SignedIn>
+            )}
           </div>
         </div>
       </nav>

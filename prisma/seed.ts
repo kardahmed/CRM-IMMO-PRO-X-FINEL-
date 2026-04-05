@@ -7,7 +7,7 @@ const prisma = new PrismaClient();
 // Seed data
 // ============================================================================
 
-const SUPER_ADMIN_CLERK_ID = process.env.SUPER_ADMIN_CLERK_ID || "clerk_superadmin_placeholder";
+const SUPER_ADMIN_SUPABASE_ID = process.env.SUPER_ADMIN_SUPABASE_ID || "supabase_superadmin_placeholder";
 
 const DEMO_TENANT = {
   name: "Agence Immobiliere Demo",
@@ -22,7 +22,7 @@ const DEMO_TENANT = {
 
 const DEMO_USERS = [
   {
-    clerkId: "clerk_demo_ceo",
+    clerkId: "sb_demo_ceo",
     firstName: "Karim",
     lastName: "Benali",
     email: "karim@demo-agency.dz",
@@ -30,7 +30,7 @@ const DEMO_USERS = [
     role: "CEO" as const,
   },
   {
-    clerkId: "clerk_demo_supervisor",
+    clerkId: "sb_demo_supervisor",
     firstName: "Amina",
     lastName: "Hadj",
     email: "amina@demo-agency.dz",
@@ -38,7 +38,7 @@ const DEMO_USERS = [
     role: "SUPERVISOR" as const,
   },
   {
-    clerkId: "clerk_demo_agent1",
+    clerkId: "sb_demo_agent1",
     firstName: "Youcef",
     lastName: "Mansouri",
     email: "youcef@demo-agency.dz",
@@ -46,7 +46,7 @@ const DEMO_USERS = [
     role: "AGENT" as const,
   },
   {
-    clerkId: "clerk_demo_agent2",
+    clerkId: "sb_demo_agent2",
     firstName: "Sara",
     lastName: "Boudiaf",
     email: "sara@demo-agency.dz",
@@ -219,7 +219,7 @@ async function seedSuperAdmin(): Promise<void> {
   console.log("\n--- Super Admin ---");
 
   const existing = await prisma.user.findUnique({
-    where: { clerkId: SUPER_ADMIN_CLERK_ID },
+    where: { clerkId: SUPER_ADMIN_SUPABASE_ID },
   });
 
   if (existing) {
@@ -242,7 +242,7 @@ async function seedSuperAdmin(): Promise<void> {
 
   const superAdmin = await prisma.user.create({
     data: {
-      clerkId: SUPER_ADMIN_CLERK_ID,
+      clerkId: SUPER_ADMIN_SUPABASE_ID,
       tenantId: platformTenant.id,
       firstName: "Super",
       lastName: "Admin",

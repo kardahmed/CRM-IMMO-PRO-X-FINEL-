@@ -94,7 +94,7 @@ vi.mock("@/lib/prisma", () => {
   return { prisma: mockPrisma };
 });
 
-vi.mock("@clerk/nextjs/server", () => ({
+vi.mock("@/lib/auth", () => ({
   auth: vi.fn(),
   currentUser: vi.fn(),
 }));

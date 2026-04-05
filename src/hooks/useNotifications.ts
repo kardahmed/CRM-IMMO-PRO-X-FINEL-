@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
-import { useUser } from "@clerk/nextjs";
+import { useSupabaseAuth } from "@/hooks/useSupabaseAuth";
 import { supabase } from "@/lib/supabase";
 import type { RealtimeChannel } from "@supabase/supabase-js";
 
@@ -39,14 +39,13 @@ interface IUseNotificationsReturn {
  * - Fournit des méthodes pour marquer comme lues
  */
 export function useNotifications(): IUseNotificationsReturn {
-  const { user, isLoaded } = useUser();
+  const { isLoaded, dbUserId, tenantId } = useSupabaseAuth();
   const [notifications, setNotifications] = useState<INotification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const channelRef = useRef<RealtimeChannel | null>(null);
 
-  const userId = user?.publicMetadata?.dbUserId as string | undefined;
-  const tenantId = user?.publicMetadata?.tenantId as string | undefined;
+  const userId = dbUserId ?? undefined;
 
   // Charger les notifications depuis l'API
   const fetchNotifications = useCallback(async () => {
