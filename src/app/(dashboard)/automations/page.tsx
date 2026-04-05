@@ -15,6 +15,7 @@ import {
   Users,
   Settings2,
   BarChart3,
+  Pencil,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -39,6 +40,7 @@ interface AutomationTask {
   delayMinutes?: number;
   isActive?: boolean;
   targetAgentId?: string | null;
+  messageTemplate?: string;
 }
 
 interface AutomationConfig {
@@ -107,6 +109,7 @@ export default function AutomationsPage() {
   const [error, setError] = useState<string | null>(null);
   const [expandedStages, setExpandedStages] = useState<Set<string>>(new Set());
   const [savingStages, setSavingStages] = useState<Set<string>>(new Set());
+  const [editingTemplate, setEditingTemplate] = useState<string | null>(null);
 
   // -------------------------------------------------------------------------
   // Fetch configs
@@ -214,6 +217,21 @@ export default function AutomationsPage() {
         if (c.pipelineStage !== pipelineStage) return c;
         const updatedTasks = c.tasks.map((t, i) =>
           i === taskIndex ? { ...t, targetAgentId: agentId } : t
+        );
+        return { ...c, tasks: updatedTasks };
+      })
+    );
+  }, []);
+
+  // -------------------------------------------------------------------------
+  // Task message template
+  // -------------------------------------------------------------------------
+  const handleTaskTemplateChange = useCallback((pipelineStage: string, taskIndex: number, template: string) => {
+    setConfigs((prev) =>
+      prev.map((c) => {
+        if (c.pipelineStage !== pipelineStage) return c;
+        const updatedTasks = c.tasks.map((t, i) =>
+          i === taskIndex ? { ...t, messageTemplate: template || undefined } : t
         );
         return { ...c, tasks: updatedTasks };
       })
@@ -405,36 +423,51 @@ export default function AutomationsPage() {
                               <FileText className="h-3.5 w-3.5" />
                             );
 
+                            const templateKey = `${config.pipelineStage}-${taskIndex}`;
+                            const isEditingTemplate = editingTemplate === templateKey;
+
                             return (
-                              <div
-                                key={taskIndex}
-                                className={`flex items-center gap-4 p-3 rounded-lg border transition-colors ${
-                                  task.isActive === false
-                                    ? "bg-muted/30 border-muted"
-                                    : "bg-background border-border"
-                                }`}
-                              >
-                                {/* Task info */}
-                                <div className="flex-1 min-w-0">
-                                  <div className="flex items-center gap-2 flex-wrap">
-                                    <span className="text-sm font-medium truncate">
-                                      {task.name}
-                                    </span>
-                                    <Badge
-                                      variant="secondary"
-                                      className={`${typeMeta.color} text-xs gap-1 shrink-0`}
-                                    >
-                                      {icon}
-                                      {typeMeta.label}
-                                    </Badge>
-                                    {task.delayMinutes != null && task.delayMinutes > 0 && (
-                                      <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
-                                        <Clock className="h-3 w-3" />
-                                        {formatDelay(task.delayMinutes)}
+                              <div key={taskIndex} className="flex flex-col gap-0">
+                                <div
+                                  className={`flex items-center gap-4 p-3 rounded-lg border transition-colors ${
+                                    task.isActive === false
+                                      ? "bg-muted/30 border-muted"
+                                      : "bg-background border-border"
+                                  } ${isEditingTemplate ? "rounded-b-none" : ""}`}
+                                >
+                                  {/* Task info */}
+                                  <div className="flex-1 min-w-0">
+                                    <div className="flex items-center gap-2 flex-wrap">
+                                      <span className="text-sm font-medium truncate">
+                                        {task.name}
                                       </span>
-                                    )}
+                                      <Badge
+                                        variant="secondary"
+                                        className={`${typeMeta.color} text-xs gap-1 shrink-0`}
+                                      >
+                                        {icon}
+                                        {typeMeta.label}
+                                      </Badge>
+                                      {task.delayMinutes != null && task.delayMinutes > 0 && (
+                                        <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
+                                          <Clock className="h-3 w-3" />
+                                          {formatDelay(task.delayMinutes)}
+                                        </span>
+                                      )}
+                                      {task.type === "OTHER" && (
+                                        <button
+                                          type="button"
+                                          className="inline-flex items-center justify-center h-6 w-6 rounded hover:bg-muted transition-colors"
+                                          title="Modifier le template WhatsApp"
+                                          onClick={() =>
+                                            setEditingTemplate(isEditingTemplate ? null : templateKey)
+                                          }
+                                        >
+                                          <Pencil className="h-3 w-3 text-muted-foreground" />
+                                        </button>
+                                      )}
+                                    </div>
                                   </div>
-                                </div>
 
                                 {/* Agent selector */}
                                 <div className="shrink-0 w-44">
@@ -474,6 +507,33 @@ export default function AutomationsPage() {
                                   aria-label={`Activer la tâche ${task.name}`}
                                   className="shrink-0"
                                 />
+                              </div>
+
+                              {/* WhatsApp template editor */}
+                              {isEditingTemplate && task.type === "OTHER" && (
+                                <div className="border border-t-0 rounded-b-lg p-3 bg-muted/20 flex flex-col gap-2">
+                                  <label className="text-xs font-semibold text-foreground">
+                                    Template de message WhatsApp
+                                  </label>
+                                  <textarea
+                                    className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 resize-y min-h-[80px]"
+                                    rows={3}
+                                    maxLength={2000}
+                                    placeholder="Pas de template personnalise"
+                                    value={task.messageTemplate ?? ""}
+                                    onChange={(e) =>
+                                      handleTaskTemplateChange(
+                                        config.pipelineStage,
+                                        taskIndex,
+                                        e.target.value
+                                      )
+                                    }
+                                  />
+                                  <p className="text-[11px] text-muted-foreground">
+                                    Variables disponibles : <code className="bg-muted px-1 rounded">{"{clientName}"}</code> <code className="bg-muted px-1 rounded">{"{agentName}"}</code> <code className="bg-muted px-1 rounded">{"{propertyName}"}</code> <code className="bg-muted px-1 rounded">{"{budget}"}</code> <code className="bg-muted px-1 rounded">{"{date}"}</code>
+                                  </p>
+                                </div>
+                              )}
                               </div>
                             );
                           })}

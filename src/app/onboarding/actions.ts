@@ -124,6 +124,14 @@ export async function createWorkspace(formData: FormData) {
       Sentry.captureMessage("[createWorkspace] DemoLead creation skipped (table may not exist)", "warning");
     }
 
+    // 2b. Seed default automation configs (non-critical)
+    try {
+      const { seedAutomationConfigsForTenant } = await import("@/services/automation-seed.service");
+      await seedAutomationConfigsForTenant(result.tenant.id);
+    } catch (err) {
+      Sentry.captureException(err, { tags: { context: "seedAutomationConfigs" } });
+    }
+
     // 3. Update Clerk metadata — unlocks dashboard access
     const client = await clerkClient();
     await client.users.updateUserMetadata(clerkId, {

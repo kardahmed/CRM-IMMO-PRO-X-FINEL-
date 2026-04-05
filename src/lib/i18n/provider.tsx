@@ -31,7 +31,7 @@ const STORAGE_KEY = "immo-pro-x-locale";
 function getInitialLocale(): Locale {
   if (typeof window === "undefined") return DEFAULT_LOCALE;
   const stored = localStorage.getItem(STORAGE_KEY);
-  if (stored === "fr" || stored === "ar" || stored === "en") return stored;
+  if (stored === "fr" || stored === "ar" || stored === "dz" || stored === "en") return stored;
   return DEFAULT_LOCALE;
 }
 

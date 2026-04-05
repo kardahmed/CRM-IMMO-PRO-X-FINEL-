@@ -3,6 +3,10 @@
     {
       "path": "/api/v1/automations/check-overdue",
       "schedule": "0 * * * *"
+    },
+    {
+      "path": "/api/v1/automations/check-pending",
+      "schedule": "*/15 * * * *"
     }
   ]
 }

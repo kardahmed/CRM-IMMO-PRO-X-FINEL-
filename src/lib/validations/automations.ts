@@ -5,6 +5,7 @@ const automationTaskSchema = z.object({
   type: z.enum(["CALL", "EMAIL", "VISIT", "FOLLOW_UP", "DOCUMENT", "MEETING", "OTHER"]),
   delayMinutes: z.number().int().min(0, "Délai doit être >= 0"),
   description: z.string().max(1000).optional(),
+  messageTemplate: z.string().max(2000).optional(),
 });
 
 export const upsertAutomationConfigSchema = z.object({

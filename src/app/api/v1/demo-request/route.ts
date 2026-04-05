@@ -119,6 +119,14 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       return { tenant, demoLead };
     });
 
+    // Seed default automation configs (non-critical)
+    try {
+      const { seedAutomationConfigsForTenant } = await import("@/services/automation-seed.service");
+      await seedAutomationConfigsForTenant(result.tenant.id);
+    } catch (err) {
+      Sentry.captureException(err, { tags: { context: "seedAutomationConfigs" } });
+    }
+
     return NextResponse.json({
       success: true,
       data: {

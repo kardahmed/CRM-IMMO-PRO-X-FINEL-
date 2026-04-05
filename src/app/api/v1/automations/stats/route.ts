@@ -21,6 +21,9 @@ export const GET = apiHandler(
     const url = new URL(ctx.req.url);
     const from = url.searchParams.get("from");
     const to = url.searchParams.get("to");
+    const assignedToId = url.searchParams.get("assignedToId");
+    const stage = url.searchParams.get("stage");
+    const status = url.searchParams.get("status");
     const now = new Date();
 
     const baseWhere: Record<string, unknown> = {
@@ -37,6 +40,22 @@ export const GET = apiHandler(
       baseWhere.createdAt = {};
       if (from) (baseWhere.createdAt as Record<string, unknown>).gte = new Date(from);
       if (to) (baseWhere.createdAt as Record<string, unknown>).lte = new Date(to);
+    }
+
+    // Optional agent filter (only if not already restricted by AGENT role)
+    if (assignedToId && ctx.user.role !== "AGENT") {
+      baseWhere.assignedToId = assignedToId;
+    }
+
+    // Optional pipeline stage filter
+    if (stage && PIPELINE_STAGES.includes(stage as (typeof PIPELINE_STAGES)[number])) {
+      baseWhere.pipelineStage = stage;
+    }
+
+    // Optional task status filter
+    const validStatuses = ["PENDING", "IN_PROGRESS", "COMPLETED", "CANCELLED"] as const;
+    if (status && validStatuses.includes(status as (typeof validStatuses)[number])) {
+      baseWhere.status = status;
     }
 
     // --- Summary counts ---

@@ -142,14 +142,29 @@ export const GET = apiHandler(
         }
       : null;
 
-    const suggestedMessage =
-      client
-        ? buildSuggestedMessage(
-            task.type,
-            task.title,
-            client.firstName,
-            client.pipelineStage,
-          )
+    // Load automation config to check for custom templates
+    let customTemplate: string | null = null;
+    if (task.pipelineStage) {
+      const config = await ctx.db.automationConfig.findFirst({
+        where: { pipelineStage: task.pipelineStage },
+      });
+      if (config) {
+        const tasks = config.tasks as Array<{ title: string; messageTemplate?: string }>;
+        const matchingTask = tasks.find(t => t.title === task.title || t.title.replace('{clientName}', client?.firstName ?? '') === task.title);
+        if (matchingTask?.messageTemplate) {
+          customTemplate = matchingTask.messageTemplate;
+        }
+      }
+    }
+
+    const suggestedMessage = customTemplate
+      ? customTemplate
+          .replace(/\{clientName\}/g, client?.firstName ?? '')
+          .replace(/\{agentName\}/g, '')
+          .replace(/\{propertyName\}/g, property?.name ?? '')
+          .replace(/\{budget\}/g, client?.budgetMin ? `${client.budgetMin} DA` : '')
+      : client
+        ? buildSuggestedMessage(task.type, task.title, client.firstName, client.pipelineStage)
         : null;
 
     return jsonOk({

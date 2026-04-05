@@ -5,19 +5,21 @@
 // L'arabe dialectal algerien est gere par l'AI Agent, pas par l'interface.
 // ============================================================================
 
-export type Locale = "fr" | "ar" | "en";
+export type Locale = "fr" | "ar" | "dz" | "en";
 
-export const SUPPORTED_LOCALES: Locale[] = ["fr", "ar", "en"];
+export const SUPPORTED_LOCALES: Locale[] = ["fr", "ar", "dz", "en"];
 
 export const LOCALE_NAMES: Record<Locale, string> = {
   fr: "Francais",
   ar: "العربية",
+  dz: "الدارجة",
   en: "English",
 };
 
 export const LOCALE_DIRECTION: Record<Locale, "ltr" | "rtl"> = {
   fr: "ltr",
   ar: "rtl",
+  dz: "rtl",
   en: "ltr",
 };
 
@@ -409,10 +411,105 @@ const en: ITranslations = {
 };
 
 // ============================================================================
+// Darija algerienne (الدارجة الجزائرية)
+// ============================================================================
+
+const dz: ITranslations = {
+  nav: {
+    dashboard: "تابلو دو بور",
+    pipeline: "بيبلاين",
+    clients: "الكليون",
+    planning: "البلانينغ",
+    projects: "البروجيات",
+    portfolio: "البورتفوي",
+    map: "الكارط",
+    owners: "المولين",
+    mandates: "الموندا",
+    commissions: "الكوميسيون",
+    automations: "الأوتوماتيزاسيون",
+    ai: "لاسيستون IA",
+    objectives: "الأوبجيكتيف",
+    performance: "البيرفورمونس",
+    documents: "الدوكيمون",
+    notifications: "النوتيفيكاسيون",
+    settings: "الباراماتر",
+    auditLog: "الجورنال",
+    cadastre: "الكاداستر",
+    portalManager: "بورتاي الكليون",
+    payments: "الدفع",
+  },
+  sections: {
+    principal: "الرئيسي",
+    promotion: "البروموسيون",
+    agency: "الأوجونس",
+    tools: "الزوافر",
+    admin: "لادمينيستراسيون",
+  },
+  actions: {
+    create: "كريي",
+    edit: "موديفيي",
+    delete: "سوبريمي",
+    save: "أونروجيستري",
+    cancel: "أنيلي",
+    search: "شيرشي",
+    filter: "فيلتري",
+    export: "ايكسبورتي",
+    import: "امبورتي",
+    back: "ارجع",
+    next: "اللي بعد",
+    previous: "اللي قبل",
+    skip: "فوّت",
+    confirm: "كونفيرمي",
+    close: "سكّر",
+    refresh: "أكتواليزي",
+    download: "تيليشارجي",
+    upload: "ابعث",
+    send: "ابعث",
+    call: "عيّط",
+    whatsapp: "واتساب",
+    sms: "SMS",
+    email: "إيمايل",
+  },
+  common: {
+    loading: "راه يشارجي...",
+    noData: "ما كاين والو",
+    error: "خطأ",
+    success: "مليح",
+    welcome: "مرحبا بيك",
+    logout: "اخرج",
+    profile: "البروفيل",
+    name: "الاسم",
+    phone: "التيليفون",
+    status: "الحالة",
+    date: "التاريخ",
+    type: "النوع",
+    price: "السوم",
+    agent: "الزعيم",
+    client: "الكليون",
+    property: "البيان",
+    project: "البروجي",
+    visit: "الفيزيت",
+    task: "التاش",
+    all: "الكل",
+  },
+  pipeline: {
+    new: "جديد",
+    contacted: "تّواصلنا معاه",
+    qualified: "مؤهل",
+    visitScheduled: "فيزيت مبروغرامي",
+    visited: "دارو الفيزيت",
+    negotiation: "نيغوسياسيون",
+    reserved: "ريزيرفي",
+    signed: "سينيي",
+    closed: "مغلوق",
+  },
+};
+
+// ============================================================================
 // Dictionnaire complet
 // ============================================================================
 
-const DICTIONARIES: Record<Locale, ITranslations> = { fr, ar, en };
+const DICTIONARIES: Record<Locale, ITranslations> = { fr, ar, dz, en };
 
 /**
  * Retourne le dictionnaire de traductions pour une locale donnee.

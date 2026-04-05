@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import {
   Card,
@@ -9,6 +9,15 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table,
@@ -18,6 +27,43 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+
+/* ------------------------------------------------------------------ */
+/*  Filter / export constants                                          */
+/* ------------------------------------------------------------------ */
+
+const STAGE_OPTIONS = [
+  { value: "NEW", label: "Nouveau" },
+  { value: "CONTACTED", label: "Contact\u00e9" },
+  { value: "QUALIFIED", label: "Qualifi\u00e9" },
+  { value: "VISIT_SCHEDULED", label: "Visite planifi\u00e9e" },
+  { value: "VISITED", label: "Visite effectu\u00e9e" },
+  { value: "NEGOTIATION", label: "N\u00e9gociation" },
+  { value: "RESERVED", label: "R\u00e9serv\u00e9" },
+  { value: "SIGNED", label: "Sign\u00e9" },
+  { value: "CLOSED", label: "Cl\u00f4tur\u00e9" },
+] as const;
+
+const STATUS_OPTIONS = [
+  { value: "PENDING", label: "En attente" },
+  { value: "IN_PROGRESS", label: "En cours" },
+  { value: "COMPLETED", label: "Termin\u00e9es" },
+  { value: "CANCELLED", label: "Annul\u00e9es" },
+] as const;
+
+interface ITeamMember {
+  id: string;
+  firstName: string;
+  lastName: string;
+}
+
+interface IFilters {
+  from: string;
+  to: string;
+  assignedToId: string;
+  stage: string;
+  status: string;
+}
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -52,6 +98,7 @@ interface IRecentTask {
   type: string;
   status: string;
   dueAt: string | null;
+  createdAt: string | null;
   pipelineStage: string;
   client: { firstName: string; lastName: string } | null;
   assignedTo: { firstName: string; lastName: string } | null;
@@ -459,6 +506,25 @@ function AlertTriangleIcon({ className }: { className?: string }) {
   );
 }
 
+function DownloadIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+    >
+      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+      <polyline points="7 10 12 15 17 10" />
+      <line x1="12" y1="15" x2="12" y2="3" />
+    </svg>
+  );
+}
+
 function ArrowLeftIcon({ className }: { className?: string }) {
   return (
     <svg
@@ -485,11 +551,34 @@ export default function AutomationsDashboardPage() {
   const [data, setData] = useState<IStatsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [teamMembers, setTeamMembers] = useState<ITeamMember[]>([]);
+  const [filters, setFilters] = useState<IFilters>({
+    from: "",
+    to: "",
+    assignedToId: "",
+    stage: "",
+    status: "",
+  });
 
-  useEffect(() => {
-    async function fetchStats() {
+  const buildQueryString = useCallback((f: IFilters): string => {
+    const params = new URLSearchParams();
+    if (f.from) params.set("from", f.from);
+    if (f.to) params.set("to", f.to);
+    if (f.assignedToId) params.set("assignedToId", f.assignedToId);
+    if (f.stage) params.set("stage", f.stage);
+    if (f.status) params.set("status", f.status);
+    const qs = params.toString();
+    return qs ? `?${qs}` : "";
+  }, []);
+
+  const fetchStats = useCallback(
+    async (f: IFilters) => {
+      setLoading(true);
+      setError(null);
       try {
-        const res = await fetch("/api/v1/automations/stats");
+        const res = await fetch(
+          `/api/v1/automations/stats${buildQueryString(f)}`
+        );
         const json = await res.json();
         if (!json.success) {
           setError(json.error ?? "Erreur lors du chargement des statistiques.");
@@ -501,10 +590,99 @@ export default function AutomationsDashboardPage() {
       } finally {
         setLoading(false);
       }
-    }
+    },
+    [buildQueryString]
+  );
 
-    fetchStats();
+  /* Load team members once */
+  useEffect(() => {
+    async function loadTeam() {
+      try {
+        const res = await fetch("/api/v1/settings/team");
+        const json = await res.json();
+        if (json.success && json.data?.members) {
+          setTeamMembers(json.data.members);
+        }
+      } catch {
+        /* silently ignore — agent dropdown will just be empty */
+      }
+    }
+    loadTeam();
   }, []);
+
+  /* Fetch stats on mount and whenever filters change */
+  useEffect(() => {
+    fetchStats(filters);
+  }, [filters, fetchStats]);
+
+  const updateFilter = (key: keyof IFilters, value: string | null) => {
+    setFilters((prev) => ({ ...prev, [key]: value ?? "" }));
+  };
+
+  const resetFilters = () => {
+    setFilters({ from: "", to: "", assignedToId: "", stage: "", status: "" });
+  };
+
+  const hasActiveFilters =
+    filters.from !== "" ||
+    filters.to !== "" ||
+    filters.assignedToId !== "" ||
+    filters.stage !== "" ||
+    filters.status !== "";
+
+  /* ---- CSV export ---- */
+  const exportCsv = useCallback(() => {
+    if (!data) return;
+
+    const csvHeader = [
+      "Titre",
+      "Client",
+      "Type",
+      "\u00c9tape",
+      "Statut",
+      "\u00c9ch\u00e9ance",
+      "Agent",
+      "Cr\u00e9\u00e9 le",
+    ];
+
+    const escapeField = (value: string): string => {
+      if (value.includes(",") || value.includes('"') || value.includes("\n")) {
+        return `"${value.replace(/"/g, '""')}"`;
+      }
+      return value;
+    };
+
+    const csvRows = data.recentTasks.map((task) => {
+      const stageMeta = STAGE_META[task.pipelineStage];
+      const typeMeta = TYPE_META[task.type];
+      const statusMeta = STATUS_META[task.status];
+
+      return [
+        escapeField(task.title),
+        escapeField(fullName(task.client)),
+        escapeField(typeMeta?.label ?? task.type),
+        escapeField(stageMeta?.label ?? task.pipelineStage),
+        escapeField(statusMeta?.label ?? task.status),
+        escapeField(formatDate(task.dueAt)),
+        escapeField(fullName(task.assignedTo)),
+        escapeField(formatDate(task.createdAt)),
+      ].join(",");
+    });
+
+    const bom = "\uFEFF";
+    const csvContent = bom + [csvHeader.join(","), ...csvRows].join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+
+    const today = new Date().toISOString().slice(0, 10);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `automations-export-${today}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }, [data]);
 
   return (
     <div className="mx-auto w-full max-w-7xl space-y-8 p-4 md:p-6 lg:p-8">
@@ -519,14 +697,149 @@ export default function AutomationsDashboardPage() {
             automatis&eacute;es
           </p>
         </div>
-        <Link
-          href="/dashboard/automations"
-          className="inline-flex items-center gap-2 rounded-lg border bg-background px-4 py-2 text-sm font-medium shadow-sm transition-colors hover:bg-muted"
-        >
-          <ArrowLeftIcon className="h-4 w-4" />
-          Configuration
-        </Link>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={exportCsv}
+            disabled={!data || data.recentTasks.length === 0}
+            className="inline-flex items-center gap-2"
+          >
+            <DownloadIcon className="h-4 w-4" />
+            Exporter CSV
+          </Button>
+          <Link
+            href="/dashboard/automations"
+            className="inline-flex items-center gap-2 rounded-lg border bg-background px-4 py-2 text-sm font-medium shadow-sm transition-colors hover:bg-muted"
+          >
+            <ArrowLeftIcon className="h-4 w-4" />
+            Configuration
+          </Link>
+        </div>
       </div>
+
+      {/* ---- Filter bar ---- */}
+      <Card>
+        <CardContent className="p-4">
+          <div className="flex flex-wrap items-end gap-3">
+            {/* Date from */}
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-medium text-muted-foreground">
+                Du
+              </label>
+              <Input
+                type="date"
+                value={filters.from}
+                onChange={(e) => updateFilter("from", e.target.value)}
+                className="h-9 w-40"
+              />
+            </div>
+
+            {/* Date to */}
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-medium text-muted-foreground">
+                Au
+              </label>
+              <Input
+                type="date"
+                value={filters.to}
+                onChange={(e) => updateFilter("to", e.target.value)}
+                className="h-9 w-40"
+              />
+            </div>
+
+            {/* Agent */}
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-medium text-muted-foreground">
+                Agent
+              </label>
+              <Select
+                value={filters.assignedToId}
+                onValueChange={(v) =>
+                  updateFilter("assignedToId", v === "__all__" ? "" : v)
+                }
+              >
+                <SelectTrigger className="h-9 w-48">
+                  <SelectValue placeholder="Tous les agents" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__all__">Tous les agents</SelectItem>
+                  {teamMembers.map((m) => (
+                    <SelectItem key={m.id} value={m.id}>
+                      {m.firstName} {m.lastName}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Pipeline stage */}
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-medium text-muted-foreground">
+                \u00c9tape
+              </label>
+              <Select
+                value={filters.stage}
+                onValueChange={(v) =>
+                  updateFilter("stage", v === "__all__" ? "" : v)
+                }
+              >
+                <SelectTrigger className="h-9 w-44">
+                  <SelectValue placeholder="Toutes les \u00e9tapes" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__all__">
+                    Toutes les \u00e9tapes
+                  </SelectItem>
+                  {STAGE_OPTIONS.map((s) => (
+                    <SelectItem key={s.value} value={s.value}>
+                      {s.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Status */}
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-medium text-muted-foreground">
+                Statut
+              </label>
+              <Select
+                value={filters.status}
+                onValueChange={(v) =>
+                  updateFilter("status", v === "__all__" ? "" : v)
+                }
+              >
+                <SelectTrigger className="h-9 w-40">
+                  <SelectValue placeholder="Tous" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__all__">Tous</SelectItem>
+                  {STATUS_OPTIONS.map((s) => (
+                    <SelectItem key={s.value} value={s.value}>
+                      {s.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Reset */}
+            {hasActiveFilters && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={resetFilters}
+                className="h-9 text-muted-foreground hover:text-foreground"
+              >
+                <XCircleIcon className="mr-1.5 h-4 w-4" />
+                R\u00e9initialiser
+              </Button>
+            )}
+          </div>
+        </CardContent>
+      </Card>
 
       {/* ---- Loading / Error states ---- */}
       {loading && <LoadingSkeleton />}

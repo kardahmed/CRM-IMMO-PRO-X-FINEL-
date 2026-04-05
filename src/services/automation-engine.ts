@@ -13,6 +13,7 @@ export interface IAutomationTask {
   type: TaskType;
   delayMinutes: number; // délai après le changement d'étape
   description?: string;
+  messageTemplate?: string;
 }
 
 export interface IAutomationConfigTasks {
