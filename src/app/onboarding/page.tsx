@@ -241,7 +241,7 @@ export default function OnboardingPage() {
                 etapes.
               </p>
             </div>
-            <div className="grid grid-cols-3 gap-3 pt-2">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
               <div className="p-3 rounded-xl bg-white/5 border border-white/10 text-center">
                 <Users className="h-5 w-5 text-blue-400 mx-auto mb-1.5" />
                 <p className="text-xs text-zinc-400">Gestion clients</p>
@@ -306,7 +306,7 @@ export default function OnboardingPage() {
               <label className={labelClass}>
                 Type d&apos;activite <span className="text-red-400">*</span>
               </label>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <label
                   className={`relative flex flex-col items-center justify-center gap-2 p-4 rounded-xl border cursor-pointer hover:bg-white/5 transition-all group ${
                     workspaceType === "AGENCY"
@@ -482,7 +482,7 @@ export default function OnboardingPage() {
               </select>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="space-y-2">
                 <label className={labelClass}>Prix (DA)</label>
                 <div className="relative">
@@ -650,7 +650,7 @@ export default function OnboardingPage() {
               </div>
             )}
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="space-y-2">
                 <label className={labelClass}>Prenom</label>
                 <div className="relative">

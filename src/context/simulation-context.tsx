@@ -1,13 +1,14 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
-import { WorkspaceType, UserRole } from "@prisma/client";
+import { WorkspaceType, UserRole, PlanType } from "@prisma/client";
 
 interface ISimulationState {
   isSimulating: boolean;
   tenantId: string | null;
   workspaceType: WorkspaceType | null;
   role: UserRole | null;
+  plan: PlanType | null;
 }
 
 interface ISimulationContext extends ISimulationState {
@@ -19,6 +20,7 @@ const COOKIE_NAMES = {
   TENANT_ID: "x-sim-tenant-id",
   MODE: "x-sim-mode",
   ROLE: "x-sim-role",
+  PLAN: "x-sim-plan",
   ACTIVE: "x-sim-active",
 };
 
@@ -49,6 +51,7 @@ export function SimulationProvider({ children }: { children: React.ReactNode }) 
     tenantId: null,
     workspaceType: null,
     role: null,
+    plan: null,
   });
 
   // Load from cookies on mount
@@ -60,6 +63,7 @@ export function SimulationProvider({ children }: { children: React.ReactNode }) 
         tenantId: getCookie(COOKIE_NAMES.TENANT_ID),
         workspaceType: getCookie(COOKIE_NAMES.MODE) as WorkspaceType | null,
         role: getCookie(COOKIE_NAMES.ROLE) as UserRole | null,
+        plan: getCookie(COOKIE_NAMES.PLAN) as PlanType | null,
       });
     }
   }, []);
@@ -73,6 +77,7 @@ export function SimulationProvider({ children }: { children: React.ReactNode }) 
       if (newState.tenantId) setCookie(COOKIE_NAMES.TENANT_ID, newState.tenantId);
       if (newState.workspaceType) setCookie(COOKIE_NAMES.MODE, newState.workspaceType);
       if (newState.role) setCookie(COOKIE_NAMES.ROLE, newState.role);
+      if (newState.plan) setCookie(COOKIE_NAMES.PLAN, newState.plan);
       
       return newState;
     });
@@ -84,6 +89,7 @@ export function SimulationProvider({ children }: { children: React.ReactNode }) 
       tenantId: null,
       workspaceType: null,
       role: null,
+      plan: null,
     });
     
     // Clear cookies
@@ -91,6 +97,7 @@ export function SimulationProvider({ children }: { children: React.ReactNode }) 
     deleteCookie(COOKIE_NAMES.TENANT_ID);
     deleteCookie(COOKIE_NAMES.MODE);
     deleteCookie(COOKIE_NAMES.ROLE);
+    deleteCookie(COOKIE_NAMES.PLAN);
   }, []);
 
   return (

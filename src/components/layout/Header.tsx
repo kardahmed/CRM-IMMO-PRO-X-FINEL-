@@ -23,7 +23,7 @@ export function Header() {
   const initials = `${firstName?.[0] ?? ""}${lastName?.[0] ?? ""}`.toUpperCase() || "U";
 
   return (
-    <header className="h-14 md:h-16 border-b bg-background flex items-center justify-between px-3 md:px-6 sticky top-0 z-30 shadow-sm border-neutral-100 dark:border-neutral-800">
+    <header className="h-14 md:h-16 border-b bg-background flex items-center justify-between px-3 md:px-6 sticky top-0 z-30 shadow-sm border-border">
       <div className="flex items-center gap-2 md:gap-4 flex-1">
         {/* Mobile hamburger */}
         <Button
@@ -31,12 +31,13 @@ export function Header() {
           size="icon"
           className="md:hidden shrink-0"
           onClick={toggleMobile}
+          aria-label="Ouvrir le menu"
         >
           <Menu className="h-5 w-5" />
         </Button>
 
         {/* Mobile logo */}
-        <span className="font-bold text-lg bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent md:hidden">
+        <span className="font-bold text-lg bg-gradient-to-r from-emerald-600 to-emerald-500 bg-clip-text text-transparent md:hidden">
           PRO-X
         </span>
 
@@ -47,7 +48,7 @@ export function Header() {
 
       <div className="flex items-center gap-2 md:gap-4">
         {/* Mobile search button */}
-        <Button variant="ghost" size="icon" className="sm:hidden">
+        <Button variant="ghost" size="icon" className="sm:hidden" aria-label="Rechercher">
           <Search className="h-5 w-5 text-muted-foreground" />
         </Button>
 
@@ -60,7 +61,7 @@ export function Header() {
 
         <NotificationBell />
 
-        <Button variant="ghost" size="icon" className="hover:bg-accent/50 hidden sm:flex">
+        <Button variant="ghost" size="icon" className="hover:bg-accent/50 hidden sm:flex" aria-label="Paramètres">
           <Settings className="h-5 w-5 text-muted-foreground" />
         </Button>
 

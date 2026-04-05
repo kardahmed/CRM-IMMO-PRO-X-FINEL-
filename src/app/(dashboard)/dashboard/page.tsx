@@ -175,7 +175,7 @@ export default function DashboardPage() {
               Tableau de bord
               <span className="text-primary italic text-3xl font-medium tracking-normal opacity-40">pro-x</span>
             </h1>
-            <p className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.3em] opacity-60">
+            <p className="text-xs font-bold text-muted-foreground uppercase tracking-[0.3em] opacity-60">
               {data.welcomeMessage || "Intelligence Immobilière & Flux de Performance"}
             </p>
           </header>
@@ -188,21 +188,21 @@ export default function DashboardPage() {
                 placeholder="Rechercher dossiers, agents ou projets..." 
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="pl-11 h-14 bg-white border-neutral-100 shadow-stripe focus:border-primary/30 focus:ring-4 focus:ring-primary/5 rounded-2xl transition-all font-medium text-neutral-900"
+                className="pl-11 h-14 bg-card border-border shadow-stripe focus:border-primary/30 focus:ring-4 focus:ring-primary/5 rounded-2xl transition-all font-medium text-foreground"
               />
             </div>
             
             <Select value={period} onValueChange={(v) => setPeriod(v ?? "30d")}>
-              <SelectTrigger className="w-[180px] h-14 bg-white border-neutral-100 shadow-stripe rounded-2xl font-black uppercase text-[10px] tracking-widest text-neutral-600 hover:bg-neutral-50 transition-all">
+              <SelectTrigger className="w-[180px] h-14 bg-card border-border shadow-stripe rounded-2xl font-black uppercase text-xs tracking-widest text-muted-foreground hover:bg-accent transition-all">
                 <Filter className="h-3.5 w-3.5 mr-2 text-primary" />
                 <SelectValue placeholder="Période" />
               </SelectTrigger>
-              <SelectContent className="rounded-2xl border-neutral-100 shadow-stripe-lg">
+              <SelectContent className="rounded-2xl border-border shadow-stripe-lg">
                 <SelectGroup>
-                  <SelectItem value="7d" className="text-[10px] font-black uppercase tracking-widest">7 derniers jours</SelectItem>
-                  <SelectItem value="30d" className="text-[10px] font-black uppercase tracking-widest">30 derniers jours</SelectItem>
-                  <SelectItem value="90d" className="text-[10px] font-black uppercase tracking-widest">90 derniers jours</SelectItem>
-                  <SelectItem value="all" className="text-[10px] font-black uppercase tracking-widest">Tout le temps</SelectItem>
+                  <SelectItem value="7d" className="text-xs font-black uppercase tracking-widest">7 derniers jours</SelectItem>
+                  <SelectItem value="30d" className="text-xs font-black uppercase tracking-widest">30 derniers jours</SelectItem>
+                  <SelectItem value="90d" className="text-xs font-black uppercase tracking-widest">90 derniers jours</SelectItem>
+                  <SelectItem value="all" className="text-xs font-black uppercase tracking-widest">Tout le temps</SelectItem>
                 </SelectGroup>
               </SelectContent>
             </Select>
@@ -211,7 +211,7 @@ export default function DashboardPage() {
               variant="outline" 
               size="icon" 
               className={cn(
-                "h-14 w-14 rounded-2xl border-neutral-100 bg-white text-primary shadow-stripe hover:shadow-stripe-lg active:scale-95 transition-all outline-none",
+                "h-14 w-14 rounded-2xl border-border bg-card text-primary shadow-stripe hover:shadow-stripe-lg active:scale-95 transition-all outline-none",
                 loading && "animate-pulse"
               )}
               onClick={() => fetchDashboard(period)}
@@ -231,15 +231,15 @@ export default function DashboardPage() {
             <button
               key={i}
               onClick={() => window.location.href = action.href}
-              className="group flex items-center justify-between p-6 rounded-[28px] bg-white border border-neutral-100 shadow-stripe hover:shadow-stripe-lg hover:-translate-y-1 transition-all duration-500 text-left"
+              className="group flex items-center justify-between p-6 rounded-[28px] bg-card border border-border shadow-stripe hover:shadow-stripe-lg hover:-translate-y-1 transition-all duration-500 text-left"
             >
               <div className="flex items-center gap-5">
                 <div className={cn("p-4 rounded-2xl border transition-all duration-500 group-hover:scale-110 group-hover:rotate-3", action.color)}>
                   <action.icon className="h-6 w-6" />
                 </div>
                 <div>
-                  <p className="font-black italic uppercase tracking-tighter text-base text-neutral-900">{action.label}</p>
-                  <p className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] opacity-60">{action.sub}</p>
+                  <p className="font-black italic uppercase tracking-tighter text-base text-foreground">{action.label}</p>
+                  <p className="text-xs font-bold text-muted-foreground uppercase tracking-[0.2em] opacity-60">{action.sub}</p>
                 </div>
               </div>
               <PlusCircle className="h-5 w-5 text-neutral-200 group-hover:text-primary transition-colors" />
@@ -252,7 +252,7 @@ export default function DashboardPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-10">
             {/* Health & Inventory Control (REPOSITIONED & IMPROVED) */}
-            <div className="p-8 md:p-10 rounded-[40px] bg-white border border-neutral-100 shadow-stripe-lg relative overflow-hidden group">
+            <div className="p-8 md:p-10 rounded-[40px] bg-card border border-border shadow-stripe-lg relative overflow-hidden group">
               <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 blur-[100px] -translate-y-1/2 translate-x-1/2" />
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-8 mb-10">
                 <div className="space-y-1">
@@ -260,11 +260,11 @@ export default function DashboardPage() {
                     Santé de l&apos;Inventaire
                     <div className="h-2.5 w-2.5 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_10px_rgba(16,185,129,0.5)]" />
                   </h3>
-                  <p className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.3em]">Répartition des stocks & Disponibilité PRO-X</p>
+                  <p className="text-xs font-bold text-muted-foreground uppercase tracking-[0.3em]">Répartition des stocks & Disponibilité PRO-X</p>
                 </div>
                 <div className="px-6 py-2 rounded-full bg-emerald-500/5 border border-emerald-500/10 flex items-center gap-3">
                   <CheckCircle2 className="h-4 w-4 text-emerald-500" />
-                  <span className="text-[10px] font-black uppercase tracking-widest text-emerald-700">Stock Optimal</span>
+                  <span className="text-xs font-bold uppercase tracking-widest text-emerald-700">Stock Optimal</span>
                 </div>
               </div>
 
@@ -272,8 +272,8 @@ export default function DashboardPage() {
                 {(data.propertyDistribution ?? []).map((p, i) => (
                   <div key={i} className="space-y-4">
                     <div className="flex justify-between items-end">
-                      <span className="text-[11px] font-black uppercase tracking-[0.2em] text-neutral-500">{p.name}</span>
-                      <span className="text-3xl font-black tabular-nums tracking-tighter text-neutral-900">{p.value}%</span>
+                      <span className="text-xs font-bold uppercase tracking-[0.2em] text-muted-foreground">{p.name}</span>
+                      <span className="text-3xl font-black tabular-nums tracking-tighter text-foreground">{p.value}%</span>
                     </div>
                     <div className="h-3 w-full bg-neutral-50 rounded-full overflow-hidden p-0.5 border border-neutral-100/50">
                       <div 

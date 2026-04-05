@@ -60,17 +60,17 @@ export default function SuperAdminDashboard() {
 
   return (
     <div className="space-y-12 animate-in fade-in duration-700 slide-in-from-bottom-4">
-      <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-4 border-b border-neutral-100/50">
+      <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-4 border-b border-border/50">
         <div className="space-y-1">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/5 border border-primary/10 text-primary text-[10px] font-black uppercase tracking-[0.2em] mb-2">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/5 border border-primary/10 text-primary text-xs font-bold uppercase tracking-[0.2em] mb-2">
             <Zap className="h-3 w-3" /> HQ Control Panel
           </div>
-          <h1 className="text-5xl font-black text-neutral-900 tracking-tighter italic uppercase underline decoration-primary decoration-8 underline-offset-8 text-nowrap">Performance</h1>
+          <h1 className="text-5xl font-black text-foreground tracking-tighter italic uppercase underline decoration-primary decoration-8 underline-offset-8 text-nowrap">Performance</h1>
         </div>
         <div className="flex items-center gap-4 text-right">
            <div>
-             <p className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.25em]">Dernière Sync</p>
-             <p className="text-sm font-bold text-neutral-900">À l&apos;instant</p>
+             <p className="text-xs font-bold text-muted-foreground uppercase tracking-[0.25em]">Dernière Sync</p>
+             <p className="text-sm font-bold text-foreground">À l&apos;instant</p>
            </div>
         </div>
       </header>
@@ -78,9 +78,9 @@ export default function SuperAdminDashboard() {
       {/* Metrics Row */}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         {metrics.map((metric) => (
-          <Card key={metric.title} className="bg-white border-neutral-100 shadow-stripe hover:shadow-stripe-lg hover:-translate-y-1 transition-all duration-500 rounded-[28px] group">
+          <Card key={metric.title} className="bg-card border-border shadow-stripe hover:shadow-stripe-lg hover:-translate-y-1 transition-all duration-500 rounded-[28px] group">
             <CardHeader className="flex flex-row items-center justify-between pb-4">
-              <CardTitle className="text-[10px] font-black text-neutral-400 uppercase tracking-[0.3em]">
+              <CardTitle className="text-xs font-bold text-muted-foreground uppercase tracking-[0.3em]">
                 {metric.title}
               </CardTitle>
               <div className={cn("p-2.5 rounded-xl border transition-all duration-500 group-hover:scale-110 group-hover:rotate-3", metric.bg, metric.border, metric.color)}>
@@ -88,20 +88,20 @@ export default function SuperAdminDashboard() {
               </div>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-black text-neutral-900 tracking-tighter tabular-nums">{metric.value}</div>
-              <p className="text-[10px] mt-2 flex items-center font-black uppercase tracking-widest">
+              <div className="text-3xl font-black text-foreground tracking-tighter tabular-nums">{metric.value}</div>
+              <p className="text-xs mt-2 flex items-center font-bold uppercase tracking-widest">
                 {metric.isPositive ? (
-                  <span className="text-emerald-500 flex items-center bg-emerald-50 px-2 py-0.5 rounded-full">
+                  <span className="text-emerald-500 flex items-center bg-emerald-500/10 px-2 py-0.5 rounded-full">
                     <TrendingUp className="h-3.5 w-3.5 mr-1" />
                     {metric.change}
                   </span>
                 ) : (
-                  <span className="text-rose-500 flex items-center bg-rose-50 px-2 py-0.5 rounded-full">
+                  <span className="text-rose-500 flex items-center bg-rose-500/10 px-2 py-0.5 rounded-full">
                     <ArrowDownRight className="h-3.5 w-3.5 mr-1" />
                     {metric.change}
                   </span>
                 )}
-                <span className="text-neutral-400 ml-3">Croissance</span>
+                <span className="text-muted-foreground/40 ml-3 font-bold">Croissance</span>
               </p>
             </CardContent>
           </Card>
@@ -109,12 +109,12 @@ export default function SuperAdminDashboard() {
       </div>
 
       <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-        <Card className="col-span-2 bg-white border-neutral-100 shadow-stripe-lg rounded-[32px] overflow-hidden">
-          <CardHeader className="p-8 border-b border-neutral-50 bg-[#fafafa]/50">
+        <Card className="col-span-2 bg-card border-border shadow-stripe-lg rounded-[32px] overflow-hidden">
+          <CardHeader className="p-8 border-b border-border/50 bg-accent/50">
             <div className="flex items-center justify-between">
               <div className="space-y-1">
-                <CardTitle className="text-xl font-black text-neutral-900 italic uppercase">Monétisation & Workspaces</CardTitle>
-                <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Volume analytique global</p>
+                <CardTitle className="text-xl font-black text-foreground italic uppercase">Monétisation & Workspaces</CardTitle>
+                <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Volume analytique global</p>
               </div>
               <Globe className="h-5 w-5 text-primary/30" />
             </div>
@@ -157,7 +157,7 @@ export default function SuperAdminDashboard() {
             ))}
             
             <div className="mt-8 pt-8 border-t border-white/5 text-center">
-               <p className="text-[10px] font-black text-primary uppercase tracking-[0.3em] animate-pulse">Tous les serveurs sont opérationnels</p>
+               <p className="text-xs font-bold text-primary uppercase tracking-[0.3em] animate-pulse">Tous les serveurs sont opérationnels</p>
             </div>
           </CardContent>
         </Card>

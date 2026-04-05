@@ -64,7 +64,7 @@ export function useSupabaseAuth() {
     await supabase.auth.signOut();
   }, [supabase.auth]);
 
-  const { isSimulating, tenantId: simTenantId, role: simRole, workspaceType: simWorkspaceType } = useSimulation();
+  const { isSimulating, tenantId: simTenantId, role: simRole, workspaceType: simWorkspaceType, plan: simPlan } = useSimulation();
 
   const metadata = (state.user?.user_metadata ?? {}) as IUserMetadata;
   const isSuperAdmin = state.user?.email === "contact@sensium-x.com";
@@ -79,7 +79,7 @@ export function useSupabaseAuth() {
     tenantId: (isSuperAdmin && isSimulating) ? simTenantId : (metadata.tenantId ?? null),
     role: (isSuperAdmin && isSimulating) ? simRole : (metadata.role ?? null),
     workspaceType: (isSuperAdmin && isSimulating) ? simWorkspaceType : (metadata.workspaceType ?? null),
-    plan: metadata.plan ?? null,
+    plan: (isSuperAdmin && isSimulating) ? simPlan : (metadata.plan ?? null),
     tenantName: metadata.tenantName ?? null,
     dbUserId: metadata.dbUserId ?? null,
     firstName: metadata.firstName ?? state.user?.user_metadata?.firstName ?? null,
