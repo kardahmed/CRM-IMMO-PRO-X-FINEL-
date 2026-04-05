@@ -168,7 +168,7 @@ export function KanbanCard({
               <div className="relative">
                 <Avatar className="h-7 w-7 border-2 border-white dark:border-neutral-900 shadow-sm">
                   <AvatarImage src={client.agentAvatar} />
-                  <AvatarFallback className="text-xs font-black bg-neutral-100 dark:bg-neutral-800 text-neutral-600">
+                  <AvatarFallback className="text-xs font-bold bg-neutral-100 dark:bg-neutral-800 text-neutral-600">
                     {client.agentName.split(" ").map(n => n[0]).join("")}
                   </AvatarFallback>
                 </Avatar>
@@ -195,7 +195,7 @@ export function KanbanCard({
               <Badge
                 variant="outline"
                 className={cn(
-                  "text-xs font-black h-5 px-1.5 tabular-nums uppercase tracking-tighter",
+                  "text-xs font-bold h-5 px-1.5 tabular-nums uppercase tracking-tighter",
                   client.daysInStage > 7
                     ? "border-orange-200 text-orange-600 bg-orange-50/50"
                     : "border-border text-muted-foreground"
