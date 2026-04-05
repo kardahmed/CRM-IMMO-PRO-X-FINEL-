@@ -12,7 +12,7 @@ export default function OnboardingLoading() {
             <div className="h-4 w-32 bg-white/10 rounded" />
             <div className="h-12 w-full bg-white/5 rounded-xl" />
             <div className="h-4 w-32 bg-white/10 rounded" />
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="h-20 bg-white/5 rounded-xl" />
               <div className="h-20 bg-white/5 rounded-xl" />
             </div>

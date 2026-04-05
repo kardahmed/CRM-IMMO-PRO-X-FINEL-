@@ -124,7 +124,7 @@ export function KanbanColumn({
       className={cn(
         "flex flex-col rounded-2xl border-2 transition-all duration-300 min-w-[280px] w-[280px] md:min-w-[320px] md:w-[320px] shrink-0",
         stage.borderColor,
-        "bg-neutral-50/50 dark:bg-neutral-900/50 backdrop-blur-sm",
+        "bg-accent/50 backdrop-blur-sm",
         "shadow-sm hover:shadow-md"
       )}
     >
@@ -136,14 +136,14 @@ export function KanbanColumn({
             <h3 className={cn("text-xs font-black uppercase tracking-widest", stage.color)}>
               {stage.label}
             </h3>
-            <Badge variant="outline" className={cn("text-[10px] font-black h-5 px-1.5 rounded-md", stage.color, "bg-white/50 border-inherit")}>
+            <Badge variant="outline" className={cn("text-xs font-black h-5 px-1.5 rounded-md", stage.color, "bg-white/50 border-inherit")}>
               {clients.length}
             </Badge>
           </div>
           
           <DropdownMenu>
             <DropdownMenuTrigger>
-              <div className="p-1 px-2 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-md text-muted-foreground hover:text-foreground">
+              <div className="p-1 px-2 hover:bg-accent rounded-md text-muted-foreground hover:text-foreground">
                 <MoreHorizontal className="h-4 w-4" />
               </div>
             </DropdownMenuTrigger>
@@ -165,9 +165,10 @@ export function KanbanColumn({
               {formatColumnBudget(totalBudget)}
             </span>
           </div>
-          <Button 
-            variant="ghost" 
-            size="icon" 
+          <Button
+            variant="ghost"
+            size="icon"
+            aria-label="Ajouter un prospect"
             className={cn("h-7 w-7 rounded-full bg-white/50 dark:bg-black/20 hover:scale-110 transition-transform", stage.color)}
           >
             <Plus className="h-3.5 w-3.5" />
@@ -195,7 +196,7 @@ export function KanbanColumn({
             {clients.length === 0 && !snapshot.isDraggingOver && (
               <div className="flex flex-col items-center justify-center h-32 opacity-30 grayscale group">
                 <LayoutDashboard className="h-8 w-8 mb-2 animate-pulse" />
-                <div className="text-[10px] font-black uppercase tracking-widest text-center">
+                <div className="text-xs font-black uppercase tracking-widest text-center">
                   Aucun prospect <br/> dans cette étape
                 </div>
               </div>

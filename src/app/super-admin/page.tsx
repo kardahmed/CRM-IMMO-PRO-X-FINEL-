@@ -52,7 +52,7 @@ export default function SuperAdminDashboard() {
       change: "-0.4%",
       isPositive: true, // true because decrease in churn is good
       icon: Activity,
-      color: "text-neutral-900",
+      color: "text-foreground",
       bg: "bg-neutral-500/5",
       border: "border-neutral-500/10"
     }
@@ -119,14 +119,14 @@ export default function SuperAdminDashboard() {
               <Globe className="h-5 w-5 text-primary/30" />
             </div>
           </CardHeader>
-          <CardContent className="h-[400px] flex items-center justify-center relative bg-white">
+          <CardContent className="h-[400px] flex items-center justify-center relative bg-card">
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--primary)_0%,_transparent_1%)] [background-size:24px_24px] opacity-10" />
             <div className="text-center space-y-4 z-10">
                <div className="h-16 w-16 rounded-full bg-primary/5 border border-primary/10 flex items-center justify-center mx-auto mb-6">
                  <Activity className="h-8 w-8 text-primary/40 animate-pulse" />
                </div>
-               <p className="text-[10px] font-black text-neutral-400 uppercase tracking-[0.4em]">Visualisation Recharts v2.0</p>
-               <p className="text-xs font-bold text-neutral-900">En attente de connexion au flux API Phoenix</p>
+               <p className="text-xs font-bold text-muted-foreground uppercase tracking-[0.4em]">Visualisation Recharts v2.0</p>
+               <p className="text-xs font-bold text-foreground">En attente de connexion au flux API Phoenix</p>
             </div>
           </CardContent>
         </Card>
@@ -147,7 +147,7 @@ export default function SuperAdminDashboard() {
             ].map((plan, i) => (
               <div key={i} className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-black text-neutral-400 uppercase tracking-[0.25em]">{plan.label}</span>
+                  <span className="text-xs font-black text-neutral-400 uppercase tracking-[0.25em]">{plan.label}</span>
                   <span className="text-xl font-black tabular-nums">{plan.value}%</span>
                 </div>
                 <div className="h-2.5 w-full bg-white/5 rounded-full overflow-hidden p-0.5 border border-white/5">

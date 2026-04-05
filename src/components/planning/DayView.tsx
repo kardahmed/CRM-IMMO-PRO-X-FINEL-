@@ -70,7 +70,7 @@ export function DayView({ visits, date, onVisitClick }: DayViewProps) {
                         <Home className="h-3 w-3 inline mr-1" />
                         {visit.propertyName}
                       </p>
-                      <p className="text-[10px] text-muted-foreground mt-0.5">
+                      <p className="text-xs text-muted-foreground mt-0.5">
                         <MapPin className="h-3 w-3 inline mr-1" />
                         {visit.agentName}
                       </p>

@@ -257,7 +257,7 @@ export default function PerformancePage() {
                       </td>
                       <td className="px-4 py-3 text-center font-bold text-primary">{agent.clientCount}</td>
                       <td className="px-4 py-3 text-center">
-                        <Badge variant="outline" className="text-[10px] uppercase font-black">{agent.role}</Badge>
+                        <Badge variant="outline" className="text-xs uppercase font-black">{agent.role}</Badge>
                       </td>
                     </tr>
                   ))}

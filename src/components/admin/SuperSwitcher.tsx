@@ -140,14 +140,14 @@ export function SuperSwitcher() {
               <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground/60 px-1">
                 Logiciel Business
               </label>
-              <div className="grid grid-cols-2 gap-2 px-1">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 px-1">
                 <Button
                   variant={workspaceType === "AGENCY" ? "default" : "outline"}
                   onClick={() => setSimulation({ workspaceType: "AGENCY" })}
                   className="rounded-xl h-16 flex flex-col gap-1 font-bold group border-border"
                 >
                   <Building2 className={cn("h-4 w-4", workspaceType === "AGENCY" ? "text-white" : "group-hover:text-primary")} />
-                  <span className="text-[10px] uppercase">Agence</span>
+                  <span className="text-xs uppercase">Agence</span>
                 </Button>
                 <Button
                   variant={workspaceType === "PROMOTION" ? "default" : "outline"}
@@ -155,7 +155,7 @@ export function SuperSwitcher() {
                   className="rounded-xl h-16 flex flex-col gap-1 font-bold group border-border"
                 >
                   <HardHat className={cn("h-4 w-4", workspaceType === "PROMOTION" ? "text-white" : "group-hover:text-primary")} />
-                  <span className="text-[10px] uppercase">Promotion</span>
+                  <span className="text-xs uppercase">Promotion</span>
                 </Button>
               </div>
             </div>
@@ -165,7 +165,7 @@ export function SuperSwitcher() {
               <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground/60 px-1">
                 Plan de Souscription
               </label>
-              <div className="grid grid-cols-2 gap-1.5 px-1">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 px-1">
                 {["STARTER", "PRO", "BUSINESS", "ENTERPRISE"].map((p) => (
                   <Button
                     key={p}
@@ -173,7 +173,7 @@ export function SuperSwitcher() {
                     size="sm"
                     onClick={() => setSimulation({ plan: p as any })}
                     className={cn(
-                      "rounded-lg text-[9px] uppercase font-bold h-8 border-border",
+                      "rounded-lg text-xs uppercase font-bold h-8 border-border",
                       plan === p ? "bg-primary text-primary-foreground" : "hover:bg-primary/5 hover:text-primary"
                     )}
                   >
@@ -196,7 +196,7 @@ export function SuperSwitcher() {
                     size="sm"
                     onClick={() => setSimulation({ role: r as any })}
                     className={cn(
-                      "rounded-lg text-[9px] uppercase font-bold h-7 px-3 border border-transparent",
+                      "rounded-lg text-xs uppercase font-bold h-7 px-3 border border-transparent",
                       role === r ? "bg-primary/10 text-primary border-primary/20" : "hover:bg-accent"
                     )}
                   >

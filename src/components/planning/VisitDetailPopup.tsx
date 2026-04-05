@@ -63,7 +63,7 @@ export function VisitDetailPopup({ visit, open, onClose, onAction }: VisitDetail
 
         <div className="space-y-4 py-2">
           <div className="flex items-center justify-between">
-            <Badge variant="outline" className={cn("text-[10px] font-black uppercase", status.color)}>
+            <Badge variant="outline" className={cn("text-xs font-black uppercase", status.color)}>
               {status.label}
             </Badge>
           </div>
@@ -73,14 +73,14 @@ export function VisitDetailPopup({ visit, open, onClose, onAction }: VisitDetail
               <div className="flex items-center gap-2 text-sm">
                 <User className="h-4 w-4 text-blue-500 shrink-0" />
                 <div>
-                  <p className="text-[10px] font-bold text-muted-foreground uppercase">Client</p>
+                  <p className="text-xs font-bold text-muted-foreground uppercase">Client</p>
                   <p className="font-bold">{visit.clientName}</p>
                 </div>
               </div>
               <div className="flex items-center gap-2 text-sm">
                 <Home className="h-4 w-4 text-indigo-500 shrink-0" />
                 <div>
-                  <p className="text-[10px] font-bold text-muted-foreground uppercase">Bien</p>
+                  <p className="text-xs font-bold text-muted-foreground uppercase">Bien</p>
                   <p className="font-medium">{visit.propertyName}</p>
                 </div>
               </div>
@@ -89,14 +89,14 @@ export function VisitDetailPopup({ visit, open, onClose, onAction }: VisitDetail
               <div className="flex items-center gap-2 text-sm">
                 <MapPin className="h-4 w-4 text-green-500 shrink-0" />
                 <div>
-                  <p className="text-[10px] font-bold text-muted-foreground uppercase">Agent</p>
+                  <p className="text-xs font-bold text-muted-foreground uppercase">Agent</p>
                   <p className="font-medium">{visit.agentName}</p>
                 </div>
               </div>
               <div className="flex items-center gap-2 text-sm">
                 <Clock className="h-4 w-4 text-amber-500 shrink-0" />
                 <div>
-                  <p className="text-[10px] font-bold text-muted-foreground uppercase">Heure</p>
+                  <p className="text-xs font-bold text-muted-foreground uppercase">Heure</p>
                   <p className="font-mono font-bold">{format(new Date(visit.scheduledAt), "HH:mm")}</p>
                 </div>
               </div>

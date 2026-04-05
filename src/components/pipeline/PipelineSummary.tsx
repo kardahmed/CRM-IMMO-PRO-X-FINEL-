@@ -86,7 +86,7 @@ export function PipelineSummary({ clients, className }: PipelineSummaryProps) {
               <div className={cn("p-2.5 rounded-xl transition-transform group-hover:scale-110", stat.bg, stat.color)}>
                 <stat.icon className="h-5 w-5" />
               </div>
-              <div className="flex items-center gap-1 text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+              <div className="flex items-center gap-1 text-xs font-bold text-muted-foreground uppercase tracking-wider">
                 Direct <ArrowUpRight className="h-3 w-3" />
               </div>
             </div>
@@ -101,7 +101,7 @@ export function PipelineSummary({ clients, className }: PipelineSummaryProps) {
             </div>
 
             <div className="mt-4 pt-4 border-t border-neutral-50 dark:border-neutral-800">
-              <p className="text-[10px] text-muted-foreground/80 font-medium italic">
+              <p className="text-xs text-muted-foreground/80 font-medium italic">
                 {stat.description}
               </p>
             </div>

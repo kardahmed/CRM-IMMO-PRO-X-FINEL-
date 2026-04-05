@@ -298,7 +298,7 @@ export function TaskExecutionDialog({
                     {isOverdue && (
                       <Badge
                         variant="destructive"
-                        className="text-[10px] uppercase font-black px-1.5 py-0"
+                        className="text-xs uppercase font-black px-1.5 py-0"
                       >
                         En retard &mdash;{" "}
                         {formatDistanceToNow(new Date(context.task.dueAt), {
@@ -322,7 +322,7 @@ export function TaskExecutionDialog({
                     </div>
                     <Badge
                       variant="outline"
-                      className={`uppercase font-black text-[10px] ${
+                      className={`uppercase font-black text-xs ${
                         PIPELINE_COLORS[context.client.pipelineStage] ||
                         "bg-gray-50 text-gray-700 border-gray-200"
                       }`}
@@ -398,19 +398,19 @@ export function TaskExecutionDialog({
                         <div className="flex items-center gap-2">
                           <Badge
                             variant="outline"
-                            className="text-[10px] font-bold px-1.5 py-0"
+                            className="text-xs font-bold px-1.5 py-0"
                           >
                             {INTERACTION_TYPE_LABELS[interaction.type] ||
                               interaction.type}
                           </Badge>
-                          <span className="text-[10px] text-muted-foreground">
+                          <span className="text-xs text-muted-foreground">
                             {interaction.direction === "OUTGOING"
                               ? "Sortant"
                               : "Entrant"}
                           </span>
                         </div>
                         <p className="text-sm mt-0.5">{interaction.content}</p>
-                        <p className="text-[10px] text-muted-foreground mt-0.5">
+                        <p className="text-xs text-muted-foreground mt-0.5">
                           {format(
                             new Date(interaction.createdAt),
                             "dd MMM yyyy à HH:mm",
@@ -525,7 +525,7 @@ export function TaskExecutionDialog({
                         )}
                         <Badge
                           variant="outline"
-                          className="text-[10px] font-bold text-purple-600 border-purple-200 bg-purple-50"
+                          className="text-xs font-bold text-purple-600 border-purple-200 bg-purple-50"
                         >
                           <Sparkles className="h-3 w-3 mr-1" /> Généré par IA
                           &mdash; validation humaine requise

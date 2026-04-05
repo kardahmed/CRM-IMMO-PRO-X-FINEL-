@@ -191,13 +191,13 @@ export default function WorkspaceDetailPanel() {
             <Link href="/super-admin/entreprises" className="text-neutral-500 hover:text-white transition-colors text-sm font-bold">
               ← Retour
             </Link>
-            <Badge className={`${statusColor[tenant.status] || ""} border-none font-black uppercase text-[10px]`}>
+            <Badge className={`${statusColor[tenant.status] || ""} border-none font-black uppercase text-xs`}>
               {tenant.status}
             </Badge>
-            <Badge className="bg-indigo-500/10 text-indigo-400 border-none font-black uppercase text-[10px]">
+            <Badge className="bg-indigo-500/10 text-indigo-400 border-none font-black uppercase text-xs">
               {tenant.plan}
             </Badge>
-            <Badge variant="outline" className="border-neutral-700 text-neutral-400 font-bold uppercase text-[10px]">
+            <Badge variant="outline" className="border-neutral-700 text-neutral-400 font-bold uppercase text-xs">
               {tenant.type}
             </Badge>
           </div>
@@ -299,14 +299,14 @@ export default function WorkspaceDetailPanel() {
                       <p className="text-xs text-neutral-500">{u.email}</p>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Badge className={`text-[10px] uppercase font-bold ${u.isActive ? "bg-emerald-500/10 text-emerald-400" : "bg-neutral-800 text-neutral-500"} border-none`}>
+                      <Badge className={`text-xs uppercase font-bold ${u.isActive ? "bg-emerald-500/10 text-emerald-400" : "bg-neutral-800 text-neutral-500"} border-none`}>
                         {u.role}
                       </Badge>
                       {u.isActive ? (
                         <Button
                           size="sm"
                           variant="ghost"
-                          className="h-7 text-[10px] text-rose-400 hover:bg-rose-500/10 font-bold gap-1"
+                          className="h-7 text-xs text-rose-400 hover:bg-rose-500/10 font-bold gap-1"
                           disabled={togglingUser === u.id}
                           onClick={() => handleToggleUser(u.id, false)}
                         >
@@ -317,7 +317,7 @@ export default function WorkspaceDetailPanel() {
                         <Button
                           size="sm"
                           variant="ghost"
-                          className="h-7 text-[10px] text-emerald-400 hover:bg-emerald-500/10 font-bold gap-1"
+                          className="h-7 text-xs text-emerald-400 hover:bg-emerald-500/10 font-bold gap-1"
                           disabled={togglingUser === u.id}
                           onClick={() => handleToggleUser(u.id, true)}
                         >

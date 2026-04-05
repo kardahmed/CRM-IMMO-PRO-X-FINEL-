@@ -84,7 +84,7 @@ export function TabVisites({ visits }: { visits: Visit[] }) {
                         </span>
                         <Badge
                           variant="outline"
-                          className={cn("text-[10px] font-black uppercase", status.color)}
+                          className={cn("text-xs font-black uppercase", status.color)}
                         >
                           {status.label}
                         </Badge>
@@ -107,7 +107,7 @@ export function TabVisites({ visits }: { visits: Visit[] }) {
                         </div>
                       )}
 
-                      <span className="text-[10px] text-muted-foreground mt-1 block">
+                      <span className="text-xs text-muted-foreground mt-1 block">
                         {formatDistanceToNow(new Date(visit.scheduledAt), {
                           addSuffix: true,
                           locale: fr,

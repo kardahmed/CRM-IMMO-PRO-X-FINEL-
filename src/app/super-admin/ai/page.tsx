@@ -78,9 +78,9 @@ export default function SuperAdminAI() {
                 <tbody className="divide-y divide-neutral-800">
                   {MOCK_AI_USAGE.map((usage, idx) => {
                     const ratio = usage.tokens / usage.limit;
-                    let badge = <Badge className="bg-emerald-500/10 text-emerald-400 border-none uppercase text-[10px]">Normal</Badge>;
-                    if (ratio > 0.8) badge = <Badge className="bg-amber-500/10 text-amber-400 border-none uppercase text-[10px]">Warning</Badge>;
-                    if (ratio >= 1) badge = <Badge className="bg-rose-500/10 text-rose-400 border-none uppercase text-[10px]">Dépassement</Badge>;
+                    let badge = <Badge className="bg-emerald-500/10 text-emerald-400 border-none uppercase text-xs">Normal</Badge>;
+                    if (ratio > 0.8) badge = <Badge className="bg-amber-500/10 text-amber-400 border-none uppercase text-xs">Warning</Badge>;
+                    if (ratio >= 1) badge = <Badge className="bg-rose-500/10 text-rose-400 border-none uppercase text-xs">Dépassement</Badge>;
 
                     return (
                       <tr key={idx} className="hover:bg-neutral-800/20 transition-colors">

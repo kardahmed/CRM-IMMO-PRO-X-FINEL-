@@ -22,7 +22,7 @@ export function ConversionChart({ data }: { data: DataPoint[] }) {
         </div>
         <div className="text-right">
           <span className="text-2xl font-bold text-primary">+24%</span>
-          <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-tighter">Croissance</p>
+          <p className="text-xs text-muted-foreground uppercase font-bold tracking-tighter">Croissance</p>
         </div>
       </CardHeader>
       <CardContent className="pt-4">

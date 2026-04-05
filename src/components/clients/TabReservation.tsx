@@ -52,12 +52,12 @@ export function TabReservation({ reservation }: TabReservationProps) {
       <CardContent>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <div className="space-y-1">
-            <p className="text-[10px] uppercase font-black tracking-wider text-muted-foreground">Numéro de Contrat</p>
+            <p className="text-xs uppercase font-black tracking-wider text-muted-foreground">Numéro de Contrat</p>
             <p className="font-mono text-sm font-bold bg-accent/30 w-fit px-2 py-1 rounded">{reservation.contractId}</p>
           </div>
           
           <div className="space-y-1">
-            <p className="text-[10px] uppercase font-black tracking-wider text-muted-foreground">Date de signature</p>
+            <p className="text-xs uppercase font-black tracking-wider text-muted-foreground">Date de signature</p>
             <p className="flex items-center gap-1.5 text-sm font-bold">
               <Calendar className="h-4 w-4 text-muted-foreground" />
               {format(new Date(reservation.date), "dd MMMM yyyy", { locale: fr })}
@@ -65,7 +65,7 @@ export function TabReservation({ reservation }: TabReservationProps) {
           </div>
 
           <div className="space-y-1">
-            <p className="text-[10px] uppercase font-black tracking-wider text-muted-foreground">Bien Réserve</p>
+            <p className="text-xs uppercase font-black tracking-wider text-muted-foreground">Bien Réserve</p>
             <p className="flex items-center gap-1.5 text-sm font-bold">
               <Building2 className="h-4 w-4 text-muted-foreground" />
               {reservation.property.name} <span className="text-muted-foreground font-normal">({reservation.property.unit})</span>
@@ -73,7 +73,7 @@ export function TabReservation({ reservation }: TabReservationProps) {
           </div>
 
           <div className="space-y-1">
-            <p className="text-[10px] uppercase font-black tracking-wider text-muted-foreground">Finance</p>
+            <p className="text-xs uppercase font-black tracking-wider text-muted-foreground">Finance</p>
             <div className="flex flex-col gap-0.5">
               <span className="flex items-center gap-1.5 text-sm font-bold">
                 <span className="text-muted-foreground font-normal w-12 text-xs">Vente :</span> {formatDA(reservation.amount)}

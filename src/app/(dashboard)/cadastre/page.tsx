@@ -91,7 +91,7 @@ export default function CadastrePage() {
   return (
     <div className="space-y-8 pb-10">
       <header>
-        <h1 className="text-3xl font-black tracking-tight text-neutral-900 dark:text-neutral-100 uppercase">
+        <h1 className="text-3xl font-black tracking-tight text-foreground uppercase">
           Cadastre
         </h1>
         <p className="text-muted-foreground mt-1 font-medium">

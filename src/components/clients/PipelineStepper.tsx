@@ -68,7 +68,7 @@ export function PipelineStepper({ currentStage }: PipelineStepperProps) {
               </div>
               <span 
                 className={cn(
-                  "text-[10px] font-bold uppercase tracking-wider text-center max-w-[90px] leading-tight",
+                  "text-xs font-bold uppercase tracking-wider text-center max-w-[90px] leading-tight",
                   isCurrent ? "text-primary" : 
                   isCompleted ? "text-foreground" : "text-muted-foreground"
                 )}

@@ -29,14 +29,14 @@ export function MultiComparisonChart({ data }: { data: ComparisonPoint[] }) {
   }));
 
   return (
-    <Card className="col-span-1 md:col-span-2 border-neutral-100 dark:border-neutral-800 shadow-sm overflow-hidden group">
-      <CardHeader className="flex flex-row items-center justify-between pb-2 border-b border-neutral-50 dark:border-neutral-900 mb-4 bg-neutral-50/50 dark:bg-neutral-900/50">
+    <Card className="col-span-1 md:col-span-2 border-border shadow-sm overflow-hidden group">
+      <CardHeader className="flex flex-row items-center justify-between pb-2 border-b border-border mb-4 bg-accent/50">
         <div className="space-y-1">
           <CardTitle className="text-lg font-black flex items-center gap-2 uppercase tracking-tight">
             <Layers className="h-4 w-4 text-primary" />
             Analyse Multi-Indicateurs
           </CardTitle>
-          <CardDescription className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">
+          <CardDescription className="text-xs font-bold uppercase tracking-widest text-muted-foreground/60">
             Comparaison Leads vs Visites sur la période
           </CardDescription>
         </div>

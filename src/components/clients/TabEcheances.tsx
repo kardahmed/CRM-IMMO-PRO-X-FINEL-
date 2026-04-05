@@ -60,7 +60,7 @@ export function TabEcheances({ totalAmount, paidAmount }: TabEcheancesProps) {
                   </div>
                   <div className="flex items-center gap-3">
                     <span className="font-black text-sm">{formatDA(tranche.amount)}</span>
-                    <Badge variant="outline" className="text-[10px] font-bold text-muted-foreground">A VENIR</Badge>
+                    <Badge variant="outline" className="text-xs font-bold text-muted-foreground">A VENIR</Badge>
                   </div>
                 </div>
               </div>

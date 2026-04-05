@@ -35,13 +35,13 @@ export function ClientInfoPanel({ client }: ClientInfoPanelProps) {
     <div className="w-full bg-white dark:bg-card border rounded-2xl overflow-hidden shadow-sm transition-all duration-300">
       {/* Header Accordion */}
       <div 
-        className="px-6 py-4 flex items-center justify-between cursor-pointer bg-neutral-50/50 dark:bg-transparent hover:bg-neutral-100/50 transition-colors"
+        className="px-6 py-4 flex items-center justify-between cursor-pointer bg-accent/50 hover:bg-accent transition-colors"
         onClick={() => setIsOpen(!isOpen)}
       >
         <div className="flex items-center gap-2 font-bold text-sm">
           <User className="h-4 w-4 text-primary" /> Informations du Dossier
         </div>
-        <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full">
+        <Button variant="ghost" size="icon" aria-label="Afficher ou masquer les informations" className="h-8 w-8 rounded-full">
           {isOpen ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
         </Button>
       </div>
@@ -52,7 +52,7 @@ export function ClientInfoPanel({ client }: ClientInfoPanelProps) {
           
           {/* Col 1 : Contact & Base */}
           <div className="space-y-4">
-            <h3 className="text-[10px] font-black uppercase text-muted-foreground mb-3 tracking-widest border-b pb-1">Identité & Contact</h3>
+            <h3 className="text-xs font-black uppercase text-muted-foreground mb-3 tracking-widest border-b pb-1">Identité & Contact</h3>
             <div className="flex gap-3">
               <div className="h-8 w-8 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
                 <User className="h-4 w-4" />
@@ -84,7 +84,7 @@ export function ClientInfoPanel({ client }: ClientInfoPanelProps) {
 
           {/* Col 2 : Localisation & Notes */}
           <div className="space-y-4">
-            <h3 className="text-[10px] font-black uppercase text-muted-foreground mb-3 tracking-widest border-b pb-1">Localisation & Notes</h3>
+            <h3 className="text-xs font-black uppercase text-muted-foreground mb-3 tracking-widest border-b pb-1">Localisation & Notes</h3>
             <div className="flex gap-3">
               <div className="h-8 w-8 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
                 <MapPin className="h-4 w-4" />
@@ -107,7 +107,7 @@ export function ClientInfoPanel({ client }: ClientInfoPanelProps) {
 
           {/* Col 3 : Critères de recherche */}
           <div className="space-y-4">
-            <h3 className="text-[10px] font-black uppercase text-muted-foreground mb-3 tracking-widest border-b pb-1">Critères de recherche</h3>
+            <h3 className="text-xs font-black uppercase text-muted-foreground mb-3 tracking-widest border-b pb-1">Critères de recherche</h3>
             <div className="flex gap-3">
               <div className="h-8 w-8 rounded-full bg-purple-50 text-purple-600 flex items-center justify-center shrink-0">
                 <Wallet className="h-4 w-4" />

@@ -298,12 +298,13 @@ export default function PipelinePage() {
         </div>
 
         <div className="flex items-center gap-2">
-          <Button 
-             variant="outline" 
-             size="icon" 
-             onClick={fetchClients} 
+          <Button
+             variant="outline"
+             size="icon"
+             aria-label="Actualiser le pipeline"
+             onClick={fetchClients}
              disabled={loading}
-             className="rounded-xl border-2 hover:bg-neutral-50 dark:hover:bg-neutral-900"
+             className="rounded-xl border-2 hover:bg-accent"
           >
             <RefreshCcw className={cn("h-4 w-4", loading && "animate-spin")} />
           </Button>

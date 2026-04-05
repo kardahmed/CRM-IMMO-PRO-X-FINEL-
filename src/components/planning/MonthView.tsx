@@ -54,7 +54,7 @@ export function MonthView({ visits, date, onVisitClick }: MonthViewProps) {
       {/* Day Names */}
       <div className="grid grid-cols-7 border-b">
         {dayNames.map((d) => (
-          <div key={d} className="text-center py-2 text-[10px] font-black uppercase text-muted-foreground border-r last:border-r-0">
+          <div key={d} className="text-center py-2 text-xs font-black uppercase text-muted-foreground border-r last:border-r-0">
             {d}
           </div>
         ))}
@@ -87,7 +87,7 @@ export function MonthView({ visits, date, onVisitClick }: MonthViewProps) {
                     {format(day, "d")}
                   </span>
                   {dayVisits.length > 0 && (
-                    <span className="text-[9px] font-black text-muted-foreground">
+                    <span className="text-xs font-black text-muted-foreground">
                       {dayVisits.length}
                     </span>
                   )}
@@ -101,7 +101,7 @@ export function MonthView({ visits, date, onVisitClick }: MonthViewProps) {
                         key={visit.id}
                         onClick={() => onVisitClick(visit)}
                         className={cn(
-                          "px-1.5 py-0.5 rounded text-[9px] cursor-pointer truncate font-bold transition-all hover:shadow-sm",
+                          "px-1.5 py-0.5 rounded text-xs cursor-pointer truncate font-bold transition-all hover:shadow-sm",
                           sc.bg,
                           sc.text,
                           sc.border,
@@ -113,7 +113,7 @@ export function MonthView({ visits, date, onVisitClick }: MonthViewProps) {
                     );
                   })}
                   {dayVisits.length > 3 && (
-                    <p className="text-[9px] text-muted-foreground font-bold text-center">
+                    <p className="text-xs text-muted-foreground font-bold text-center">
                       +{dayVisits.length - 3} autres
                     </p>
                   )}

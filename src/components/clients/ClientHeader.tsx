@@ -91,7 +91,7 @@ export function ClientHeader({ client }: ClientHeaderProps) {
             <Badge
               variant="outline"
               className={cn(
-                "text-[10px] font-black uppercase shrink-0",
+                "text-xs font-black uppercase shrink-0",
                 STAGE_COLORS[client.pipelineStage] || "bg-gray-100"
               )}
             >
@@ -104,7 +104,7 @@ export function ClientHeader({ client }: ClientHeaderProps) {
             <span>Agent : <span className="font-bold">{agentName}</span></span>
             <span className="text-neutral-300 mx-1">•</span>
             {client.source && (
-              <span className="font-medium text-[10px] uppercase bg-neutral-100 dark:bg-neutral-800 px-1.5 py-0.5 rounded">
+              <span className="font-medium text-xs uppercase bg-neutral-100 dark:bg-neutral-800 px-1.5 py-0.5 rounded">
                 {client.source}
               </span>
             )}

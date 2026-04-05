@@ -337,7 +337,7 @@ export default function PortfolioPage() {
                 placeholder="Ex: Appartement F3 Hydra"
               />
             </div>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="space-y-1.5">
                 <Label>Type *</Label>
                 <Select value={form.type ?? ""} onValueChange={(v) => setForm({ ...form, type: v ?? "" })}>
@@ -361,7 +361,7 @@ export default function PortfolioPage() {
                 </Select>
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="space-y-1.5">
                 <Label>Prix (DA)</Label>
                 <Input
@@ -381,7 +381,7 @@ export default function PortfolioPage() {
                 />
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="space-y-1.5">
                 <Label>Nombre de pieces</Label>
                 <Input

@@ -246,7 +246,7 @@ export default function ObjectivesPage() {
               </DialogTitle>
             </DialogHeader>
             <div className="space-y-4 py-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <label className="text-xs font-bold uppercase text-muted-foreground">Type de metrique</label>
                   <Select value={objForm.type} onValueChange={(v: string | null) => setObjForm((p) => ({ ...p, type: v ?? "" }))}>
@@ -342,13 +342,13 @@ export default function ObjectivesPage() {
                     <div className="flex flex-col md:flex-row justify-between gap-4 md:items-center mb-4">
                       <div>
                         <div className="flex items-center gap-2 mb-1">
-                          <Badge variant="outline" className="text-[10px] uppercase font-black tracking-wider text-muted-foreground">
+                          <Badge variant="outline" className="text-xs uppercase font-black tracking-wider text-muted-foreground">
                             {TYPE_LABELS[obj.type] ?? obj.type}
                           </Badge>
-                          <Badge variant="secondary" className="text-[10px] uppercase font-black bg-accent">
+                          <Badge variant="secondary" className="text-xs uppercase font-black bg-accent">
                             {PERIOD_LABELS[obj.period] ?? obj.period}
                           </Badge>
-                          <Badge variant="secondary" className="text-[10px] uppercase font-black bg-accent">
+                          <Badge variant="secondary" className="text-xs uppercase font-black bg-accent">
                             {formatDateRange(obj.startDate, obj.endDate)}
                           </Badge>
                         </div>
@@ -422,12 +422,12 @@ export default function ObjectivesPage() {
                       </div>
                       <div>
                         <p className="font-bold text-sm">{l.name}</p>
-                        <p className="text-[10px] uppercase font-black text-muted-foreground">{l.role}</p>
+                        <p className="text-xs uppercase font-black text-muted-foreground">{l.role}</p>
                       </div>
                     </div>
                     <div className="text-right">
                       <p className="font-black text-lg">{l.score}</p>
-                      <p className="text-[10px] font-bold text-muted-foreground">
+                      <p className="text-xs font-bold text-muted-foreground">
                         {l.achieved}/{l.total} atteints
                       </p>
                     </div>

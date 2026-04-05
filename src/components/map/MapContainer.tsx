@@ -200,7 +200,7 @@ export function MapContainer({ filters, clientCriteria, onMatchCountUpdate }: Ma
             <div className="relative h-[140px] w-full">
               <Image src={selectedProp.imageUrl} alt={selectedProp.name} className="w-full h-full object-cover rounded-t-xl" width={300} height={140} />
               <div className="absolute top-2 right-2">
-                <Badge className={cn("text-[10px] font-black uppercase text-white shadow-sm border-none")} style={{ backgroundColor: PIN_COLORS[selectedProp.status] }}>
+                <Badge className={cn("text-xs font-black uppercase text-white shadow-sm border-none")} style={{ backgroundColor: PIN_COLORS[selectedProp.status] }}>
                   {selectedProp.status === "AVAILABLE" && "Disponible"}
                   {selectedProp.status === "RESERVED" && "Réservé"}
                   {selectedProp.status === "SOLD" && "Vendu"}

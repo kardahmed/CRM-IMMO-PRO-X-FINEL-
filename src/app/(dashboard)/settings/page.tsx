@@ -359,7 +359,7 @@ export default function SettingsPage() {
                             <p className="text-xs text-muted-foreground">{u.email}</p>
                           </td>
                           <td className="px-6 py-4">
-                            <Badge variant="outline" className="font-black text-[10px] uppercase">{u.role}</Badge>
+                            <Badge variant="outline" className="font-black text-xs uppercase">{u.role}</Badge>
                           </td>
                           <td className="px-6 py-4">
                             {u.isActive ? (
@@ -385,7 +385,7 @@ export default function SettingsPage() {
                   </DialogTitle>
                 </DialogHeader>
                 <div className="space-y-4 py-4">
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <label className="text-xs font-bold uppercase text-muted-foreground">Prenom</label>
                       <Input value={inviteForm.firstName} onChange={(e) => setInviteForm((p) => ({ ...p, firstName: e.target.value }))} placeholder="Prenom" />
@@ -465,7 +465,7 @@ export default function SettingsPage() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="pt-4 space-y-4">
-                    <div className="grid grid-cols-2 gap-2">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                        <div className="space-y-1.5">
                         <label className="text-xs font-bold uppercase text-muted-foreground">Hote SMTP</label>
                         <Input placeholder="smtp.mailtrap.io" value={smtpForm.host} onChange={(e) => setSmtpForm((prev) => ({ ...prev, host: e.target.value }))} />
@@ -527,7 +527,7 @@ export default function SettingsPage() {
                       />
                       <Badge
                         variant="outline"
-                        className={`text-[9px] uppercase font-bold ${rule.channel === "whatsapp" ? "text-green-600 border-green-200" : ""}`}
+                        className={`text-xs uppercase font-bold ${rule.channel === "whatsapp" ? "text-green-600 border-green-200" : ""}`}
                       >
                         {rule.channelLabel}
                       </Badge>

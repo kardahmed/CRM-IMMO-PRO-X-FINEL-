@@ -60,7 +60,7 @@ export function UnitGrid({ units, onUnitClick }: UnitGridProps) {
                       <tr key={floor} className="border-b last:border-0 border-neutral-100 dark:border-neutral-800">
                         {/* Floor Label */}
                         <td className="w-20 py-3 pr-4 align-middle border-r border-neutral-100 dark:border-neutral-800">
-                          <div className="text-[10px] font-black uppercase text-muted-foreground text-right w-full">
+                          <div className="text-xs font-black uppercase text-muted-foreground text-right w-full">
                             {floor === 0 ? "RDC" : `${floor}er Étage`}
                           </div>
                         </td>
@@ -88,7 +88,7 @@ export function UnitGrid({ units, onUnitClick }: UnitGridProps) {
                                     </p>
                                     <p className="text-xs">Surface: {unit.area} m²</p>
                                     <p className="text-xs">Prix: {new Intl.NumberFormat("fr-DZ").format(unit.price)} DA</p>
-                                    <Badge variant="secondary" className="mt-2 text-[9px] uppercase font-black">
+                                    <Badge variant="secondary" className="mt-2 text-xs uppercase font-black">
                                       {unit.status === "AVAILABLE" && "Disponible"}
                                       {unit.status === "RESERVED" && "Réservé"}
                                       {unit.status === "SOLD" && "Vendu"}

@@ -205,7 +205,7 @@ export default function AutomationAgentsPage() {
               </CardHeader>
               <CardContent>
                 <Skeleton className="h-3 w-full rounded-full mb-4" />
-                <div className="grid grid-cols-4 gap-2">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
                   {Array.from({ length: 4 }).map((_, j) => (
                     <Skeleton key={j} className="h-14 rounded-lg" />
                   ))}
@@ -299,10 +299,10 @@ export default function AutomationAgentsPage() {
                   </div>
 
                   {/* Stats grid */}
-                  <div className="grid grid-cols-4 gap-2">
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
                     <div className="flex flex-col items-center rounded-lg bg-muted/50 p-2.5">
                       <span className="text-lg font-bold">{stats.total}</span>
-                      <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">
+                      <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
                         Total
                       </span>
                     </div>
@@ -310,7 +310,7 @@ export default function AutomationAgentsPage() {
                       <span className="text-lg font-bold text-green-700">
                         {stats.completed}
                       </span>
-                      <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">
+                      <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
                         Terminees
                       </span>
                     </div>
@@ -318,7 +318,7 @@ export default function AutomationAgentsPage() {
                       <span className="text-lg font-bold text-amber-700">
                         {stats.pending}
                       </span>
-                      <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">
+                      <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
                         En attente
                       </span>
                     </div>
@@ -326,7 +326,7 @@ export default function AutomationAgentsPage() {
                       <span className="text-lg font-bold text-red-700">
                         {stats.overdue}
                       </span>
-                      <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">
+                      <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
                         En retard
                       </span>
                     </div>

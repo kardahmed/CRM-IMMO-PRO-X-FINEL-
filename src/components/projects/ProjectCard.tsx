@@ -39,7 +39,7 @@ export function ProjectCard({ id, name, location, availableUnits, totalUnits, pr
           <Image src={imageUrl} alt={name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" fill sizes="(max-width: 768px) 100vw, 400px" />
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
           <div className="absolute top-3 right-3">
-            <Badge className={cn("text-[10px] font-black uppercase text-white shadow-sm border-none backdrop-blur-md", sc.color)}>
+            <Badge className={cn("text-xs font-black uppercase text-white shadow-sm border-none backdrop-blur-md", sc.color)}>
               {sc.label}
             </Badge>
           </div>
@@ -70,7 +70,7 @@ export function ProjectCard({ id, name, location, availableUnits, totalUnits, pr
             {/* Commercialisation */}
             <div>
               <div className="flex justify-between text-xs font-bold mb-1.5">
-                <span className="text-muted-foreground uppercase text-[10px]">Commercialisation</span>
+                <span className="text-muted-foreground uppercase text-xs">Commercialisation</span>
                 <span>{sellRatio}% vendu</span>
               </div>
               <Progress value={sellRatio} className="h-1.5 bg-neutral-200 dark:bg-neutral-800" />
@@ -79,7 +79,7 @@ export function ProjectCard({ id, name, location, availableUnits, totalUnits, pr
             {/* Chantier */}
             <div>
               <div className="flex justify-between text-xs font-bold mb-1.5">
-                <span className="text-muted-foreground uppercase text-[10px]">Chantier</span>
+                <span className="text-muted-foreground uppercase text-xs">Chantier</span>
                 <span>{progress}%</span>
               </div>
               <Progress value={progress} className="h-1.5 bg-neutral-200 dark:bg-neutral-800 [&_[data-slot=progress-indicator]]:bg-amber-500" />

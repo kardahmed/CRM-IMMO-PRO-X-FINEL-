@@ -36,10 +36,10 @@ interface IDemoLead {
 }
 
 const STATUS_BADGES: Record<string, { label: string; className: string }> = {
-  NEW: { label: "NOUVEAU", className: "bg-rose-500/10 text-rose-400 border-none font-black uppercase text-[10px] animate-pulse" },
-  CONTACTED: { label: "CONTACTE", className: "bg-cyan-500/10 text-cyan-400 border-none font-bold uppercase text-[10px]" },
-  QUALIFIED: { label: "QUALIFIE", className: "bg-emerald-500/10 text-emerald-400 border-none font-bold uppercase text-[10px]" },
-  CLOSED: { label: "FERME", className: "bg-neutral-800 text-neutral-400 border-none font-bold uppercase text-[10px]" },
+  NEW: { label: "NOUVEAU", className: "bg-rose-500/10 text-rose-400 border-none font-black uppercase text-xs animate-pulse" },
+  CONTACTED: { label: "CONTACTE", className: "bg-cyan-500/10 text-cyan-400 border-none font-bold uppercase text-xs" },
+  QUALIFIED: { label: "QUALIFIE", className: "bg-emerald-500/10 text-emerald-400 border-none font-bold uppercase text-xs" },
+  CLOSED: { label: "FERME", className: "bg-neutral-800 text-neutral-400 border-none font-bold uppercase text-xs" },
 };
 
 export default function SuperAdminDemoLeads() {
@@ -159,14 +159,14 @@ export default function SuperAdminDemoLeads() {
                         variant="outline"
                         className={
                           lead.companyType === "PROMOTION"
-                            ? "border-violet-500/30 text-violet-400 bg-violet-500/10 text-[10px]"
-                            : "border-cyan-500/30 text-cyan-400 bg-cyan-500/10 text-[10px]"
+                            ? "border-violet-500/30 text-violet-400 bg-violet-500/10 text-xs"
+                            : "border-cyan-500/30 text-cyan-400 bg-cyan-500/10 text-xs"
                         }
                       >
                         {lead.companyType === "PROMOTION" ? "Promotion" : "Agence"}
                       </Badge>
                       {lead.agentCount && (
-                        <span className="text-[10px] text-neutral-500 flex items-center gap-1">
+                        <span className="text-xs text-neutral-500 flex items-center gap-1">
                           <UserCheck className="h-3 w-3" /> {lead.agentCount} agents
                         </span>
                       )}
@@ -198,7 +198,7 @@ export default function SuperAdminDemoLeads() {
 
                   {lead.tenantId && (
                     <div className="pt-2 border-t border-neutral-800">
-                      <p className="text-[10px] text-neutral-500 font-mono truncate">
+                      <p className="text-xs text-neutral-500 font-mono truncate">
                         Tenant: {lead.tenantId}
                       </p>
                     </div>

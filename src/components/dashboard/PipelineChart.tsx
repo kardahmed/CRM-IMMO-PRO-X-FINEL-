@@ -19,7 +19,7 @@ const COLORS = [
 
 export function PipelineChart({ data }: { data: PipelineStep[] }) {
   return (
-    <Card className="h-full border-neutral-100 dark:border-neutral-800 shadow-sm transition-all duration-300 hover:shadow-lg">
+    <Card className="h-full border-border shadow-sm transition-all duration-300 hover:shadow-lg">
       <CardHeader>
         <CardTitle className="text-lg font-black uppercase tracking-tight">Répartition Pipeline</CardTitle>
         <CardDescription>Volume de prospects par étape</CardDescription>

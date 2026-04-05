@@ -224,7 +224,7 @@ function ProjectSection({ project }: { project: IPortalData["project"] }) {
         <ProgressBar percent={project.progressPercentage} />
       </div>
 
-      <div className="grid grid-cols-2 gap-3 text-sm">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
         <div>
           <span className="text-gray-500">Statut</span>
           <p className="font-medium">

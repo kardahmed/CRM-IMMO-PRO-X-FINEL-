@@ -83,7 +83,7 @@ export default function SuperAdminLayout({
       )}>
         <div className="h-20 flex items-center justify-between px-8 border-b border-border/50">
           <Logo width={32} height={32} />
-          <Button variant="ghost" size="icon" className="md:hidden" onClick={() => setIsSidebarOpen(false)}>
+          <Button variant="ghost" size="icon" aria-label="Fermer le menu" className="md:hidden" onClick={() => setIsSidebarOpen(false)}>
             <X className="h-5 w-5" />
           </Button>
         </div>
@@ -149,13 +149,13 @@ export default function SuperAdminLayout({
       <main className="flex-1 flex flex-col min-w-0 bg-background overflow-hidden relative">
         <header className="h-20 flex items-center justify-between px-4 md:px-10 border-b border-border/50 bg-background/50 backdrop-blur-xl shrink-0">
           <div className="flex items-center gap-4">
-             <Button variant="ghost" size="icon" className="md:hidden" onClick={() => setIsSidebarOpen(true)}>
+             <Button variant="ghost" size="icon" aria-label="Ouvrir le menu" className="md:hidden" onClick={() => setIsSidebarOpen(true)}>
                 <Menu className="h-5 w-5" />
              </Button>
              <div className="flex items-center gap-3">
                 <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
                 <h2 className="text-xs font-bold text-muted-foreground uppercase tracking-[0.4em] hidden sm:block">Système en ligne • v1.4.0</h2>
-                <h2 className="text-xs font-bold text-muted-foreground uppercase tracking-[0.4em] sm:hidden text-[10px]">HQ LIVE</h2>
+                <h2 className="text-xs font-bold text-muted-foreground uppercase tracking-[0.4em] sm:hidden text-xs">HQ LIVE</h2>
              </div>
           </div>
           <div className="flex items-center gap-6">

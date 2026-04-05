@@ -37,7 +37,7 @@ export function WeekView({ visits, date, onVisitClick }: WeekViewProps) {
               isSameDay(day, today) && "bg-primary/5"
             )}
           >
-            <p className="text-[10px] font-bold uppercase text-muted-foreground">
+            <p className="text-xs font-bold uppercase text-muted-foreground">
               {format(day, "EEE", { locale: fr })}
             </p>
             <p
@@ -58,7 +58,7 @@ export function WeekView({ visits, date, onVisitClick }: WeekViewProps) {
           <div key={hour} className="grid grid-cols-[80px_repeat(7,1fr)] border-b last:border-b-0 min-h-[60px]">
             {/* Time Label */}
             <div className="flex items-start justify-end pr-3 pt-1.5 border-r">
-              <span className="text-[10px] font-mono font-bold text-muted-foreground">
+              <span className="text-xs font-mono font-bold text-muted-foreground">
                 {String(hour).padStart(2, "0")}:00
               </span>
             </div>
@@ -85,7 +85,7 @@ export function WeekView({ visits, date, onVisitClick }: WeekViewProps) {
                         key={visit.id}
                         onClick={() => onVisitClick(visit)}
                         className={cn(
-                          "p-1.5 rounded-md border text-[10px] cursor-pointer transition-all hover:shadow-sm mb-0.5",
+                          "p-1.5 rounded-md border text-xs cursor-pointer transition-all hover:shadow-sm mb-0.5",
                           sc.bg,
                           sc.border
                         )}

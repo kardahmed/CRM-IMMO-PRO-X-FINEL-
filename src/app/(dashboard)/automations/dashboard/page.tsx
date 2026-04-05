@@ -188,14 +188,14 @@ function fullName(person: { firstName: string; lastName: string } | null): strin
 
 function KpiCard({ label, value, icon: Icon, iconBg }: { label: string; value: number; icon: any; iconBg: string }) {
   return (
-    <Card className="border-none shadow-stripe hover:shadow-stripe-lg transition-all duration-500 rounded-[28px] bg-white group overflow-hidden">
+    <Card className="border-none shadow-stripe hover:shadow-stripe-lg transition-all duration-500 rounded-[28px] bg-card group overflow-hidden">
       <CardContent className="flex items-center gap-5 p-7">
         <div className={cn("flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl shadow-sm transition-transform group-hover:scale-110 group-hover:rotate-3", iconBg)}>
           <Icon className="h-7 w-7" />
         </div>
         <div className="space-y-0.5">
-          <p className="text-[10px] font-black uppercase tracking-[0.25em] text-muted-foreground/60 italic">{label}</p>
-          <p className="text-4xl font-black tracking-tighter tabular-nums text-neutral-900">{value}</p>
+          <p className="text-xs font-bold uppercase tracking-[0.25em] text-muted-foreground/60 italic">{label}</p>
+          <p className="text-4xl font-black tracking-tighter tabular-nums text-foreground">{value}</p>
         </div>
       </CardContent>
     </Card>
@@ -213,12 +213,12 @@ function BarChart({ data }: { data: IByStage[] }) {
         return (
           <div key={s.stage} className="group/bar space-y-3">
             <div className="flex items-center justify-between">
-              <Badge variant="outline" className={cn("rounded-full px-4 py-1 text-[10px] font-black uppercase border italic", meta.color)}>
+              <Badge variant="outline" className={cn("rounded-full px-4 py-1 text-xs font-bold uppercase border italic", meta.color)}>
                 {meta.label}
               </Badge>
-              <span className="font-black tabular-nums text-neutral-900 text-lg tracking-tight">{total}</span>
+              <span className="font-bold tabular-nums text-foreground text-lg tracking-tight">{total}</span>
             </div>
-            <div className="h-3 w-full overflow-hidden rounded-full bg-neutral-50 p-0.5 border border-neutral-100/50">
+            <div className="h-3 w-full overflow-hidden rounded-full bg-accent p-0.5 border border-border/50">
               <div className="flex h-full rounded-full transition-all duration-700" style={{ width: `${pct}%` }}>
                 {s.completed > 0 && <div className="bg-emerald-500" style={{ width: `${(s.completed / total) * 100}%` }} />}
                 {s.inProgress > 0 && <div className="bg-blue-500" style={{ width: `${(s.inProgress / total) * 100}%` }} />}
@@ -500,19 +500,19 @@ export default function AutomationsDashboardPage() {
   }, [data]);
 
   return (
-    <div className="mx-auto w-full max-w-7xl space-y-12 p-4 md:p-8 lg:p-10 animate-page-enter bg-[#F6F9FC]">
+    <div className="mx-auto w-full max-w-7xl space-y-12 p-4 md:p-8 lg:p-10 animate-page-enter bg-background">
       {/* Executive Header */}
-      <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between bg-white p-8 rounded-[32px] shadow-stripe border border-neutral-100">
+      <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between bg-card p-8 rounded-[32px] shadow-stripe border border-border">
         <div className="flex items-center gap-6">
           <div className="h-16 w-16 rounded-2xl bg-emerald-500/10 flex items-center justify-center text-emerald-600 border border-emerald-500/20 shadow-sm">
             <BarChart3 className="h-8 w-8" />
           </div>
           <div>
-            <h1 className="text-4xl font-black tracking-tighter text-neutral-900 flex items-center gap-2">
+            <h1 className="text-4xl font-black tracking-tighter text-foreground flex items-center gap-2">
               Performance
               <span className="text-primary italic text-xl font-medium tracking-normal opacity-40 lowercase">hub</span>
             </h1>
-            <p className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.3em] opacity-60 mt-1">
+            <p className="text-xs font-bold text-muted-foreground uppercase tracking-[0.3em] opacity-60 mt-1">
               Analytics & Flux d'Execution en Temps Réel
             </p>
           </div>
@@ -520,7 +520,7 @@ export default function AutomationsDashboardPage() {
         <div className="flex items-center gap-2">
           <Button
             variant="outline"
-            className="h-14 px-8 rounded-full font-black uppercase text-[10px] tracking-[0.2em] shadow-stripe border-neutral-100 hover:bg-neutral-50 gap-3 group transition-all"
+            className="h-14 px-8 rounded-full font-bold uppercase text-xs tracking-[0.2em] shadow-stripe border-border hover:bg-accent gap-3 group transition-all"
             onClick={exportCsv}
             disabled={!data || data.recentTasks.length === 0}
           >
@@ -528,7 +528,7 @@ export default function AutomationsDashboardPage() {
             Exporter CSV
           </Button>
           <Link href="/dashboard/automations">
-            <Button variant="outline" className="h-14 px-8 rounded-full font-black uppercase text-[10px] tracking-[0.2em] shadow-stripe border-neutral-100 hover:bg-neutral-50 gap-3 group transition-all">
+            <Button variant="outline" className="h-14 px-8 rounded-full font-bold uppercase text-xs tracking-[0.2em] shadow-stripe border-border hover:bg-accent gap-3 group transition-all">
               <ArrowLeft className="h-4 w-4 text-primary transition-transform group-hover:-translate-x-1" />
               Architecture Flux
             </Button>
@@ -537,13 +537,13 @@ export default function AutomationsDashboardPage() {
       </div>
 
       {/* ---- Filter bar ---- */}
-      <Card className="rounded-[32px] border-none shadow-stripe bg-white overflow-visible">
+      <Card className="rounded-[32px] border-none shadow-stripe bg-card overflow-visible">
         <CardContent className="p-8">
           <div className="flex flex-wrap items-end gap-6">
             {/* Date range group */}
-            <div className="flex items-center gap-3 bg-neutral-50/50 p-2 rounded-2xl border border-neutral-100">
+            <div className="flex items-center gap-3 bg-accent/50 p-2 rounded-2xl border border-border">
               <div className="flex flex-col gap-1 px-2">
-                <label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/60">Date Début</label>
+                <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground/60">Date Début</label>
                 <Input
                   type="date"
                   value={filters.from}
@@ -553,7 +553,7 @@ export default function AutomationsDashboardPage() {
               </div>
               <div className="h-8 w-px bg-neutral-200" />
               <div className="flex flex-col gap-1 px-2">
-                <label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/60">Date Fin</label>
+                <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground/60">Date Fin</label>
                 <Input
                   type="date"
                   value={filters.to}
@@ -565,15 +565,15 @@ export default function AutomationsDashboardPage() {
 
             {/* Agent Select */}
             <div className="flex flex-col gap-2 flex-1 min-w-[200px]">
-              <label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/60 px-2">Propulseur Assigné</label>
+              <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground/60 px-2">Propulseur Assigné</label>
               <Select
                 value={filters.assignedToId}
                 onValueChange={(v) => updateFilter("assignedToId", v === "__all__" ? "" : v)}
               >
-                <SelectTrigger className="h-12 rounded-2xl border-neutral-100 bg-neutral-50/50 px-4 text-xs font-bold uppercase tracking-tight">
+                <SelectTrigger className="h-12 rounded-2xl border-border bg-accent/50 px-4 text-xs font-bold uppercase tracking-tight">
                   <SelectValue placeholder="Tous les agents" />
                 </SelectTrigger>
-                <SelectContent className="rounded-2xl border-neutral-100 shadow-stripe-lg">
+                <SelectContent className="rounded-2xl border-border shadow-stripe-lg">
                   <SelectItem value="__all__" className="text-xs font-bold uppercase">Tous les agents</SelectItem>
                   {teamMembers.map((m) => (
                     <SelectItem key={m.id} value={m.id} className="text-xs font-bold uppercase">
@@ -586,15 +586,15 @@ export default function AutomationsDashboardPage() {
 
             {/* Stage Select */}
             <div className="flex flex-col gap-2 flex-1 min-w-[180px]">
-              <label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/60 px-2">Étape Pipeline</label>
+              <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground/60 px-2">Étape Pipeline</label>
               <Select
                 value={filters.stage}
                 onValueChange={(v) => updateFilter("stage", v === "__all__" ? "" : v)}
               >
-                <SelectTrigger className="h-12 rounded-2xl border-neutral-100 bg-neutral-50/50 px-4 text-xs font-bold uppercase tracking-tight">
+                <SelectTrigger className="h-12 rounded-2xl border-border bg-accent/50 px-4 text-xs font-bold uppercase tracking-tight">
                   <SelectValue placeholder="Toutes les étapes" />
                 </SelectTrigger>
-                <SelectContent className="rounded-2xl border-neutral-100 shadow-stripe-lg">
+                <SelectContent className="rounded-2xl border-border shadow-stripe-lg">
                   <SelectItem value="__all__" className="text-xs font-bold uppercase">Toutes les étapes</SelectItem>
                   {STAGE_OPTIONS.map((s) => (
                     <SelectItem key={s.value} value={s.value} className="text-xs font-bold uppercase">
@@ -607,15 +607,15 @@ export default function AutomationsDashboardPage() {
 
             {/* Status Select */}
             <div className="flex flex-col gap-2 w-48">
-              <label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/60 px-2">État Flux</label>
+              <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground/60 px-2">État Flux</label>
               <Select
                 value={filters.status}
                 onValueChange={(v) => updateFilter("status", v === "__all__" ? "" : v)}
               >
-                <SelectTrigger className="h-12 rounded-2xl border-neutral-100 bg-neutral-50/50 px-4 text-xs font-bold uppercase tracking-tight">
+                <SelectTrigger className="h-12 rounded-2xl border-border bg-accent/50 px-4 text-xs font-bold uppercase tracking-tight">
                   <SelectValue placeholder="Tous les flux" />
                 </SelectTrigger>
-                <SelectContent className="rounded-2xl border-neutral-100 shadow-stripe-lg">
+                <SelectContent className="rounded-2xl border-border shadow-stripe-lg">
                   <SelectItem value="__all__" className="text-xs font-bold uppercase">Tous les flux</SelectItem>
                   {STATUS_OPTIONS.map((s) => (
                     <SelectItem key={s.value} value={s.value} className="text-xs font-bold uppercase">
@@ -631,7 +631,7 @@ export default function AutomationsDashboardPage() {
               <Button
                 variant="ghost"
                 onClick={resetFilters}
-                className="h-12 rounded-2xl text-[9px] font-black text-rose-500 hover:text-rose-600 hover:bg-rose-50/50 uppercase tracking-widest transition-all px-6 border border-rose-100"
+                className="h-12 rounded-2xl text-xs font-bold text-rose-500 hover:text-rose-600 hover:bg-rose-50/50 uppercase tracking-widest transition-all px-6 border border-rose-100"
               >
                 <XCircleIcon className="mr-2 h-3.5 w-3.5" />
                 Reset
@@ -647,7 +647,7 @@ export default function AutomationsDashboardPage() {
       ) : error ? (
         <Card className="rounded-[32px] border-none shadow-stripe bg-rose-50/50 p-12 text-center">
           <AlertCircle className="h-16 w-16 text-rose-500 mx-auto mb-4 opacity-50" />
-          <p className="text-lg font-black text-rose-900 tracking-tight">{error}</p>
+          <p className="text-lg font-bold text-rose-900 tracking-tight">{error}</p>
         </Card>
       ) : data ? (
         <div className="space-y-12 pb-20">
@@ -661,13 +661,13 @@ export default function AutomationsDashboardPage() {
 
           {/* Charts Row */}
           <div className="grid grid-cols-1 gap-10 lg:grid-cols-2">
-            <Card className="rounded-[40px] border-none shadow-stripe bg-white">
+            <Card className="rounded-[40px] border-none shadow-stripe bg-card">
               <CardHeader className="p-10 pb-4">
-                <CardTitle className="text-[11px] font-black uppercase tracking-[0.3em] text-muted-foreground/60 italic">Efficacité par Étape</CardTitle>
+                <CardTitle className="text-xs font-bold uppercase tracking-[0.3em] text-muted-foreground/60 italic">Efficacité par Étape</CardTitle>
               </CardHeader>
               <CardContent className="p-10 pt-0">
                 <BarChart data={data.byStage} />
-                <div className="mt-10 pt-6 border-t border-neutral-50 flex flex-wrap gap-4 text-[9px] font-black uppercase tracking-widest text-muted-foreground/60">
+                <div className="mt-10 pt-6 border-t border-neutral-50 flex flex-wrap gap-4 text-xs font-bold uppercase tracking-widest text-muted-foreground/60">
                    {['completed', 'inProgress', 'pending', 'cancelled', 'overdue'].map(s => (
                      <div key={s} className="flex items-center gap-2">
                        <div className={cn("h-2.5 w-2.5 rounded-full", s==='completed'?'bg-emerald-500':s==='inProgress'?'bg-blue-500':s==='pending'?'bg-amber-400':s==='cancelled'?'bg-rose-400':'bg-orange-500')} />
@@ -678,21 +678,21 @@ export default function AutomationsDashboardPage() {
               </CardContent>
             </Card>
 
-            <Card className="rounded-[40px] border-none shadow-stripe bg-white">
+            <Card className="rounded-[40px] border-none shadow-stripe bg-card">
               <CardHeader className="p-10 pb-4">
-                 <CardTitle className="text-[11px] font-black uppercase tracking-[0.3em] text-muted-foreground/60 italic">Mix Logistique</CardTitle>
+                 <CardTitle className="text-xs font-bold uppercase tracking-[0.3em] text-muted-foreground/60 italic">Mix Logistique</CardTitle>
               </CardHeader>
               <CardContent className="p-10 pt-0 space-y-8">
                  {data.byType.map(d => {
-                   const meta = TYPE_META[d.type] ?? { label: d.type, color: "text-neutral-500", bg: "bg-neutral-400" };
+                   const meta = TYPE_META[d.type] ?? { label: d.type, color: "text-muted-foreground", bg: "bg-neutral-400" };
                    const pct = Math.round((d._count._all / (data.summary.total || 1)) * 100);
                    return (
                      <div key={d.type} className="space-y-3">
                         <div className="flex justify-between items-end">
-                          <span className={cn("text-xs font-black uppercase tracking-widest", meta.color)}>{meta.label}</span>
-                          <span className="font-black tabular-nums text-xl">{d._count._all} <span className="text-[10px] text-muted-foreground opacity-40 ml-1">({pct}%)</span></span>
+                          <span className={cn("text-xs font-bold uppercase tracking-widest", meta.color)}>{meta.label}</span>
+                          <span className="font-black tabular-nums text-xl">{d._count._all} <span className="text-xs text-muted-foreground opacity-40 ml-1">({pct}%)</span></span>
                         </div>
-                        <div className="h-2.5 w-full bg-neutral-50 rounded-full border border-neutral-100/50 overflow-hidden">
+                        <div className="h-2.5 w-full bg-accent rounded-full border border-border/50 overflow-hidden">
                            <div className={cn("h-full rounded-full transition-all duration-1000", meta.bg)} style={{ width: `${pct}%` }} />
                         </div>
                      </div>
@@ -704,60 +704,60 @@ export default function AutomationsDashboardPage() {
 
           {/* Recent Tasks List */}
           <Card className="rounded-[40px] border-none shadow-stripe-lg bg-neutral-900 text-white overflow-hidden">
-             <CardHeader className="p-10 bg-white/[0.03] border-b border-white/5">
+             <CardHeader className="p-10 bg-card/[0.03] border-b border-white/5">
                 <div className="flex items-center justify-between">
                   <div>
-                    <CardTitle className="text-[12px] font-black uppercase tracking-[0.4em] text-neutral-400 italic">Propulseurs Récents</CardTitle>
-                    <p className="text-[10px] text-neutral-500 mt-2 font-medium tracking-widest uppercase">Flux PRO-X Live Optimization</p>
+                    <CardTitle className="text-[12px] font-bold uppercase tracking-[0.4em] text-neutral-400 italic">Propulseurs Récents</CardTitle>
+                    <p className="text-xs text-muted-foreground mt-2 font-medium tracking-widest uppercase">Flux PRO-X Live Optimization</p>
                   </div>
-                  <Badge className="bg-emerald-500 text-white rounded-full px-6 py-2 text-[10px] font-black uppercase italic shadow-[0_0_20px_rgba(16,185,129,0.3)] border-none">
+                  <Badge className="bg-emerald-500 text-white rounded-full px-6 py-2 text-xs font-bold uppercase italic shadow-[0_0_20px_rgba(16,185,129,0.3)] border-none">
                     ENGINE ACTIVE
                   </Badge>
                 </div>
              </CardHeader>
              <CardContent className="p-0">
                <Table>
-                 <TableHeader className="bg-white/[0.01]">
+                 <TableHeader className="bg-card/[0.01]">
                    <TableRow className="border-b border-white/5 hover:bg-transparent">
-                     <TableHead className="px-10 h-16 text-[9px] font-black uppercase tracking-[0.2em] text-neutral-500">Flux / Titre</TableHead>
-                     <TableHead className="text-[9px] font-black uppercase tracking-[0.2em] text-neutral-500">Média</TableHead>
-                     <TableHead className="text-[9px] font-black uppercase tracking-[0.2em] text-neutral-500">Étape</TableHead>
-                     <TableHead className="text-[9px] font-black uppercase tracking-[0.2em] text-neutral-500">Statut</TableHead>
-                     <TableHead className="px-10 text-right text-[9px] font-black uppercase tracking-[0.2em] text-neutral-500">Échéance</TableHead>
+                     <TableHead className="px-10 h-16 text-xs font-bold uppercase tracking-[0.2em] text-muted-foreground">Flux / Titre</TableHead>
+                     <TableHead className="text-xs font-bold uppercase tracking-[0.2em] text-muted-foreground">Média</TableHead>
+                     <TableHead className="text-xs font-bold uppercase tracking-[0.2em] text-muted-foreground">Étape</TableHead>
+                     <TableHead className="text-xs font-bold uppercase tracking-[0.2em] text-muted-foreground">Statut</TableHead>
+                     <TableHead className="px-10 text-right text-xs font-bold uppercase tracking-[0.2em] text-muted-foreground">Échéance</TableHead>
                    </TableRow>
                  </TableHeader>
                  <TableBody>
                    {data.recentTasks.map(task => {
                      const stageMeta = STAGE_META[task.pipelineStage] ?? { label: task.pipelineStage, color: "text-neutral-400" };
-                     const typeMeta = TYPE_META[task.type] ?? { label: task.type, color: "text-neutral-400", bg: "bg-white/10" };
-                     const statusMeta = STATUS_META[task.status] ?? { label: task.status, className: "bg-white/5" };
+                     const typeMeta = TYPE_META[task.type] ?? { label: task.type, color: "text-neutral-400", bg: "bg-card/10" };
+                     const statusMeta = STATUS_META[task.status] ?? { label: task.status, className: "bg-card/5" };
                      const overdue = isOverdue(task);
                      return (
-                       <TableRow key={task.id} className="border-b border-white/5 hover:bg-white/[0.04] transition-colors group">
+                       <TableRow key={task.id} className="border-b border-white/5 hover:bg-card/[0.04] transition-colors group">
                          <TableCell className="px-10 py-6">
                             <div className="space-y-1">
-                              <p className="font-black text-lg tracking-tight group-hover:text-primary transition-colors">{task.title}</p>
-                              <p className="text-[11px] text-neutral-500 tabular-nums uppercase font-black opacity-60 tracking-wider">Prospect: {fullName(task.client)}</p>
+                              <p className="font-bold text-lg tracking-tight group-hover:text-primary transition-colors">{task.title}</p>
+                              <p className="text-xs text-muted-foreground tabular-nums uppercase font-bold opacity-60 tracking-wider">Prospect: {fullName(task.client)}</p>
                             </div>
                          </TableCell>
                          <TableCell>
-                            <span className={cn("px-4 py-1.5 rounded-full text-[9px] font-black uppercase border border-white/10 italic", typeMeta.color)}>
+                            <span className={cn("px-4 py-1.5 rounded-full text-xs font-bold uppercase border border-white/10 italic", typeMeta.color)}>
                                {typeMeta.label}
                             </span>
                          </TableCell>
                          <TableCell>
-                            <span className={cn("px-4 py-1.5 rounded-lg text-[9px] font-black uppercase bg-white/5", stageMeta.color)}>
+                            <span className={cn("px-4 py-1.5 rounded-lg text-xs font-bold uppercase bg-card/5", stageMeta.color)}>
                                {stageMeta.label}
                             </span>
                          </TableCell>
                          <TableCell>
-                            <Badge variant="outline" className={cn("px-4 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border-white/10", statusMeta.className)}>
+                            <Badge variant="outline" className={cn("px-4 py-1 rounded-full text-xs font-bold uppercase tracking-widest border-white/10", statusMeta.className)}>
                                {statusMeta.label}
                             </Badge>
                          </TableCell>
                          <TableCell className="px-10 text-right space-y-1">
-                            <p className={cn("text-sm font-black tabular-nums", overdue ? "text-rose-500 animate-pulse" : "text-neutral-400")}>{formatDate(task.dueAt)}</p>
-                            <p className="text-[9px] text-neutral-600 font-bold uppercase tracking-widest">{fullName(task.assignedTo)}</p>
+                            <p className={cn("text-sm font-bold tabular-nums", overdue ? "text-rose-500 animate-pulse" : "text-neutral-400")}>{formatDate(task.dueAt)}</p>
+                            <p className="text-xs text-muted-foreground font-bold uppercase tracking-widest">{fullName(task.assignedTo)}</p>
                          </TableCell>
                        </TableRow>
                      );

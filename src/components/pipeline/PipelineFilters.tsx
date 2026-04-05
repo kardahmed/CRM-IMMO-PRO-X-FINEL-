@@ -69,7 +69,7 @@ export function PipelineFilters({
   projects,
 }: PipelineFiltersProps) {
   return (
-    <div className="flex flex-col gap-4 w-full bg-white dark:bg-neutral-900 p-4 rounded-2xl border-2 border-neutral-100 dark:border-neutral-800 shadow-sm">
+    <div className="flex flex-col gap-4 w-full bg-white dark:bg-neutral-900 p-4 rounded-2xl border-2 border-border shadow-sm">
       <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4">
         {/* Search & Main Filters */}
         <div className="flex flex-col md:flex-row items-stretch md:items-center gap-3 flex-1">
@@ -79,7 +79,7 @@ export function PipelineFilters({
               placeholder="Rechercher nom, téléphone..."
               value={search}
               onChange={(e) => onSearchChange(e.target.value)}
-              className="pl-10 h-11 bg-neutral-50/50 dark:bg-neutral-800/50 border-none ring-1 ring-neutral-200 dark:ring-neutral-700 focus:ring-2 focus:ring-primary rounded-xl transition-all"
+              className="pl-10 h-11 bg-accent/50 border-none ring-1 ring-neutral-200 dark:ring-neutral-700 focus:ring-2 focus:ring-primary rounded-xl transition-all"
             />
           </div>
 
@@ -124,12 +124,12 @@ export function PipelineFilters({
                 variant="ghost" 
                 size="sm" 
                 onClick={onReset}
-                className="text-[11px] font-black uppercase tracking-widest text-muted-foreground hover:text-red-500"
+                className="text-xs font-black uppercase tracking-widest text-muted-foreground hover:text-red-500"
               >
                 Réinitialiser
               </Button>
             )}
-            <Badge variant="secondary" className="h-10 px-4 rounded-xl gap-2 bg-neutral-100 dark:bg-neutral-800 text-[11px] font-black uppercase tracking-widest border-none">
+            <Badge variant="secondary" className="h-10 px-4 rounded-xl gap-2 bg-accent text-xs font-black uppercase tracking-widest border-none">
               <Filter className="h-3.5 w-3.5" />
               {activeFiltersCount} Filtres actifs
             </Badge>
@@ -138,7 +138,7 @@ export function PipelineFilters({
       </div>
 
       {/* Secondary Filters Row */}
-      <div className="flex flex-wrap items-center gap-3 pt-2 border-t border-neutral-50 dark:border-neutral-800">
+      <div className="flex flex-wrap items-center gap-3 pt-2 border-t border-border">
         <Select value={source} onValueChange={(v) => onSourceChange(v ?? "all")}>
           <SelectTrigger className="w-[160px] h-9 bg-transparent border-none ring-1 ring-neutral-100 dark:ring-neutral-800 rounded-lg text-xs font-bold">
             <Target className="h-3 w-3 mr-2 text-primary/60" />

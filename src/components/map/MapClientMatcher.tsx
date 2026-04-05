@@ -74,7 +74,7 @@ export function MapClientMatcher({ onMatch, matchedCount }: MapClientMatcherProp
         </div>
         <div>
           <h3 className="text-sm font-black uppercase">Matcher un client</h3>
-          <p className="text-[10px] font-medium text-muted-foreground">Filtre auto avec transparence</p>
+          <p className="text-xs font-medium text-muted-foreground">Filtre auto avec transparence</p>
         </div>
       </div>
 

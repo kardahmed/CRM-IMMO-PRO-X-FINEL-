@@ -43,7 +43,7 @@ export function AuthHeader() {
           <div className="h-8 w-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-semibold">
             {initials}
           </div>
-          <Button variant="ghost" size="icon" onClick={signOut}>
+          <Button variant="ghost" size="icon" aria-label="Se déconnecter" onClick={signOut}>
             <LogOut className="h-4 w-4" />
           </Button>
         </div>

@@ -58,7 +58,7 @@ export function MapFilters({ filters, onChange, className }: MapFiltersProps) {
             <Filter className="h-4 w-4 text-primary" />
             Filtres de recherche
           </CardTitle>
-          <Button variant="ghost" size="sm" onClick={reset} className="h-6 text-[10px] uppercase font-bold text-muted-foreground">
+          <Button variant="ghost" size="sm" onClick={reset} className="h-6 text-xs uppercase font-bold text-muted-foreground">
             Réinitialiser
           </Button>
         </div>

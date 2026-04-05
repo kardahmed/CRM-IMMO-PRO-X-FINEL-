@@ -256,23 +256,23 @@ export default function AutomationsPage() {
   return (
     <div className="space-y-12 pb-20 max-w-5xl mx-auto px-4 italic-none">
       {/* Executive Header */}
-      <div className="flex flex-col md:flex-row items-center justify-between gap-6 bg-white p-8 rounded-[32px] shadow-stripe border border-neutral-100 animate-page-enter">
+      <div className="flex flex-col md:flex-row items-center justify-between gap-6 bg-card p-8 rounded-[32px] shadow-stripe border border-border animate-page-enter">
         <div className="flex items-center gap-6">
           <div className="h-16 w-16 rounded-2xl bg-emerald-500/10 flex items-center justify-center text-emerald-600 shadow-sm border border-emerald-500/20">
             <Zap className="h-8 w-8 fill-emerald-500/20" />
           </div>
           <div>
-            <h1 className="text-4xl font-black tracking-tighter text-neutral-900 flex items-center gap-2">
+            <h1 className="text-4xl font-black tracking-tighter text-foreground flex items-center gap-2">
               Automations
               <span className="text-primary italic text-xl font-medium tracking-normal opacity-40 lowercase">engine</span>
             </h1>
-            <p className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.3em] opacity-60 mt-1">
+            <p className="text-xs font-bold text-muted-foreground uppercase tracking-[0.3em] opacity-60 mt-1">
               Architecture des Flux & Propulseurs d'Activite
             </p>
           </div>
         </div>
         <Link href="/dashboard/automations/dashboard">
-          <Button variant="outline" className="h-14 px-8 rounded-full font-black uppercase text-[10px] tracking-[0.2em] shadow-stripe border-neutral-100 hover:bg-neutral-50 gap-3 group transition-all">
+          <Button variant="outline" className="h-14 px-8 rounded-full font-bold uppercase text-xs tracking-[0.2em] shadow-stripe border-border hover:bg-accent gap-3 group transition-all">
             <BarChart3 className="h-4 w-4 text-primary group-hover:rotate-12 transition-transform" />
             Performance Hub
           </Button>
@@ -286,7 +286,7 @@ export default function AutomationsPage() {
       ) : error ? (
         <Card className="rounded-[32px] border-none shadow-stripe bg-rose-50/50 p-12 text-center">
           <XCircle className="h-16 w-16 text-rose-500 mx-auto mb-4 opacity-50" />
-          <p className="text-lg font-black text-rose-900 tracking-tight">{error}</p>
+          <p className="text-lg font-bold text-rose-900 tracking-tight">{error}</p>
           <Button onClick={fetchConfigs} variant="outline" className="mt-6 rounded-full h-12 px-8">Réessayer</Button>
         </Card>
       ) : (
@@ -313,18 +313,18 @@ export default function AutomationsPage() {
                    </div>
                    
                    <div className={cn(
-                     "flex-1 bg-white p-8 rounded-[32px] border transition-all duration-500 shadow-stripe hover:shadow-stripe-lg",
-                     config.isActive ? "border-emerald-500/10" : "border-neutral-100 opacity-60"
+                     "flex-1 bg-card p-8 rounded-[32px] border transition-all duration-500 shadow-stripe hover:shadow-stripe-lg",
+                     config.isActive ? "border-emerald-500/10" : "border-border opacity-60"
                    )}>
                       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
                         <div className="space-y-1">
                            <div className="flex items-center gap-3">
-                             <span className="text-[10px] font-black uppercase tracking-[0.25em] text-primary">Déclencheur Système</span>
-                             <Badge className={cn("rounded-full px-4 py-1 text-[10px] font-black uppercase border", meta.color)}>
+                             <span className="text-xs font-black uppercase tracking-[0.25em] text-primary">Déclencheur Système</span>
+                             <Badge className={cn("rounded-full px-4 py-1 text-xs font-black uppercase border", meta.color)}>
                                {meta.label}
                              </Badge>
                            </div>
-                           <h3 className="text-2xl font-black tracking-tight text-neutral-900 transition-colors group-hover:text-primary">
+                           <h3 className="text-2xl font-black tracking-tight text-foreground transition-colors group-hover:text-primary">
                              Prospect entre dans l'étape
                            </h3>
                            <p className="text-sm text-muted-foreground font-medium italic">
@@ -332,10 +332,10 @@ export default function AutomationsPage() {
                            </p>
                         </div>
 
-                        <div className="flex items-center gap-6 self-start lg:self-center bg-neutral-50 px-6 py-4 rounded-2xl border border-neutral-100">
+                        <div className="flex items-center gap-6 self-start lg:self-center bg-accent px-6 py-4 rounded-2xl border border-border">
                           <div className="text-right">
-                             <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">{config.isActive ? "Actif" : "Suspendu"}</p>
-                             <p className="text-xs font-black uppercase text-neutral-900">{activeTaskCount} actif{activeTaskCount > 1 ? "s" : ""}</p>
+                             <p className="text-xs font-black uppercase tracking-widest text-muted-foreground/60">{config.isActive ? "Actif" : "Suspendu"}</p>
+                             <p className="text-xs font-black uppercase text-foreground">{activeTaskCount} actif{activeTaskCount > 1 ? "s" : ""}</p>
                           </div>
                           <Switch
                             checked={config.isActive}
@@ -349,7 +349,7 @@ export default function AutomationsPage() {
                       <Button 
                         variant="ghost" 
                         onClick={() => toggleExpand(config.pipelineStage)}
-                        className="mt-6 w-full h-12 bg-neutral-50/50 hover:bg-neutral-100 border border-neutral-100 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground transition-all rounded-xl gap-2"
+                        className="mt-6 w-full h-12 bg-accent/50 hover:bg-accent border border-border text-xs font-black uppercase tracking-[0.2em] text-muted-foreground transition-all rounded-xl gap-2"
                       >
                         {isExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
                         {isExpanded ? "Masquer le pipeline visuel" : "Déployer le flux Zapier"}
@@ -379,8 +379,8 @@ export default function AutomationsPage() {
 
                             {/* Action Card */}
                             <div className={cn(
-                              "flex-1 bg-white border p-6 rounded-[24px] shadow-stripe hover:shadow-stripe-lg transition-all duration-500",
-                              task.isActive !== false ? "border-emerald-500/5" : "opacity-50 border-neutral-100"
+                              "flex-1 bg-card border p-6 rounded-[24px] shadow-stripe hover:shadow-stripe-lg transition-all duration-500",
+                              task.isActive !== false ? "border-emerald-500/5" : "opacity-50 border-border"
                             )}>
                               <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
                                 <div className="flex items-center gap-4">
@@ -389,9 +389,9 @@ export default function AutomationsPage() {
                                   </div>
                                   <div>
                                     <div className="flex items-center gap-2 mb-0.5">
-                                      <span className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground/60 italic">Propulseur #{idx + 1}</span>
+                                      <span className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground/60 italic">Propulseur #{idx + 1}</span>
                                       {task.delayMinutes && task.delayMinutes > 0 && (
-                                        <Badge variant="outline" className="text-[9px] font-black uppercase py-0 px-2 flex items-center gap-1 border-neutral-100">
+                                        <Badge variant="outline" className="text-xs font-black uppercase py-0 px-2 flex items-center gap-1 border-border">
                                           <Clock className="h-2.5 w-2.5" />
                                           Délai : {formatDelay(task.delayMinutes)}
                                         </Badge>
@@ -399,7 +399,7 @@ export default function AutomationsPage() {
                                       {task.type === "OTHER" && (
                                         <button
                                           type="button"
-                                          className="inline-flex items-center justify-center h-6 w-6 rounded hover:bg-neutral-100 transition-colors"
+                                          className="inline-flex items-center justify-center h-6 w-6 rounded hover:bg-accent transition-colors"
                                           title="Modifier le template WhatsApp"
                                           onClick={() => {
                                             const templateKey = `${config.pipelineStage}-${idx}`;
@@ -410,7 +410,7 @@ export default function AutomationsPage() {
                                         </button>
                                       )}
                                     </div>
-                                    <h4 className="text-lg font-black tracking-tight text-neutral-900">{task.name}</h4>
+                                    <h4 className="text-lg font-black tracking-tight text-foreground">{task.name}</h4>
                                   </div>
                                 </div>
 
@@ -420,14 +420,14 @@ export default function AutomationsPage() {
                                       value={task.targetAgentId ?? "all"}
                                       onValueChange={(v) => handleTaskAgentChange(config.pipelineStage, idx, v === "all" ? null : v)}
                                     >
-                                      <SelectTrigger className="h-10 text-[10px] font-black uppercase tracking-widest border-neutral-100 rounded-xl bg-neutral-50/50">
+                                      <SelectTrigger className="h-10 text-xs font-black uppercase tracking-widest border-border rounded-xl bg-accent/50">
                                         <Users className="h-3 w-3 mr-2 text-primary" />
                                         <SelectValue placeholder="Assigne à..." />
                                       </SelectTrigger>
-                                      <SelectContent className="rounded-xl border-neutral-100 shadow-stripe-lg">
-                                        <SelectItem value="all" className="text-[10px] font-black uppercase">Flux Collectif</SelectItem>
+                                      <SelectContent className="rounded-xl border-border shadow-stripe-lg">
+                                        <SelectItem value="all" className="text-xs font-black uppercase">Flux Collectif</SelectItem>
                                         {agents.map((a) => (
-                                          <SelectItem key={a.id} value={a.id} className="text-[10px] font-black uppercase">{a.firstName} {a.lastName}</SelectItem>
+                                          <SelectItem key={a.id} value={a.id} className="text-xs font-black uppercase">{a.firstName} {a.lastName}</SelectItem>
                                         ))}
                                       </SelectContent>
                                     </Select>
@@ -442,12 +442,12 @@ export default function AutomationsPage() {
 
                               {/* WhatsApp template editor */}
                               {editingTemplate === `${config.pipelineStage}-${idx}` && task.type === "OTHER" && (
-                                <div className="mt-4 border-t border-neutral-100 pt-4 animate-in fade-in slide-in-from-top-2 duration-300">
-                                  <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground block mb-2">
+                                <div className="mt-4 border-t border-border pt-4 animate-in fade-in slide-in-from-top-2 duration-300">
+                                  <label className="text-xs font-black uppercase tracking-widest text-muted-foreground block mb-2">
                                     Template de message WhatsApp
                                   </label>
                                   <textarea
-                                    className="w-full rounded-xl border border-neutral-100 bg-neutral-50/50 px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all resize-none min-h-[100px] font-medium text-neutral-900"
+                                    className="w-full rounded-xl border border-border bg-accent/50 px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all resize-none min-h-[100px] font-medium text-foreground"
                                     rows={3}
                                     maxLength={2000}
                                     placeholder="Pas de template personnalisé"
@@ -456,7 +456,7 @@ export default function AutomationsPage() {
                                   />
                                   <div className="mt-2 flex flex-wrap gap-1.5">
                                     {["{clientName}", "{agentName}", "{propertyName}", "{budget}", "{date}"].map(v => (
-                                      <span key={v} className="px-2 py-0.5 rounded-md bg-neutral-100 text-[9px] font-bold text-neutral-500 border border-neutral-200/50">{v}</span>
+                                      <span key={v} className="px-2 py-0.5 rounded-md bg-neutral-100 text-xs font-bold text-muted-foreground border border-neutral-200/50">{v}</span>
                                     ))}
                                   </div>
                                 </div>
@@ -472,7 +472,7 @@ export default function AutomationsPage() {
                         size="lg"
                         onClick={() => handleSaveTasks(config)}
                         disabled={isSaving}
-                        className="h-14 px-10 rounded-full font-black uppercase text-[10px] tracking-[0.25em] bg-neutral-900 text-white shadow-stripe-lg hover:bg-neutral-800 transition-all active:scale-95 italic"
+                        className="h-14 px-10 rounded-full font-black uppercase text-xs tracking-[0.25em] bg-neutral-900 text-white shadow-stripe-lg hover:bg-neutral-800 transition-all active:scale-95 italic"
                       >
                         {isSaving ? "Synchronisation..." : "Optimiser ce flux"}
                       </Button>

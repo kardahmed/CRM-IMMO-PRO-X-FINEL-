@@ -132,7 +132,7 @@ export function TabTaches({ tasks }: { tasks: Task[]; clientId: string }) {
                         >
                           {task.title}
                         </p>
-                        <p className="text-[10px] text-muted-foreground flex items-center gap-1 mt-0.5">
+                        <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
                           <Clock className="h-3 w-3" />
                           {format(new Date(task.deadline), "dd MMM yyyy", {
                             locale: fr,
@@ -145,7 +145,7 @@ export function TabTaches({ tasks }: { tasks: Task[]; clientId: string }) {
                       {isOverdue && (
                         <Badge
                           variant="destructive"
-                          className="text-[9px] font-black uppercase gap-0.5 animate-pulse"
+                          className="text-xs font-black uppercase gap-0.5 animate-pulse"
                         >
                           <AlertTriangle className="h-2.5 w-2.5" />
                           Retard
@@ -154,7 +154,7 @@ export function TabTaches({ tasks }: { tasks: Task[]; clientId: string }) {
                       {isDone && (
                         <Badge
                           variant="outline"
-                          className="text-[9px] font-black uppercase bg-green-100 text-green-700 border-green-200"
+                          className="text-xs font-black uppercase bg-green-100 text-green-700 border-green-200"
                         >
                           <CheckCircle2 className="h-2.5 w-2.5 mr-0.5" />
                           Fait

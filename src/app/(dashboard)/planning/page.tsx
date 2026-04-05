@@ -276,7 +276,7 @@ export default function PlanningPage() {
             <CalendarIcon className="h-3.5 w-3.5" />
             Visites
             {!loading && (
-              <Badge variant="secondary" className="ml-1 text-[10px] px-1.5 py-0">
+              <Badge variant="secondary" className="ml-1 text-xs px-1.5 py-0">
                 {filteredVisits.length}
               </Badge>
             )}
@@ -285,7 +285,7 @@ export default function PlanningPage() {
             <ListTodo className="h-3.5 w-3.5" />
             Taches
             {!loading && (
-              <Badge variant="secondary" className="ml-1 text-[10px] px-1.5 py-0">
+              <Badge variant="secondary" className="ml-1 text-xs px-1.5 py-0">
                 {filteredTasks.length}
               </Badge>
             )}
@@ -364,11 +364,11 @@ export default function PlanningPage() {
                             <div className={cn("h-2 w-2 rounded-full shrink-0", sc.dot)} />
                             <Badge
                               variant="outline"
-                              className={cn("text-[10px] font-black uppercase", sc.text, sc.border)}
+                              className={cn("text-xs font-black uppercase", sc.text, sc.border)}
                             >
                               {label}
                             </Badge>
-                            <Badge variant="outline" className="text-[10px] font-bold uppercase">
+                            <Badge variant="outline" className="text-xs font-bold uppercase">
                               {task.type}
                             </Badge>
                           </div>

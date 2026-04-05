@@ -45,7 +45,7 @@ export function TabVente({ vente }: TabVenteProps) {
       <CardContent>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
           <div className="space-y-1">
-            <p className="text-[10px] uppercase font-black tracking-wider text-muted-foreground">Notaire chargé</p>
+            <p className="text-xs uppercase font-black tracking-wider text-muted-foreground">Notaire chargé</p>
             <p className="flex items-center gap-1.5 text-sm font-bold">
               <User className="h-4 w-4 text-muted-foreground" />
               {vente.notary}
@@ -53,7 +53,7 @@ export function TabVente({ vente }: TabVenteProps) {
           </div>
           
           <div className="space-y-1">
-            <p className="text-[10px] uppercase font-black tracking-wider text-muted-foreground">Promesse prévue</p>
+            <p className="text-xs uppercase font-black tracking-wider text-muted-foreground">Promesse prévue</p>
             <p className="flex items-center gap-1.5 text-sm font-medium">
               <Calendar className="h-4 w-4 text-muted-foreground" />
               {vente.promesseDate ? format(new Date(vente.promesseDate), "dd MMMM yyyy", { locale: fr }) : "Non défini"}
@@ -61,7 +61,7 @@ export function TabVente({ vente }: TabVenteProps) {
           </div>
 
           <div className="space-y-1">
-            <p className="text-[10px] uppercase font-black tracking-wider text-muted-foreground">Acte final prévu</p>
+            <p className="text-xs uppercase font-black tracking-wider text-muted-foreground">Acte final prévu</p>
             <p className="flex items-center gap-1.5 text-sm font-medium">
               <Calendar className="h-4 w-4 text-muted-foreground" />
               {vente.acteDate ? format(new Date(vente.acteDate), "dd MMMM yyyy", { locale: fr }) : "Non défini"}

@@ -28,7 +28,7 @@ export const Logo: React.FC<LogoProps> = ({
         />
       </div>
       {showText && (
-        <span className="text-xl font-black tracking-tighter text-neutral-900 uppercase italic flex items-center gap-1.5">
+        <span className="text-xl font-black tracking-tighter text-foreground uppercase italic flex items-center gap-1.5">
           IMMO PRO-X
           <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
         </span>

@@ -94,7 +94,7 @@ function SidebarNav({ collapsed, onNavigate }: { collapsed: boolean; onNavigate?
               "flex items-center gap-3 px-3 py-2 rounded-xl transition-all duration-300 group relative",
               isActive
                 ? "bg-primary/10 text-primary"
-                : "text-muted-foreground hover:bg-neutral-100 dark:hover:bg-neutral-800 hover:text-foreground"
+                : "text-muted-foreground hover:bg-accent hover:text-foreground"
             )}
           >
             {isActive && (
@@ -141,7 +141,7 @@ function SidebarContent({ collapsed, onNavigate }: { collapsed: boolean; onNavig
   return (
     <>
       {/* Header */}
-      <div className="flex items-center justify-between h-20 px-6 border-b border-neutral-100 dark:border-neutral-800 shrink-0">
+      <div className="flex items-center justify-between h-20 px-6 border-b border-border shrink-0">
         <Logo 
           collapsed={collapsed} 
           showText={!collapsed} 
@@ -152,7 +152,8 @@ function SidebarContent({ collapsed, onNavigate }: { collapsed: boolean; onNavig
           variant="ghost"
           size="icon"
           onClick={toggleCollapse}
-          className="ml-auto hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-xl h-8 w-8 hidden md:flex text-muted-foreground transition-all active:scale-95"
+          aria-label="Réduire le menu"
+          className="ml-auto hover:bg-accent rounded-xl h-8 w-8 hidden md:flex text-muted-foreground transition-all active:scale-95"
         >
           {collapsed ? (
             <ChevronRight className="h-4 w-4" />
@@ -168,7 +169,7 @@ function SidebarContent({ collapsed, onNavigate }: { collapsed: boolean; onNavig
       </ScrollArea>
 
       {/* Footer */}
-      <div className="p-4 border-t border-neutral-100 dark:border-neutral-800 shrink-0">
+      <div className="p-4 border-t border-border shrink-0">
         <Button
           variant="ghost"
           className="w-full justify-start gap-3 h-11 rounded-xl text-muted-foreground hover:text-destructive hover:bg-destructive/5 group transition-all"
@@ -178,7 +179,7 @@ function SidebarContent({ collapsed, onNavigate }: { collapsed: boolean; onNavig
           {!collapsed && <span className="font-bold text-xs uppercase tracking-tight">Déconnexion</span>}
         </Button>
         {!collapsed && (
-          <div className="mt-4 text-[10px] text-muted-foreground/50 text-center font-bold uppercase tracking-widest">
+          <div className="mt-4 text-xs text-muted-foreground/50 text-center font-bold uppercase tracking-widest">
             v1.0.5 &bull; PRO-X REDESIGN
           </div>
         )}
@@ -219,7 +220,7 @@ export function Sidebar() {
       >
         {/* Mobile close button */}
         <div className="absolute top-4 right-4 z-10">
-          <Button variant="ghost" size="icon" onClick={closeMobile}>
+          <Button variant="ghost" size="icon" aria-label="Fermer le menu" onClick={closeMobile}>
             <X className="h-5 w-5" />
           </Button>
         </div>

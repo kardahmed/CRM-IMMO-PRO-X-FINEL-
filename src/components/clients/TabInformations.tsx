@@ -95,7 +95,7 @@ export function TabInformations({ client }: TabInformationsProps) {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-muted-foreground uppercase">Prénom</label>
               <Input value={form.firstName} onChange={(e) => handleChange("firstName", e.target.value)} />
@@ -105,7 +105,7 @@ export function TabInformations({ client }: TabInformationsProps) {
               <Input value={form.lastName} onChange={(e) => handleChange("lastName", e.target.value)} />
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-muted-foreground uppercase">Téléphone</label>
               <Input value={form.phone} onChange={(e) => handleChange("phone", e.target.value)} />
@@ -115,7 +115,7 @@ export function TabInformations({ client }: TabInformationsProps) {
               <Input value={form.email} onChange={(e) => handleChange("email", e.target.value)} type="email" />
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-muted-foreground uppercase">Adresse</label>
               <Input value={form.address} onChange={(e) => handleChange("address", e.target.value)} />
@@ -147,7 +147,7 @@ export function TabInformations({ client }: TabInformationsProps) {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-muted-foreground uppercase">Budget min (DA)</label>
               <Input value={form.budget} onChange={(e) => handleChange("budget", e.target.value)} type="number" placeholder="0" />
@@ -173,7 +173,7 @@ export function TabInformations({ client }: TabInformationsProps) {
               </SelectContent>
             </Select>
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-muted-foreground uppercase">Surface min (m²)</label>
               <Input value={form.minArea} onChange={(e) => handleChange("minArea", e.target.value)} type="number" placeholder="0" />
@@ -183,7 +183,7 @@ export function TabInformations({ client }: TabInformationsProps) {
               <Input value={form.maxArea} onChange={(e) => handleChange("maxArea", e.target.value)} type="number" placeholder="0" />
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-muted-foreground uppercase">Pièces min</label>
               <Input value={form.minRooms} onChange={(e) => handleChange("minRooms", e.target.value)} type="number" placeholder="0" />

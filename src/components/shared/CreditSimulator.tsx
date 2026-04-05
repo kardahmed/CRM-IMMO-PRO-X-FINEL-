@@ -159,9 +159,9 @@ N'hésitez pas si vous avez des questions !`;
           </div>
 
           {/* Results Section */}
-          <div className="bg-neutral-50 dark:bg-neutral-900 rounded-3xl p-6 flex flex-col justify-between border">
+          <div className="bg-accent rounded-3xl p-6 flex flex-col justify-between border">
             <div className="space-y-6">
-              <div className="text-center p-6 bg-white dark:bg-black rounded-2xl shadow-sm border border-neutral-100 dark:border-neutral-800">
+              <div className="text-center p-6 bg-white dark:bg-black rounded-2xl shadow-sm border border-border">
                 <p className="text-xs font-black uppercase text-muted-foreground mb-2">Mensualité Estimée</p>
                 <p className="text-4xl text-primary font-black tabular-nums">{new Intl.NumberFormat("fr-DZ", { maximumFractionDigits: 0 }).format(simulation.mensualite)} <span className="text-xl text-muted-foreground">DA</span></p>
               </div>

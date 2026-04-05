@@ -115,7 +115,7 @@ export function AgentOverview({ welcomeMessage, stats, tasks }: AgentOverviewPro
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
-                   {task.overdue && <Badge variant="destructive" className="text-[10px] uppercase font-bold py-0 h-4">Retard</Badge>}
+                   {task.overdue && <Badge variant="destructive" className="text-xs uppercase font-bold py-0 h-4">Retard</Badge>}
                    <button className="h-8 w-8 inline-flex items-center justify-center rounded-md hover:bg-accent">
                     <MoreHorizontal className="h-4 w-4 text-muted-foreground" />
                    </button>

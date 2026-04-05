@@ -52,18 +52,18 @@ export function TabDocuments({ documents }: TabDocumentsProps) {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {documents.map((doc) => (
-            <Card key={doc.id} className="group relative overflow-hidden transition-all hover:shadow-md border-neutral-100 dark:border-neutral-800">
+            <Card key={doc.id} className="group relative overflow-hidden transition-all hover:shadow-md border-border">
               <CardContent className="p-4 flex flex-col items-center text-center gap-3">
-                <div className="h-16 w-16 rounded-2xl bg-neutral-50 dark:bg-neutral-900 flex items-center justify-center group-hover:scale-110 transition-transform">
+                <div className="h-16 w-16 rounded-2xl bg-accent flex items-center justify-center group-hover:scale-110 transition-transform">
                   {getIconForType(doc.type)}
                 </div>
                 <div>
                   <p className="font-bold text-sm line-clamp-1" title={doc.title}>{doc.title}</p>
-                  <p className="text-[10px] text-muted-foreground mt-1">
+                  <p className="text-xs text-muted-foreground mt-1">
                     Ajouté le {format(new Date(doc.uploadedAt), "dd MMM yyyy", { locale: fr })} • {doc.size}
                   </p>
                 </div>
-                <Button variant="ghost" size="icon" className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity h-8 w-8 rounded-full bg-background/80 backdrop-blur-sm border">
+                <Button variant="ghost" size="icon" aria-label="Télécharger le document" className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity h-8 w-8 rounded-full bg-background/80 backdrop-blur-sm border">
                   <Download className="h-4 w-4" />
                 </Button>
               </CardContent>

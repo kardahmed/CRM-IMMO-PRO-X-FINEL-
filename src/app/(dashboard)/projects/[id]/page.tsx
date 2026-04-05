@@ -340,7 +340,7 @@ export default function ProjectDetailPage() {
                     </div>
                     <Progress value={project.progressPercentage} className="h-3 bg-neutral-200 dark:bg-neutral-800 [&_[data-slot=progress-indicator]]:bg-amber-500" />
                     <div className="flex justify-between text-xs text-muted-foreground">
-                      <span>Statut: <Badge className={`${statusCfg.className} font-bold text-[10px] ml-1`}>{statusCfg.label}</Badge></span>
+                      <span>Statut: <Badge className={`${statusCfg.className} font-bold text-xs ml-1`}>{statusCfg.label}</Badge></span>
                       <span>Unites: {soldUnits}/{totalUnits} vendues</span>
                     </div>
                   </div>
@@ -402,10 +402,10 @@ export default function ProjectDetailPage() {
                         </div>
                         <div>
                           <p className="text-sm font-bold">{doc.name}</p>
-                          <p className="text-[10px] text-muted-foreground uppercase">{doc.type}</p>
+                          <p className="text-xs text-muted-foreground uppercase">{doc.type}</p>
                         </div>
                       </div>
-                      <Badge variant={doc.status === "requis" ? "default" : "secondary"} className="text-[10px] font-bold uppercase">
+                      <Badge variant={doc.status === "requis" ? "default" : "secondary"} className="text-xs font-bold uppercase">
                         {doc.status === "requis" ? "Non fourni" : "Optionnel"}
                       </Badge>
                     </div>

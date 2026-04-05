@@ -343,7 +343,7 @@ export default function ClientsPage() {
             <DialogDescription>Remplissez les informations du client</DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-2">
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="space-y-1.5">
                 <Label>Prenom *</Label>
                 <Input
@@ -361,7 +361,7 @@ export default function ClientsPage() {
                 />
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="space-y-1.5">
                 <Label>Telephone *</Label>
                 <Input
@@ -380,7 +380,7 @@ export default function ClientsPage() {
                 />
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="space-y-1.5">
                 <Label>Source</Label>
                 <Select value={form.source ?? ""} onValueChange={(v) => setForm({ ...form, source: v ?? "" })}>
@@ -404,7 +404,7 @@ export default function ClientsPage() {
                 </Select>
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="space-y-1.5">
                 <Label>Budget min (DA)</Label>
                 <Input

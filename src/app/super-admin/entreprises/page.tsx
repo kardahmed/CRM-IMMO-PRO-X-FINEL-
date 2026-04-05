@@ -58,7 +58,7 @@ export default function SuperAdminWorkspaces() {
       PRO: "bg-cyan-500/10 text-cyan-400",
     };
     return (
-      <Badge className={`${colors[plan] || "bg-neutral-800 text-neutral-400"} border-none font-black uppercase text-[10px]`}>
+      <Badge className={`${colors[plan] || "bg-neutral-800 text-neutral-400"} border-none font-black uppercase text-xs`}>
         {plan}
       </Badge>
     );
@@ -139,7 +139,7 @@ export default function SuperAdminWorkspaces() {
                     </Link>
                   </TableCell>
                   <TableCell>
-                    <Badge variant="outline" className="text-[10px] font-bold uppercase border-neutral-700 text-neutral-300">
+                    <Badge variant="outline" className="text-xs font-bold uppercase border-neutral-700 text-neutral-300">
                       {tenant.type}
                     </Badge>
                   </TableCell>
@@ -152,7 +152,7 @@ export default function SuperAdminWorkspaces() {
                   </TableCell>
                   <TableCell className="text-right">
                     <Link href={`/super-admin/entreprises/${tenant.id}`}>
-                      <Button size="icon" variant="ghost" className="h-8 w-8 text-neutral-400 hover:text-indigo-400 hover:bg-indigo-500/10">
+                      <Button size="icon" variant="ghost" aria-label="Voir les détails de l'entreprise" className="h-8 w-8 text-neutral-400 hover:text-indigo-400 hover:bg-indigo-500/10">
                         <MoreHorizontal className="h-4 w-4" />
                       </Button>
                     </Link>

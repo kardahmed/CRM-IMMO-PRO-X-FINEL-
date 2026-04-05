@@ -102,7 +102,7 @@ export function KanbanCard({
           {/* Top Indicators */}
           <div className="absolute -top-2 -left-2 flex items-center gap-1.5 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
             {client.overdueTasks > 0 && (
-              <div className="bg-red-500 text-white text-[9px] font-black h-5 w-5 flex items-center justify-center rounded-full animate-bounce shadow-lg">
+              <div className="bg-red-500 text-white text-xs font-black h-5 w-5 flex items-center justify-center rounded-full animate-bounce shadow-lg">
                 !
               </div>
             )}
@@ -116,7 +116,7 @@ export function KanbanCard({
               </h4>
               <div className="flex items-center gap-1.5 mt-0.5">
                 {getSourceIcon(client.source)}
-                <span className="text-[10px] font-black text-muted-foreground uppercase opacity-70">
+                <span className="text-xs font-black text-muted-foreground uppercase opacity-70">
                   ID: {client.id.slice(0, 4)}
                 </span>
               </div>
@@ -124,7 +124,7 @@ export function KanbanCard({
 
             <DropdownMenu>
               <DropdownMenuTrigger onClick={(e) => e.stopPropagation()}>
-                <div className="p-1 px-2 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-md opacity-0 group-hover:opacity-100 transition-opacity">
+                <div className="p-1 px-2 hover:bg-accent rounded-md opacity-0 group-hover:opacity-100 transition-opacity">
                   <MoreVertical className="h-4 w-4" />
                 </div>
               </DropdownMenuTrigger>
@@ -144,7 +144,7 @@ export function KanbanCard({
 
           {/* Budget Display - Prominent */}
           <div className="bg-primary/5 dark:bg-primary/10 rounded-lg p-2.5 mb-4 border border-primary/10">
-            <div className="text-[10px] font-black text-primary uppercase tracking-wider mb-0.5 opacity-70">Budget estimé</div>
+            <div className="text-xs font-black text-primary uppercase tracking-wider mb-0.5 opacity-70">Budget estimé</div>
             <div className="text-sm font-black text-primary tabular-nums">
               {formatBudgetDA(client.budget)}
             </div>
@@ -163,12 +163,12 @@ export function KanbanCard({
           </div>
 
           {/* Footer: Agent + Activity Status */}
-          <div className="flex items-center justify-between pt-3 border-t border-neutral-100 dark:border-neutral-800">
+          <div className="flex items-center justify-between pt-3 border-t border-border">
             <div className="flex items-center gap-2">
               <div className="relative">
                 <Avatar className="h-7 w-7 border-2 border-white dark:border-neutral-900 shadow-sm">
                   <AvatarImage src={client.agentAvatar} />
-                  <AvatarFallback className="text-[10px] font-black bg-neutral-100 dark:bg-neutral-800 text-neutral-600">
+                  <AvatarFallback className="text-xs font-black bg-neutral-100 dark:bg-neutral-800 text-neutral-600">
                     {client.agentName.split(" ").map(n => n[0]).join("")}
                   </AvatarFallback>
                 </Avatar>
@@ -178,8 +178,8 @@ export function KanbanCard({
                 )} />
               </div>
               <div className="flex flex-col">
-                <span className="text-[10px] font-bold text-foreground leading-none mb-0.5">{client.agentName}</span>
-                <div className="flex items-center gap-1 text-[9px] text-muted-foreground font-semibold uppercase tracking-tighter">
+                <span className="text-xs font-bold text-foreground leading-none mb-0.5">{client.agentName}</span>
+                <div className="flex items-center gap-1 text-xs text-muted-foreground font-semibold uppercase tracking-tighter">
                   <MessageSquare className="h-2.5 w-2.5" />
                   <span>
                     {formatDistanceToNow(new Date(client.lastInteraction), {
@@ -195,10 +195,10 @@ export function KanbanCard({
               <Badge
                 variant="outline"
                 className={cn(
-                  "text-[9px] font-black h-5 px-1.5 tabular-nums uppercase tracking-tighter",
+                  "text-xs font-black h-5 px-1.5 tabular-nums uppercase tracking-tighter",
                   client.daysInStage > 7
                     ? "border-orange-200 text-orange-600 bg-orange-50/50"
-                    : "border-neutral-100 text-muted-foreground"
+                    : "border-border text-muted-foreground"
                 )}
               >
                 {client.daysInStage} JOURS

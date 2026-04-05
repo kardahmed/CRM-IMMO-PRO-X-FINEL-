@@ -115,7 +115,7 @@ export function TabPaiements({ payments, totalAmount, paidAmount }: TabPaiements
                       <TableCell>
                         <Badge
                           variant="outline"
-                          className={cn("text-[10px] font-black uppercase gap-1", status.color)}
+                          className={cn("text-xs font-black uppercase gap-1", status.color)}
                         >
                           <StatusIcon className="h-3 w-3" />
                           {status.label}

@@ -152,10 +152,10 @@ export default function DashboardPage() {
       <div className="flex flex-col items-center justify-center h-[70vh] gap-6 text-center">
         <div className="p-6 rounded-[32px] bg-rose-50 border border-rose-100 shadow-stripe">
           <AlertCircle className="h-12 w-12 text-rose-500 mx-auto mb-4" />
-          <h2 className="text-2xl font-black text-neutral-900 tracking-tight uppercase italic mb-2">Erreur Système</h2>
+          <h2 className="text-2xl font-black text-foreground tracking-tight uppercase italic mb-2">Erreur Système</h2>
           <p className="text-muted-foreground font-medium max-w-sm">Le moteur PRO-X n&apos;a pas pu synchroniser les données du dashboard.</p>
         </div>
-        <Button onClick={() => fetchDashboard(period)} variant="outline" className="h-14 px-10 rounded-full font-black uppercase tracking-widest border-neutral-100 shadow-stripe hover:bg-neutral-50">
+        <Button onClick={() => fetchDashboard(period)} variant="outline" className="h-14 px-10 rounded-full font-black uppercase tracking-widest border-border shadow-stripe hover:bg-accent">
           <RefreshCw className="h-4 w-4 mr-3" /> Forcer la Synchronisation
         </Button>
       </div>
@@ -171,7 +171,7 @@ export default function DashboardPage() {
         {/* Superior Header */}
         <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-8">
           <header className="space-y-1">
-            <h1 className="text-5xl font-black tracking-tighter text-neutral-900 flex items-center gap-3">
+            <h1 className="text-5xl font-black tracking-tighter text-foreground flex items-center gap-3">
               Tableau de bord
               <span className="text-primary italic text-3xl font-medium tracking-normal opacity-40">pro-x</span>
             </h1>
@@ -207,9 +207,10 @@ export default function DashboardPage() {
               </SelectContent>
             </Select>
 
-            <Button 
-              variant="outline" 
-              size="icon" 
+            <Button
+              variant="outline"
+              size="icon"
+              aria-label="Actualiser les données"
               className={cn(
                 "h-14 w-14 rounded-2xl border-border bg-card text-primary shadow-stripe hover:shadow-stripe-lg active:scale-95 transition-all outline-none",
                 loading && "animate-pulse"
@@ -256,7 +257,7 @@ export default function DashboardPage() {
               <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 blur-[100px] -translate-y-1/2 translate-x-1/2" />
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-8 mb-10">
                 <div className="space-y-1">
-                  <h3 className="font-black text-3xl uppercase tracking-tighter italic flex items-center gap-3 text-neutral-900">
+                  <h3 className="font-black text-3xl uppercase tracking-tighter italic flex items-center gap-3 text-foreground">
                     Santé de l&apos;Inventaire
                     <div className="h-2.5 w-2.5 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_10px_rgba(16,185,129,0.5)]" />
                   </h3>
@@ -275,7 +276,7 @@ export default function DashboardPage() {
                       <span className="text-xs font-bold uppercase tracking-[0.2em] text-muted-foreground">{p.name}</span>
                       <span className="text-3xl font-black tabular-nums tracking-tighter text-foreground">{p.value}%</span>
                     </div>
-                    <div className="h-3 w-full bg-neutral-50 rounded-full overflow-hidden p-0.5 border border-neutral-100/50">
+                    <div className="h-3 w-full bg-accent rounded-full overflow-hidden p-0.5 border border-border/50">
                       <div 
                         className="h-full bg-primary rounded-full shadow-[0_0_15px_rgba(25,185,129,0.2)] transition-all duration-1000 ease-out" 
                         style={{ width: `${p.value}%` }} 

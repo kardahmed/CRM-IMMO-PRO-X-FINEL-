@@ -138,7 +138,7 @@ export function DemoBanner({ expiresAt }: DemoBannerProps) {
                   }`}
                 >
                   {plan.popular && (
-                    <Badge className="absolute -top-2.5 right-3 bg-purple-600 text-white text-[9px] font-black uppercase">
+                    <Badge className="absolute -top-2.5 right-3 bg-purple-600 text-white text-xs font-black uppercase">
                       Populaire
                     </Badge>
                   )}

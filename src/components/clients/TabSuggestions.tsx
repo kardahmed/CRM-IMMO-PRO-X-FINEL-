@@ -231,7 +231,7 @@ export function TabSuggestions({ criteria }: TabSuggestionsProps) {
                     <Badge
                       variant="outline"
                       className={cn(
-                        "text-[10px] font-black uppercase",
+                        "text-xs font-black uppercase",
                         prop.matchScore >= 85
                           ? "bg-green-100 text-green-700 border-green-200"
                           : prop.matchScore >= 70

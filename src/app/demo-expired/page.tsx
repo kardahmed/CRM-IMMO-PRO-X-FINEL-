@@ -88,7 +88,7 @@ export default function DemoExpiredPage() {
                     }`}
                   >
                     {plan.popular && (
-                      <span className="absolute -top-2.5 right-3 bg-purple-600 text-white text-[9px] font-black uppercase px-2 py-0.5 rounded-full">
+                      <span className="absolute -top-2.5 right-3 bg-purple-600 text-white text-xs font-black uppercase px-2 py-0.5 rounded-full">
                         Populaire
                       </span>
                     )}

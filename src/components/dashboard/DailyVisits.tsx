@@ -13,7 +13,7 @@ interface Visit {
 
 export function DailyVisits({ visits }: { visits: Visit[] }) {
   return (
-    <Card className="h-full border-neutral-100 dark:border-neutral-800">
+    <Card className="h-full border-border">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
         <CardTitle className="text-lg font-bold">Visites du jour</CardTitle>
         <Calendar className="h-4 w-4 text-muted-foreground" />
@@ -39,7 +39,7 @@ export function DailyVisits({ visits }: { visits: Visit[] }) {
                     {visit.client}
                   </div>
                 </div>
-                <Badge variant="outline" className="text-[10px] uppercase font-bold text-primary border-primary/20 bg-primary/5">Confirmé</Badge>
+                <Badge variant="outline" className="text-xs uppercase font-bold text-primary border-primary/20 bg-primary/5">Confirmé</Badge>
               </div>
             ))
           )}

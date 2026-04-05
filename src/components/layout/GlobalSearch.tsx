@@ -114,7 +114,7 @@ export function GlobalSearch() {
 
           {results.clients.length > 0 && (
             <div>
-              <div className="px-3 py-2 text-[10px] font-black uppercase text-muted-foreground bg-accent/30">
+              <div className="px-3 py-2 text-xs font-black uppercase text-muted-foreground bg-accent/30">
                 Clients
               </div>
               {results.clients.map((c) => (
@@ -137,7 +137,7 @@ export function GlobalSearch() {
 
           {results.properties.length > 0 && (
             <div>
-              <div className="px-3 py-2 text-[10px] font-black uppercase text-muted-foreground bg-accent/30">
+              <div className="px-3 py-2 text-xs font-black uppercase text-muted-foreground bg-accent/30">
                 Biens
               </div>
               {results.properties.map((p) => (
@@ -158,7 +158,7 @@ export function GlobalSearch() {
 
           {results.projects.length > 0 && (
             <div>
-              <div className="px-3 py-2 text-[10px] font-black uppercase text-muted-foreground bg-accent/30">
+              <div className="px-3 py-2 text-xs font-black uppercase text-muted-foreground bg-accent/30">
                 Projets
               </div>
               {results.projects.map((p) => (

@@ -808,7 +808,7 @@ export default function OnboardingPage() {
                       )}
                     </div>
                     <span
-                      className={`text-[10px] mt-1.5 font-medium transition-colors ${
+                      className={`text-xs mt-1.5 font-medium transition-colors ${
                         isActive || isCompleted ? "text-zinc-300" : "text-zinc-600"
                       }`}
                     >

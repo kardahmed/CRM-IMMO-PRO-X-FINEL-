@@ -82,7 +82,7 @@ export function TabHistorique({ history }: { history: HistoryEntry[] }) {
                       <p className="text-sm font-medium text-foreground">
                         {entry.description}
                       </p>
-                      <div className="flex items-center gap-2 mt-1 text-[10px] text-muted-foreground">
+                      <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
                         <span className="font-semibold">
                           {formatDistanceToNow(new Date(entry.createdAt), {
                             addSuffix: true,
