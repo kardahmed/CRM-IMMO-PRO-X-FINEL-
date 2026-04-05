@@ -124,12 +124,12 @@ export function PipelineFilters({
                 variant="ghost" 
                 size="sm" 
                 onClick={onReset}
-                className="text-xs font-black uppercase tracking-widest text-muted-foreground hover:text-red-500"
+                className="text-xs font-bold uppercase tracking-widest text-muted-foreground hover:text-red-500"
               >
                 Réinitialiser
               </Button>
             )}
-            <Badge variant="secondary" className="h-10 px-4 rounded-xl gap-2 bg-accent text-xs font-black uppercase tracking-widest border-none">
+            <Badge variant="secondary" className="h-10 px-4 rounded-xl gap-2 bg-accent text-xs font-bold uppercase tracking-widest border-none">
               <Filter className="h-3.5 w-3.5" />
               {activeFiltersCount} Filtres actifs
             </Badge>

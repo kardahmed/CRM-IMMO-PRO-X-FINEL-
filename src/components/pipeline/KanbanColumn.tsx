@@ -133,10 +133,10 @@ export function KanbanColumn({
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             <div className={cn("h-3 w-3 rounded-full ring-4 ring-white dark:ring-neutral-900", stage.dotColor)} />
-            <h3 className={cn("text-xs font-black uppercase tracking-widest", stage.color)}>
+            <h3 className={cn("text-xs font-bold uppercase tracking-widest", stage.color)}>
               {stage.label}
             </h3>
-            <Badge variant="outline" className={cn("text-xs font-black h-5 px-1.5 rounded-md", stage.color, "bg-white/50 border-inherit")}>
+            <Badge variant="outline" className={cn("text-xs font-bold h-5 px-1.5 rounded-md", stage.color, "bg-white/50 border-inherit")}>
               {clients.length}
             </Badge>
           </div>
@@ -161,7 +161,7 @@ export function KanbanColumn({
         <div className="flex items-center justify-between mt-1">
           <div className="flex items-center gap-1.5">
             <TrendingUp className={cn("h-3.5 w-3.5", stage.color)} />
-            <span className={cn("text-sm font-black tabular-nums tracking-tighter", stage.color)}>
+            <span className={cn("text-sm font-bold tabular-nums tracking-tighter", stage.color)}>
               {formatColumnBudget(totalBudget)}
             </span>
           </div>
