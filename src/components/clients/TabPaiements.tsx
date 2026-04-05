@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
 import { DollarSign, AlertTriangle, CheckCircle2, Clock } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 
@@ -29,7 +30,7 @@ function formatDA(amount: number): string {
   return new Intl.NumberFormat("fr-DZ", { maximumFractionDigits: 0 }).format(amount) + " DA";
 }
 
-const STATUS_CONFIG: Record<string, { label: string; color: string; icon: any }> = {
+const STATUS_CONFIG: Record<string, { label: string; color: string; icon: LucideIcon }> = {
   PAID: { label: "Payé", color: "bg-green-100 text-green-700", icon: CheckCircle2 },
   PENDING: { label: "En attente", color: "bg-amber-100 text-amber-700", icon: Clock },
   OVERDUE: { label: "Impayé", color: "bg-red-100 text-red-700", icon: AlertTriangle },

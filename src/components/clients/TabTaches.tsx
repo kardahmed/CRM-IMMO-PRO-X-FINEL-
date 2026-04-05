@@ -24,6 +24,7 @@ import {
   MoreHorizontal,
   CheckCircle2,
   Loader2,
+  type LucideIcon,
 } from "lucide-react";
 import { format, isPast } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -37,7 +38,7 @@ interface Task {
   status: string;
 }
 
-const TYPE_ICONS: Record<string, any> = {
+const TYPE_ICONS: Record<string, LucideIcon> = {
   CALL: Phone,
   EMAIL: Mail,
   VISIT: Eye,

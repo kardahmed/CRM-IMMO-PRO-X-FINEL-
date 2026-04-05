@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
+import Image from "next/image";
 import { cn } from "@/lib/utils";
 import {
   Phone,
@@ -30,6 +31,7 @@ import {
   RefreshCw,
   Image as ImageIcon,
   Map,
+  type LucideIcon,
 } from "lucide-react";
 
 interface Interaction {
@@ -73,7 +75,7 @@ interface TaskExecutionDialogProps {
   onExecute: (taskId: string, action: string, note: string) => void;
 }
 
-const TYPE_ICONS: Record<string, any> = {
+const TYPE_ICONS: Record<string, LucideIcon> = {
   CALL: Phone,
   EMAIL: Mail,
   SMS: MessageSquare,
@@ -230,9 +232,9 @@ export function TaskExecutionDialog({ taskId, open, onClose, onExecute }: TaskEx
                       <Home className="h-3.5 w-3.5" /> Bien concerné
                     </h4>
                     <div className="rounded-xl border bg-white dark:bg-neutral-900 overflow-hidden flex shadow-sm">
-                      <div className="w-1/3 bg-neutral-100 flex items-center justify-center min-h-[80px]">
+                      <div className="w-1/3 bg-neutral-100 flex items-center justify-center min-h-[80px] relative">
                         {context.property.imageUrl ? (
-                          <img src={context.property.imageUrl} alt="Bien" className="w-full h-full object-cover" />
+                          <Image src={context.property.imageUrl} alt="Bien" className="w-full h-full object-cover" fill sizes="120px" />
                         ) : (
                           <ImageIcon className="h-6 w-6 text-neutral-400" />
                         )}

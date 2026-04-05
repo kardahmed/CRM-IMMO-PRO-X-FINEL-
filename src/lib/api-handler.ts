@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import * as Sentry from "@sentry/nextjs";
 import { type ZodSchema, ZodError } from "zod";
 import type { ModuleId } from "@/lib/modules";
 import type { PermissionAction } from "@/lib/permissions-matrix";
@@ -119,7 +120,7 @@ export function apiHandler(options: IApiHandlerOptions, handler: ApiHandlerFn) {
       return await handler(ctx);
     } catch (err) {
       const message = err instanceof Error ? err.message : "Erreur interne";
-      console.error("[API Error]", req.method, req.url, err);
+      Sentry.captureException(err, { tags: { context: "API Error" }, extra: { method: req.method, url: req.url } });
       return jsonError(message, 500);
     }
   };

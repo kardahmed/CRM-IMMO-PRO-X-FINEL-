@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Home, Ruler, DollarSign, Send, CalendarPlus, X, Layers } from "lucide-react";
+import Image from "next/image";
 import type { MapFiltersState } from "./MapFilters";
 import { cn } from "@/lib/utils";
 
@@ -197,7 +198,7 @@ export function MapContainer({ filters, clientCriteria, onMatchCountUpdate }: Ma
         >
           <Card className="w-[300px] border-none shadow-none m--2">
             <div className="relative h-[140px] w-full">
-              <img src={selectedProp.imageUrl} alt={selectedProp.name} className="w-full h-full object-cover rounded-t-xl" />
+              <Image src={selectedProp.imageUrl} alt={selectedProp.name} className="w-full h-full object-cover rounded-t-xl" width={300} height={140} />
               <div className="absolute top-2 right-2">
                 <Badge className={cn("text-[10px] font-black uppercase text-white shadow-sm border-none")} style={{ backgroundColor: PIN_COLORS[selectedProp.status] }}>
                   {selectedProp.status === "AVAILABLE" && "Disponible"}

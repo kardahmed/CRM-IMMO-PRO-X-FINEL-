@@ -71,7 +71,18 @@ export function TabSuggestions({ clientId, criteria }: TabSuggestionsProps) {
       if (res.ok) {
         const data = await res.json();
         // Add match scores
-        const scored = (data.data || data || []).map((p: any, i: number) => ({
+        interface IRawProperty {
+          id: string;
+          name?: string;
+          title?: string;
+          type?: string;
+          location?: string;
+          city?: string;
+          area?: number;
+          price?: number;
+          rooms?: number;
+        }
+        const scored = ((data.data || data || []) as IRawProperty[]).map((p: IRawProperty, i: number) => ({
           id: p.id,
           name: p.name || p.title || `Bien #${i + 1}`,
           type: p.type || "APPARTEMENT",

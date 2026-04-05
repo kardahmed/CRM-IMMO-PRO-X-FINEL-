@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import * as Sentry from "@sentry/nextjs";
 import { createTenantPrisma } from "@/lib/prisma-tenant";
 import type { PipelineStage, TaskType } from "@prisma/client";
 import { createNotification } from "@/services/notification.service";
@@ -71,7 +72,21 @@ export async function triggerAutomations(
       notes: task.description || null,
     }));
 
-    await db.task.createMany({ data: tasksToCreate });
+    // Filter out tasks that already exist (idempotency)
+    const existingTasks = await db.task.findMany({
+      where: {
+        clientId: client.id,
+        title: { in: tasksToCreate.map((t) => t.title) },
+        createdAt: { gte: new Date(Date.now() - 24 * 60 * 60 * 1000) }, // last 24h
+      },
+      select: { title: true },
+    });
+    const existingTitles = new Set(existingTasks.map((t) => t.title));
+    const newTasks = tasksToCreate.filter((t) => !existingTitles.has(t.title));
+
+    if (newTasks.length > 0) {
+      await db.task.createMany({ data: newTasks });
+    }
 
     // 5. Log
     await db.activityLog.create({
@@ -83,7 +98,7 @@ export async function triggerAutomations(
         metadata: {
           stage: newStage,
           clientId,
-          tasksCreated: tasksToCreate.length,
+          tasksCreated: newTasks.length,
         },
       },
     });

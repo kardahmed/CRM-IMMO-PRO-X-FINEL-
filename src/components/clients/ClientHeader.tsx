@@ -44,23 +44,35 @@ const STAGE_LABELS: Record<string, string> = {
   PERDUE: "Perdue",
 };
 
-interface ClientHeaderProps {
-  client: {
-    id: string;
+interface IClientHeaderData {
+  id: string;
+  firstName: string;
+  lastName: string;
+  phone: string;
+  email: string;
+  pipelineStage: string;
+  source: string;
+  createdAt: string;
+  address?: string;
+  city?: string;
+  notes?: string;
+  budget?: number;
+  budgetMax?: number;
+  propertyType?: string;
+  minArea?: number;
+  maxArea?: number;
+  minRooms?: number;
+  desiredLocation?: string;
+  assignedAgent?: {
+    id?: string;
     firstName: string;
     lastName: string;
-    phone: string;
-    email: string;
-    pipelineStage: string;
-    source: string;
-    createdAt: string;
-    assignedAgent?: {
-      id?: string;
-      firstName: string;
-      lastName: string;
-      email?: string;
-    };
+    email?: string;
   };
+}
+
+interface ClientHeaderProps {
+  client: IClientHeaderData;
 }
 
 export function ClientHeader({ client }: ClientHeaderProps) {
@@ -124,7 +136,7 @@ export function ClientHeader({ client }: ClientHeaderProps) {
               <DialogTitle>Édition du client</DialogTitle>
             </DialogHeader>
             <div className="mt-4">
-              <TabInformations client={client as any} />
+              <TabInformations client={client} />
             </div>
           </DialogContent>
         </Dialog>

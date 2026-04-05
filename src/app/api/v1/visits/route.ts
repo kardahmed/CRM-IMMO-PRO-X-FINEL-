@@ -1,4 +1,4 @@
-import { apiHandler, getBody, jsonOk } from "@/lib/api-handler";
+import { apiHandler, getBody, jsonOk, jsonError } from "@/lib/api-handler";
 import { createVisitSchema, type CreateVisitInput } from "@/lib/validations/visits";
 
 /**
@@ -63,10 +63,27 @@ export const POST = apiHandler(
   async (ctx) => {
     const body = getBody<CreateVisitInput>(ctx.req);
 
+    // Check for scheduling conflicts (same agent, overlapping time window of 1 hour)
+    const conflictWindow = 60 * 60 * 1000; // 1 hour in ms
+    const scheduledTime = new Date(body.scheduledAt);
+    const existingVisit = await ctx.db.visit.findFirst({
+      where: {
+        agentId: body.agentId,
+        status: "SCHEDULED",
+        scheduledAt: {
+          gte: new Date(scheduledTime.getTime() - conflictWindow),
+          lte: new Date(scheduledTime.getTime() + conflictWindow),
+        },
+      },
+    });
+    if (existingVisit) {
+      return jsonError("Conflit de planning : l'agent a déjà une visite programmée dans ce créneau.", 409);
+    }
+
     const visit = await (ctx.db.visit.create as unknown as (...a: unknown[]) => Promise<unknown>)({
       data: {
         ...body,
-        scheduledAt: new Date(body.scheduledAt),
+        scheduledAt: scheduledTime,
       },
     });
 

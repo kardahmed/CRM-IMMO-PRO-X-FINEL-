@@ -1,4 +1,5 @@
 import { randomUUID } from "crypto";
+import * as Sentry from "@sentry/nextjs";
 import { createTenantPrisma } from "@/lib/prisma-tenant";
 import { prisma } from "@/lib/prisma";
 import type { ICurrentUser } from "@/lib/auth";
@@ -263,7 +264,7 @@ export async function changeClientStage(
   // Générer un token portail si passage à RESERVED ou SIGNED (et pas déjà généré)
   const portalStages: PipelineStage[] = ["RESERVED", "SIGNED"];
   const portalToken =
-    portalStages.includes(newStage) && !(client as any).portalToken
+    portalStages.includes(newStage) && !client.portalToken
       ? randomUUID()
       : undefined;
 
@@ -277,7 +278,7 @@ export async function changeClientStage(
     data: {
       pipelineStage: newStage,
       ...(portalToken ? { portalToken, portalTokenExpiresAt } : {}),
-    } as any,
+    },
   });
 
   // Log
@@ -345,7 +346,7 @@ export async function changeClientStage(
 
   // Déclencher les automatisations configurées pour cette étape (non-bloquant)
   triggerAutomations(user.tenantId, clientId, newStage).catch((err) => {
-    console.error("[Automation trigger error]", err);
+    Sentry.captureException(err, { tags: { context: "Automation trigger error" } });
   });
 
   return updated;

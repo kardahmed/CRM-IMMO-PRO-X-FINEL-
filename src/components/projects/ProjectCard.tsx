@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { MapPin, Building, Home, ArrowRight } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 import { cn } from "@/lib/utils";
 
 interface ProjectCardProps {
@@ -35,7 +36,7 @@ export function ProjectCard({ id, name, location, availableUnits, totalUnits, pr
       <Card className="overflow-hidden cursor-pointer group hover:shadow-lg transition-all hover:-translate-y-1 border-neutral-100 dark:border-neutral-800">
         {/* Cover */}
         <div className="relative h-48 w-full">
-          <img src={imageUrl} alt={name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+          <Image src={imageUrl} alt={name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" fill sizes="(max-width: 768px) 100vw, 400px" />
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
           <div className="absolute top-3 right-3">
             <Badge className={cn("text-[10px] font-black uppercase text-white shadow-sm border-none backdrop-blur-md", sc.color)}>

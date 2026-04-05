@@ -88,6 +88,50 @@ interface IInteraction {
   userName: string;
 }
 
+interface IReservation {
+  contractId: string;
+  date: string;
+  property: {
+    id: string;
+    name: string;
+    unit: string;
+  };
+  amount: number;
+  deposit: number;
+  status: string;
+}
+
+interface IVente {
+  notary: string;
+  promesseDate: string | null;
+  acteDate: string | null;
+  status: string;
+  percentCompleted: number;
+}
+
+interface IDocument {
+  id: string;
+  title: string;
+  type: string;
+  url: string;
+  uploadedAt: string;
+  size: string;
+}
+
+interface ICharge {
+  id: string;
+  label: string;
+  amount: number;
+  status: string;
+}
+
+interface INote {
+  id: string;
+  content: string;
+  author: string;
+  date: string;
+}
+
 interface IClientDetail {
   id: string;
   firstName: string;
@@ -118,11 +162,11 @@ interface IClientDetail {
   maxArea?: number;
   minRooms?: number;
   desiredLocation?: string;
-  reservation?: Record<string, unknown>;
-  vente?: Record<string, unknown>;
-  documents?: Record<string, unknown>[];
-  charges?: Record<string, unknown>[];
-  notesLog?: Record<string, unknown>[];
+  reservation?: IReservation | null;
+  vente?: IVente | null;
+  documents?: IDocument[];
+  charges?: ICharge[];
+  notesLog?: INote[];
 }
 
 
@@ -190,7 +234,7 @@ export default function ClientDetailPage() {
   return (
     <div className="space-y-6 pb-10">
       {/* Header */}
-      <ClientHeader client={client as any} />
+      <ClientHeader client={client} />
 
       {/* Accordion Infos (Read-Only) */}
       <ClientInfoPanel client={client} />
@@ -334,11 +378,11 @@ export default function ClientDetailPage() {
           </TabsContent>
 
           <TabsContent value="reservation">
-            <TabReservation reservation={client.reservation as any} />
+            <TabReservation reservation={client.reservation ?? null} />
           </TabsContent>
 
           <TabsContent value="vente">
-            <TabVente vente={client.vente as any} />
+            <TabVente vente={client.vente ?? null} />
           </TabsContent>
 
           <TabsContent value="echeances">
@@ -357,15 +401,15 @@ export default function ClientDetailPage() {
           </TabsContent>
 
           <TabsContent value="documents">
-            <TabDocuments documents={(client.documents || []) as any} />
+            <TabDocuments documents={client.documents || []} />
           </TabsContent>
 
           <TabsContent value="charges">
-            <TabCharges charges={(client.charges || []) as any} />
+            <TabCharges charges={client.charges || []} />
           </TabsContent>
 
           <TabsContent value="notes">
-            <TabNotes notes={(client.notesLog || []) as any} />
+            <TabNotes notes={client.notesLog || []} />
           </TabsContent>
 
           <TabsContent value="taches">

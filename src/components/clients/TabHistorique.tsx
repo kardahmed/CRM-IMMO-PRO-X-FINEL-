@@ -14,6 +14,7 @@ import {
   FileText,
   Calendar,
 } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
 
@@ -25,7 +26,7 @@ interface HistoryEntry {
   userName?: string;
 }
 
-const TYPE_CONFIG: Record<string, { icon: any; color: string }> = {
+const TYPE_CONFIG: Record<string, { icon: LucideIcon; color: string }> = {
   CALL: { icon: Phone, color: "bg-green-100 text-green-600 dark:bg-green-900/30" },
   EMAIL: { icon: Mail, color: "bg-blue-100 text-blue-600 dark:bg-blue-900/30" },
   SMS: { icon: MessageSquare, color: "bg-purple-100 text-purple-600 dark:bg-purple-900/30" },

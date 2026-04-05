@@ -14,6 +14,7 @@ import {
   Plus,
   MessageSquare,
 } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { formatDistanceToNow, format } from "date-fns";
 import { fr } from "date-fns/locale";
 
@@ -25,7 +26,7 @@ interface Visit {
   property?: { id: string; name: string };
 }
 
-const STATUS_MAP: Record<string, { label: string; color: string; icon: any }> = {
+const STATUS_MAP: Record<string, { label: string; color: string; icon: LucideIcon }> = {
   PLANNED: { label: "Planifiée", color: "bg-blue-100 text-blue-700", icon: Clock },
   CONFIRMED: { label: "Confirmée", color: "bg-indigo-100 text-indigo-700", icon: CheckCircle2 },
   DONE: { label: "Terminée", color: "bg-green-100 text-green-700", icon: CheckCircle2 },

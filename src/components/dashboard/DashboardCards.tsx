@@ -2,7 +2,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import { TrendingUp, TrendingDown, Users, Calendar, ShoppingCart, DollarSign } from "lucide-react";
+import { TrendingUp, TrendingDown, Users, Calendar, ShoppingCart, DollarSign, type LucideIcon } from "lucide-react";
 
 interface StatCardProps {
   label: string;
@@ -11,7 +11,7 @@ interface StatCardProps {
   color: string;
 }
 
-const iconMap: Record<string, any> = {
+const iconMap: Record<string, LucideIcon> = {
   blue: Users,
   green: Calendar,
   purple: ShoppingCart,
