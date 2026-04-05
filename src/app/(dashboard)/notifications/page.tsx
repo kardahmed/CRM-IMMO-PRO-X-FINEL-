@@ -59,24 +59,28 @@ const TYPE_ICONS: Record<string, typeof Info> = {
 export default function NotificationsPage() {
   const [notifications, setNotifications] = useState<INotification[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [markingRead, setMarkingRead] = useState(false);
 
-  useEffect(() => {
-    async function fetchNotifications() {
-      try {
-        const res = await fetch("/api/v1/notifications");
-        if (!res.ok) throw new Error("Erreur");
-        const json = await res.json();
-        if (json.success) {
-          const d = json.data;
-          setNotifications(Array.isArray(d) ? d : d.notifications ?? []);
-        }
-      } catch (err) {
-        Sentry.captureException(err, { tags: { context: "Notifications page" } });
-      } finally {
-        setLoading(false);
+  async function fetchNotifications() {
+    try {
+      setLoading(true);
+      const res = await fetch("/api/v1/notifications");
+      if (!res.ok) throw new Error("Erreur");
+      const json = await res.json();
+      if (json.success) {
+        const d = json.data;
+        setNotifications(Array.isArray(d) ? d : d.notifications ?? []);
       }
+    } catch (err) {
+      Sentry.captureException(err, { tags: { context: "Notifications page" } });
+      setError("Erreur de chargement des données");
+    } finally {
+      setLoading(false);
     }
+  }
+
+  useEffect(() => {
     fetchNotifications();
   }, []);
 
@@ -196,6 +200,13 @@ export default function NotificationsPage() {
       {loading ? (
         <div className="flex items-center justify-center py-20">
           <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        </div>
+      ) : error ? (
+        <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
+          <p className="text-destructive font-medium">{error}</p>
+          <Button variant="outline" onClick={() => { setError(null); fetchNotifications(); }}>
+            Réessayer
+          </Button>
         </div>
       ) : notifications.length === 0 ? (
         <Card>

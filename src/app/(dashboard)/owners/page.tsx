@@ -48,6 +48,7 @@ interface IOwner {
 export default function OwnersPage() {
   const [owners, setOwners] = useState<IOwner[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [creating, setCreating] = useState(false);
@@ -57,6 +58,7 @@ export default function OwnersPage() {
 
   async function fetchOwners() {
     try {
+      setLoading(true);
       const res = await fetch("/api/v1/owners");
       if (!res.ok) throw new Error("Erreur");
       const json = await res.json();
@@ -66,6 +68,7 @@ export default function OwnersPage() {
       }
     } catch (err) {
       Sentry.captureException(err, { tags: { context: "Owners page" } });
+      setError("Erreur de chargement des données");
     } finally {
       setLoading(false);
     }
@@ -136,6 +139,13 @@ export default function OwnersPage() {
       {loading ? (
         <div className="flex items-center justify-center py-20">
           <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        </div>
+      ) : error ? (
+        <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
+          <p className="text-destructive font-medium">{error}</p>
+          <Button variant="outline" onClick={() => { setError(null); fetchOwners(); }}>
+            Réessayer
+          </Button>
         </div>
       ) : filtered.length === 0 ? (
         <Card>

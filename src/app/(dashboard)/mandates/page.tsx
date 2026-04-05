@@ -60,25 +60,29 @@ const TYPE_LABELS: Record<string, string> = {
 export default function MandatesPage() {
   const [mandates, setMandates] = useState<IMandate[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("ALL");
 
-  useEffect(() => {
-    async function fetchMandates() {
-      try {
-        const res = await fetch("/api/v1/mandates");
-        if (!res.ok) throw new Error("Erreur");
-        const json = await res.json();
-        if (json.success) {
-          const d = json.data;
-          setMandates(Array.isArray(d) ? d : d.mandates ?? []);
-        }
-      } catch (err) {
-        Sentry.captureException(err, { tags: { context: "Mandates page" } });
-      } finally {
-        setLoading(false);
+  async function fetchMandates() {
+    try {
+      setLoading(true);
+      const res = await fetch("/api/v1/mandates");
+      if (!res.ok) throw new Error("Erreur");
+      const json = await res.json();
+      if (json.success) {
+        const d = json.data;
+        setMandates(Array.isArray(d) ? d : d.mandates ?? []);
       }
+    } catch (err) {
+      Sentry.captureException(err, { tags: { context: "Mandates page" } });
+      setError("Erreur de chargement des données");
+    } finally {
+      setLoading(false);
     }
+  }
+
+  useEffect(() => {
     fetchMandates();
   }, []);
 
@@ -153,6 +157,13 @@ export default function MandatesPage() {
       {loading ? (
         <div className="flex items-center justify-center py-20">
           <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        </div>
+      ) : error ? (
+        <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
+          <p className="text-destructive font-medium">{error}</p>
+          <Button variant="outline" onClick={() => { setError(null); fetchMandates(); }}>
+            Réessayer
+          </Button>
         </div>
       ) : filtered.length === 0 ? (
         <Card>

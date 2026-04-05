@@ -65,25 +65,29 @@ const formatAmount = (amount: number) =>
 export default function PaymentsPage() {
   const [payments, setPayments] = useState<IPayment[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("ALL");
 
-  useEffect(() => {
-    async function fetchPayments() {
-      try {
-        const res = await fetch("/api/v1/payments");
-        if (!res.ok) throw new Error("Erreur");
-        const json = await res.json();
-        if (json.success) {
-          const d = json.data;
-          setPayments(Array.isArray(d) ? d : d.payments ?? []);
-        }
-      } catch (err) {
-        Sentry.captureException(err, { tags: { context: "Payments page" } });
-      } finally {
-        setLoading(false);
+  async function fetchPayments() {
+    try {
+      setLoading(true);
+      const res = await fetch("/api/v1/payments");
+      if (!res.ok) throw new Error("Erreur");
+      const json = await res.json();
+      if (json.success) {
+        const d = json.data;
+        setPayments(Array.isArray(d) ? d : d.payments ?? []);
       }
+    } catch (err) {
+      Sentry.captureException(err, { tags: { context: "Payments page" } });
+      setError("Erreur de chargement des données");
+    } finally {
+      setLoading(false);
     }
+  }
+
+  useEffect(() => {
     fetchPayments();
   }, []);
 
@@ -166,6 +170,13 @@ export default function PaymentsPage() {
       {loading ? (
         <div className="flex items-center justify-center py-20">
           <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        </div>
+      ) : error ? (
+        <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
+          <p className="text-destructive font-medium">{error}</p>
+          <Button variant="outline" onClick={() => { setError(null); fetchPayments(); }}>
+            Réessayer
+          </Button>
         </div>
       ) : filtered.length === 0 ? (
         <Card>
