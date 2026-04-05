@@ -102,7 +102,7 @@ export function KanbanCard({
           {/* Top Indicators */}
           <div className="absolute -top-2 -left-2 flex items-center gap-1.5 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
             {client.overdueTasks > 0 && (
-              <div className="bg-red-500 text-white text-xs font-black h-5 w-5 flex items-center justify-center rounded-full animate-bounce shadow-lg">
+              <div className="bg-red-500 text-white text-xs font-bold h-5 w-5 flex items-center justify-center rounded-full animate-bounce shadow-lg">
                 !
               </div>
             )}
@@ -116,7 +116,7 @@ export function KanbanCard({
               </h4>
               <div className="flex items-center gap-1.5 mt-0.5">
                 {getSourceIcon(client.source)}
-                <span className="text-xs font-black text-muted-foreground uppercase opacity-70">
+                <span className="text-xs font-bold text-muted-foreground uppercase opacity-70">
                   ID: {client.id.slice(0, 4)}
                 </span>
               </div>
@@ -144,8 +144,8 @@ export function KanbanCard({
 
           {/* Budget Display - Prominent */}
           <div className="bg-primary/5 dark:bg-primary/10 rounded-lg p-2.5 mb-4 border border-primary/10">
-            <div className="text-xs font-black text-primary uppercase tracking-wider mb-0.5 opacity-70">Budget estimé</div>
-            <div className="text-sm font-black text-primary tabular-nums">
+            <div className="text-xs font-bold text-primary uppercase tracking-wider mb-0.5 opacity-70">Budget estimé</div>
+            <div className="text-sm font-bold text-primary tabular-nums">
               {formatBudgetDA(client.budget)}
             </div>
           </div>

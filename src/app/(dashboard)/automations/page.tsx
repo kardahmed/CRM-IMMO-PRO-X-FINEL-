@@ -443,7 +443,7 @@ export default function AutomationsPage() {
                               {/* WhatsApp template editor */}
                               {editingTemplate === `${config.pipelineStage}-${idx}` && task.type === "OTHER" && (
                                 <div className="mt-4 border-t border-border pt-4 animate-in fade-in slide-in-from-top-2 duration-300">
-                                  <label className="text-xs font-black uppercase tracking-widest text-muted-foreground block mb-2">
+                                  <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground block mb-2">
                                     Template de message WhatsApp
                                   </label>
                                   <textarea
