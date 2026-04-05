@@ -3,6 +3,7 @@ import { currentUser } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
 import { rateLimit, getClientIp, RATE_LIMITS } from "@/lib/rate-limit";
 import type { UserRole } from "@prisma/client";
+import * as Sentry from "@sentry/nextjs";
 
 /**
  * GET /api/v1/admin/tenants
@@ -36,7 +37,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
 
     return NextResponse.json({ success: true, data: tenants });
   } catch (err) {
-    console.error("[Admin Tenants]", err);
+    Sentry.captureException(err, { tags: { context: "Admin Tenants" } });
     return NextResponse.json({ success: false, error: "Erreur interne" }, { status: 500 });
   }
 }

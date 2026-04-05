@@ -104,7 +104,7 @@ export async function triggerAutomations(
     });
   } catch (err) {
     // Non-bloquant — on log l'erreur sans bloquer le changement d'étape
-    console.error("[AutomationEngine] Erreur:", err);
+    Sentry.captureException(err, { tags: { context: "AutomationEngine" } });
   }
 }
 
