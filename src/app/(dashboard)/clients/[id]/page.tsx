@@ -5,7 +5,7 @@ import { useParams } from "next/navigation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ClientHeader } from "@/components/clients/ClientHeader";
-import { TabInformations } from "@/components/clients/TabInformations";
+
 import { TabVisites } from "@/components/clients/TabVisites";
 import { TabPaiements } from "@/components/clients/TabPaiements";
 import { TabTaches } from "@/components/clients/TabTaches";
@@ -23,7 +23,6 @@ import { ClientInfoPanel } from "@/components/clients/ClientInfoPanel";
 import {
   AlertCircle,
   RefreshCw,
-  User,
   Eye,
   DollarSign,
   CheckSquare,
