@@ -6,7 +6,6 @@ import { fr } from "date-fns/locale";
 import {
   Sheet,
   SheetContent,
-  SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
@@ -15,7 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
 import Image from "next/image";
-import { cn } from "@/lib/utils";
+
 import {
   Phone,
   Mail,
@@ -88,6 +87,7 @@ export function TaskExecutionDialog({ taskId, open, onClose, onExecute }: TaskEx
   const [note, setNote] = useState("");
   const [message, setMessage] = useState("");
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (open && taskId) {
       fetchContext();
@@ -290,7 +290,7 @@ export function TaskExecutionDialog({ taskId, open, onClose, onExecute }: TaskEx
 
               {/* 6. Note post-exécution */}
               <div className="space-y-2 pt-2">
-                <h4 className="text-sm font-bold">Note de conclusion (pour l'historique)</h4>
+                <h4 className="text-sm font-bold">Note de conclusion (pour l&apos;historique)</h4>
                 <Input
                   value={note}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNote(e.target.value)}

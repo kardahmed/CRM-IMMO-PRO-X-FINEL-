@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Building2, Save, Ban, CheckCircle2, Users, Activity, Loader2, AlertCircle, ArrowLeft, Briefcase, Trash2, UserMinus } from "lucide-react";
+import { Save, CheckCircle2, Users, Activity, Loader2, AlertCircle, ArrowLeft, Briefcase, Trash2, UserMinus } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -55,7 +55,7 @@ export default function WorkspaceDetailPanel() {
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [togglingUser, setTogglingUser] = useState<string | null>(null);
 
-  async function fetchTenant() {
+  const fetchTenant = useCallback(async () => {
     setLoading(true);
     try {
       const res = await fetch(`/api/v1/admin/tenants/${id}`);
@@ -71,9 +71,9 @@ export default function WorkspaceDetailPanel() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [id]);
 
-  useEffect(() => { fetchTenant(); }, [id]);
+  useEffect(() => { fetchTenant(); }, [fetchTenant]);
 
   async function handleSave() {
     if (!tenant) return;
@@ -240,7 +240,7 @@ export default function WorkspaceDetailPanel() {
                 Statut et Plan
               </CardTitle>
               <CardDescription className="text-neutral-400">
-                Changez le statut pour activer l'abonnement ou suspendre le workspace.
+                Changez le statut pour activer l&apos;abonnement ou suspendre le workspace.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -260,7 +260,7 @@ export default function WorkspaceDetailPanel() {
                   {newStatus === "ACTIVE" && tenant.status === "DEMO" && (
                     <p className="text-xs text-emerald-400 flex items-center gap-1">
                       <CheckCircle2 className="h-3 w-3" />
-                      Cela activera l'abonnement et supprimera les limites demo
+                      Cela activera l&apos;abonnement et supprimera les limites demo
                     </p>
                   )}
                 </div>

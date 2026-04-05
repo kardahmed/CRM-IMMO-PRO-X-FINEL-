@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Search, Filter, MoreHorizontal, LogIn, ExternalLink, Loader2, AlertCircle, RefreshCw } from "lucide-react";
+import { Search, MoreHorizontal, ExternalLink, Loader2, AlertCircle, RefreshCw } from "lucide-react";
 import Link from "next/link";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";

@@ -5,7 +5,7 @@ import { GoogleMap, useJsApiLoader, Marker, InfoWindow, MarkerClusterer } from "
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Home, Ruler, DollarSign, Send, CalendarPlus, X, Layers } from "lucide-react";
+import { Home, Ruler, Send, CalendarPlus, Layers } from "lucide-react";
 import Image from "next/image";
 import type { MapFiltersState } from "./MapFilters";
 import { cn } from "@/lib/utils";
@@ -63,7 +63,7 @@ export function MapContainer({ filters, clientCriteria, onMatchCountUpdate }: Ma
     googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "dummy",
   });
 
-  const [map, setMap] = useState<google.maps.Map | null>(null);
+  const [, setMap] = useState<google.maps.Map | null>(null);
   const [selectedProp, setSelectedProp] = useState<MapProperty | null>(null);
 
   const onLoad = useCallback(function callback(map: google.maps.Map) {

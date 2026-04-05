@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
+import Image from "next/image";
 import {
   ArrowLeft,
   Building,
@@ -15,7 +16,6 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
@@ -28,8 +28,6 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
 import { UnitGrid, type ProjectUnit } from "@/components/projects/UnitGrid";
 import { CreditSimulator } from "@/components/shared/CreditSimulator";
 
@@ -79,7 +77,7 @@ export default function ProjectDetailPage() {
   const [updatingProgress, setUpdatingProgress] = useState(false);
   const [progressForm, setProgressForm] = useState({ percentage: "", note: "" });
 
-  async function fetchProject() {
+  const fetchProject = useCallback(async () => {
     setLoading(true);
     setError(false);
     try {
@@ -93,11 +91,11 @@ export default function ProjectDetailPage() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [projectId]);
 
   useEffect(() => {
     if (projectId) fetchProject();
-  }, [projectId]);
+  }, [projectId, fetchProject]);
 
   if (loading) {
     return (
@@ -166,10 +164,12 @@ export default function ProjectDetailPage() {
 
         {imageUrl && (
           <div className="relative z-10 w-full md:w-64 h-48 shrink-0 rounded-xl overflow-hidden shadow-md">
-            <img
+            <Image
               src={imageUrl}
               alt={project.name}
               className="w-full h-full object-cover"
+              fill
+              unoptimized
             />
           </div>
         )}
@@ -355,12 +355,14 @@ export default function ProjectDetailPage() {
                 {project.images.map((img, i) => (
                   <div
                     key={i}
-                    className="aspect-video rounded-xl overflow-hidden border"
+                    className="aspect-video rounded-xl overflow-hidden border relative"
                   >
-                    <img
+                    <Image
                       src={img}
                       alt={`${project.name} - ${i + 1}`}
                       className="w-full h-full object-cover"
+                      fill
+                      unoptimized
                     />
                   </div>
                 ))}

@@ -8,9 +8,8 @@ import {
   isSameDay,
 } from "date-fns";
 import { fr } from "date-fns/locale";
-import { User, Home } from "lucide-react";
 import type { PlanningVisit } from "./types";
-import { STATUS_COLORS, STATUS_LABELS } from "./types";
+import { STATUS_COLORS } from "./types";
 
 const HOURS = Array.from({ length: 12 }, (_, i) => i + 8);
 

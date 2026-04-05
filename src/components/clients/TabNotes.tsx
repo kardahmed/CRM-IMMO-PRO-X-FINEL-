@@ -38,7 +38,7 @@ export function TabNotes({ notes }: TabNotesProps) {
         <div className="flex items-center justify-between p-3 border-t bg-white dark:bg-card">
           <p className="text-xs text-muted-foreground font-medium flex items-center gap-1.5">
             <StickyNote className="h-3.5 w-3.5" />
-            Visible par toute l'équipe
+            Visible par toute l&apos;équipe
           </p>
           <Button size="sm" className="gap-2 font-bold rounded-full h-8" disabled={!newNote.trim()}>
             <Send className="h-3.5 w-3.5" />

@@ -1,7 +1,6 @@
 import { randomUUID } from "crypto";
 import * as Sentry from "@sentry/nextjs";
 import { createTenantPrisma } from "@/lib/prisma-tenant";
-import { prisma } from "@/lib/prisma";
 import type { ICurrentUser } from "@/lib/auth";
 import type { Client, PipelineStage } from "@prisma/client";
 import {

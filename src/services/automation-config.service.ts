@@ -1,5 +1,4 @@
 import { createTenantPrisma } from "@/lib/prisma-tenant";
-import { prisma } from "@/lib/prisma";
 import type { ICurrentUser } from "@/lib/auth";
 import type { AutomationConfig, PipelineStage } from "@prisma/client";
 import type { IAutomationTask } from "@/services/automation-engine";

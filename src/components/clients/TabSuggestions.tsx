@@ -1,6 +1,6 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -9,7 +9,6 @@ import {
   Home,
   MapPin,
   Ruler,
-  DollarSign,
   Send,
   GitCompare,
   CheckCircle2,
@@ -47,12 +46,13 @@ interface TabSuggestionsProps {
   };
 }
 
-export function TabSuggestions({ clientId, criteria }: TabSuggestionsProps) {
+export function TabSuggestions({ clientId: _clientId, criteria }: TabSuggestionsProps) {
   const [properties, setProperties] = useState<SuggestedProperty[]>([]);
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [sending, setSending] = useState(false);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     fetchSuggestions();
   }, []);
@@ -94,7 +94,7 @@ export function TabSuggestions({ clientId, criteria }: TabSuggestionsProps) {
         }));
         setProperties(scored);
       }
-    } catch (err) {
+    } catch {
       // Use mock data as fallback
       setProperties([
         {

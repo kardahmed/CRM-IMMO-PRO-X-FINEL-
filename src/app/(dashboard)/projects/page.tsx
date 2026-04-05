@@ -36,19 +36,6 @@ interface Project {
   }>;
 }
 
-const STATUS_COLORS: Record<string, string> = {
-  PLANNING: "bg-blue-100 text-blue-700",
-  IN_PROGRESS: "bg-amber-100 text-amber-700",
-  DELIVERED: "bg-green-100 text-green-700",
-  CANCELLED: "bg-red-100 text-red-700",
-};
-
-const STATUS_LABELS: Record<string, string> = {
-  PLANNING: "Planification",
-  IN_PROGRESS: "En cours",
-  DELIVERED: "Livré",
-  CANCELLED: "Annulé",
-};
 
 export default function ProjectsPage() {
   const [projects, setProjects] = useState<Project[]>([]);

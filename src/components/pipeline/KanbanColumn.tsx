@@ -3,7 +3,7 @@
 import { Droppable } from "@hello-pangea/dnd";
 import { KanbanCard, type PipelineClient } from "./KanbanCard";
 import { cn } from "@/lib/utils";
-import { ScrollArea } from "@/components/ui/scroll-area";
+
 
 export interface StageDefinition {
   id: string;

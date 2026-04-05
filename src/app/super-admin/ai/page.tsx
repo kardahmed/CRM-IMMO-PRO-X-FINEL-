@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Sparkles, BrainCircuit, Key, RefreshCw, BarChart2 } from "lucide-react";
+import { Sparkles, Key, RefreshCw, BarChart2 } from "lucide-react";
 import { useState } from "react";
 
 const MOCK_AI_USAGE = [

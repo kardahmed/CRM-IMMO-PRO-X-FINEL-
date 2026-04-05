@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Clock, Mail, Phone, ArrowRight, Crown, Zap, Building2, CheckCircle2 } from "lucide-react";
+import { Clock, Mail, Phone, Crown, Zap, Building2, CheckCircle2 } from "lucide-react";
 import Link from "next/link";
 
 const SUPER_ADMIN = {

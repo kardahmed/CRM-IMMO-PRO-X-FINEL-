@@ -1,6 +1,6 @@
 "use client";
 
-import { Input } from "@/components/ui/input";
+
 import {
   Select,
   SelectContent,
@@ -9,7 +9,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { Search, Plus, CalendarDays, CalendarRange, Calendar } from "lucide-react";
+import { Plus, CalendarDays, CalendarRange, Calendar } from "lucide-react";
 
 export type ViewMode = "day" | "week" | "month";
 

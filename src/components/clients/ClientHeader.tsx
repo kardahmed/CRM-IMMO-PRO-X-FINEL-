@@ -1,20 +1,13 @@
 "use client";
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import {
-  Phone,
-  MessageCircle,
-  Mail,
-  MessageSquare,
-  Calendar,
   User,
-  ArrowLeft,
-  Copy,
 } from "lucide-react";
-import { useRouter } from "next/navigation";
+
 import { formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -76,7 +69,6 @@ interface ClientHeaderProps {
 }
 
 export function ClientHeader({ client }: ClientHeaderProps) {
-  const router = useRouter();
   const fullName = `${client.firstName} ${client.lastName}`;
   const initials = `${client.firstName?.[0] || ""}${client.lastName?.[0] || ""}`;
   const agentName = client.assignedAgent

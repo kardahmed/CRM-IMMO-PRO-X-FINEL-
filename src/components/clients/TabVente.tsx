@@ -2,7 +2,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, Scale, User, CheckCircle2 } from "lucide-react";
+import { Calendar, Scale, User } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 
@@ -23,7 +23,7 @@ export function TabVente({ vente }: TabVenteProps) {
         <CardContent className="flex flex-col items-center justify-center h-48 text-muted-foreground p-6 text-center">
           <Scale className="h-10 w-10 mb-4 opacity-20" />
           <p className="font-medium text-lg text-foreground">Aucune vente encours</p>
-          <p className="text-sm mt-1">L'acte notarié n'a pas encore été initialisé.</p>
+          <p className="text-sm mt-1">L&apos;acte notarié n&apos;a pas encore été initialisé.</p>
         </CardContent>
       </Card>
     );

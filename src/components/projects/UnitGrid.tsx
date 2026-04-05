@@ -2,7 +2,7 @@
 
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
-import { Info } from "lucide-react";
+
 import {
   Tooltip,
   TooltipContent,

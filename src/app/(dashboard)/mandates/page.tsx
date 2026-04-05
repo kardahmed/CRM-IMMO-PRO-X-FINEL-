@@ -3,8 +3,7 @@
 import * as Sentry from "@sentry/nextjs";
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { formatDistanceToNow, format } from "date-fns";
-import { fr } from "date-fns/locale";
+import { format } from "date-fns";
 import {
   FileText,
   Plus,

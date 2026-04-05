@@ -2,7 +2,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, FileCheck, Building2, Wallet } from "lucide-react";
+import { Calendar, FileCheck, Building2 } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 
@@ -28,7 +28,7 @@ export function TabReservation({ reservation }: TabReservationProps) {
         <CardContent className="flex flex-col items-center justify-center h-48 text-muted-foreground p-6 text-center">
           <FileCheck className="h-10 w-10 mb-4 opacity-20" />
           <p className="font-medium text-lg text-foreground">Aucune réservation</p>
-          <p className="text-sm mt-1">Ce client n'a pas encore signé de contrat de réservation.</p>
+          <p className="text-sm mt-1">Ce client n&apos;a pas encore signé de contrat de réservation.</p>
         </CardContent>
       </Card>
     );

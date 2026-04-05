@@ -12,7 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Save, Loader2, User, Home, DollarSign, MapPin } from "lucide-react";
+import { Save, Loader2, User, Home } from "lucide-react";
 import { useState } from "react";
 
 interface TabInformationsProps {

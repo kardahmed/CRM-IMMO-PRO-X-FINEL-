@@ -3,7 +3,7 @@
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { Clock, User, Home, MapPin } from "lucide-react";
+import { User, Home, MapPin } from "lucide-react";
 import type { PlanningVisit } from "./types";
 import { STATUS_COLORS, STATUS_LABELS } from "./types";
 

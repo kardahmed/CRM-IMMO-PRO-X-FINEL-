@@ -1,5 +1,4 @@
-import { NextRequest } from "next/server";
-import { apiHandler, jsonOk, jsonError } from "@/lib/api-handler";
+import { apiHandler, jsonOk } from "@/lib/api-handler";
 
 /**
  * GET /api/v1/search?q=...
@@ -14,8 +13,6 @@ export const GET = apiHandler(
     if (!q || q.length < 2) {
       return jsonOk({ clients: [], properties: [], projects: [] });
     }
-
-    const search = `%${q}%`;
 
     const [clients, properties, projects] = await Promise.all([
       ctx.db.client.findMany({

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
-import { rateLimit, getClientIp, RATE_LIMITS } from "@/lib/rate-limit";
+import { rateLimit, getClientIp } from "@/lib/rate-limit";
 import * as Sentry from "@sentry/nextjs";
 
 const DEMO_DURATION_DAYS = 14;
@@ -12,16 +12,6 @@ const DEMO_LIMITS = {
   maxUsers: 1,
 };
 
-const WILAYAS = [
-  "Alger", "Oran", "Constantine", "Annaba", "Blida", "Batna", "Setif",
-  "Tlemcen", "Bejaia", "Tizi Ouzou", "Djelfa", "Biskra", "Chlef",
-  "Mostaganem", "Medea", "Tiaret", "Bouira", "Bordj Bou Arreridj",
-  "Boumerdes", "Skikda", "Tipaza", "Msila", "Mascara", "Ouargla",
-  "Ghardaia", "Relizane", "Ain Defla", "Ain Temouchent", "El Oued",
-  "Jijel", "Mila", "Souk Ahras", "Guelma", "Khenchela", "Oum El Bouaghi",
-  "Saida", "Sidi Bel Abbes", "Laghouat", "Bechar", "Adrar", "Tamanghasset",
-  "Tindouf", "Illizi", "Naama", "El Bayadh", "Tissemsilt", "Ain Beida",
-];
 
 const demoRequestSchema = z.object({
   companyName: z.string().min(2).max(100).trim(),

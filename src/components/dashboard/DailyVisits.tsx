@@ -1,10 +1,9 @@
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Calendar, Clock, MapPin, User } from "lucide-react";
-import { cn } from "@/lib/utils";
+
 
 interface Visit {
   time: string;
@@ -22,7 +21,7 @@ export function DailyVisits({ visits }: { visits: Visit[] }) {
       <CardContent>
         <div className="space-y-4">
           {visits.length === 0 ? (
-            <p className="text-sm text-muted-foreground italic text-center py-4">Pas de visites programmées pour aujourd'hui</p>
+            <p className="text-sm text-muted-foreground italic text-center py-4">Pas de visites programmées pour aujourd&apos;hui</p>
           ) : (
             visits.map((visit, i) => (
               <div key={i} className="flex items-start gap-4 p-3 rounded-lg border bg-accent/10 hover:bg-accent/20 transition-colors group">

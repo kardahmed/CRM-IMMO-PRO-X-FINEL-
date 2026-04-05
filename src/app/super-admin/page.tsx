@@ -90,7 +90,7 @@ export default function SuperAdminDashboard() {
             <CardTitle className="text-lg font-bold text-white">Croissance des Workspaces</CardTitle>
           </CardHeader>
           <CardContent className="h-[300px] flex items-center justify-center border-t border-neutral-800/50">
-            <p className="text-neutral-500 text-sm">Zone Graphique (Recharts) - En attente d'intégration API</p>
+            <p className="text-neutral-500 text-sm">Zone Graphique (Recharts) - En attente d&apos;intégration API</p>
           </CardContent>
         </Card>
         

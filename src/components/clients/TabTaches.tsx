@@ -22,7 +22,6 @@ import {
   Mail,
   Eye,
   FileText,
-  MoreHorizontal,
   CheckCircle2,
   Loader2,
   type LucideIcon,
@@ -47,7 +46,7 @@ const TYPE_ICONS: Record<string, LucideIcon> = {
   OTHER: CheckSquare,
 };
 
-export function TabTaches({ tasks, clientId }: { tasks: Task[]; clientId: string }) {
+export function TabTaches({ tasks, clientId: _clientId }: { tasks: Task[]; clientId: string }) {
   const [execModal, setExecModal] = useState<{
     open: boolean;
     task: Task | null;
@@ -183,7 +182,7 @@ export function TabTaches({ tasks, clientId }: { tasks: Task[]; clientId: string
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-3 py-2">
-            <label className="text-sm font-bold">Note d'exécution</label>
+            <label className="text-sm font-bold">Note d&apos;exécution</label>
             <Textarea
               value={execNote}
               onChange={(e) => setExecNote(e.target.value)}

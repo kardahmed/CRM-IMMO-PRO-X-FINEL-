@@ -30,7 +30,7 @@ export function AgentOverview({ welcomeMessage, stats, tasks }: AgentOverviewPro
         <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-primary to-indigo-600 bg-clip-text text-transparent">
           {welcomeMessage}
         </h1>
-        <p className="text-muted-foreground italic">C'est une excellente journée pour conclure une vente.</p>
+        <p className="text-muted-foreground italic">C&apos;est une excellente journée pour conclure une vente.</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -78,7 +78,7 @@ export function AgentOverview({ welcomeMessage, stats, tasks }: AgentOverviewPro
                 <Zap className="h-5 w-5" />
               </div>
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Relances aujourd'hui</p>
+                <p className="text-sm font-medium text-muted-foreground">Relances aujourd&apos;hui</p>
                 <p className="text-2xl font-bold text-orange-600">{stats.todayFollowUps}</p>
               </div>
             </CardContent>

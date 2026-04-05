@@ -2,7 +2,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+
 import { Badge } from "@/components/ui/badge";
 import { Trophy, Medal, Star } from "lucide-react";
 
@@ -14,9 +14,9 @@ interface Agent {
 }
 
 const rankIcons = [
-  <Trophy className="h-5 w-5 text-yellow-500" />,
-  <Medal className="h-5 w-5 text-slate-400" />,
-  <Star className="h-5 w-5 text-amber-600" />,
+  <Trophy key="trophy" className="h-5 w-5 text-yellow-500" />,
+  <Medal key="medal" className="h-5 w-5 text-slate-400" />,
+  <Star key="star" className="h-5 w-5 text-amber-600" />,
 ];
 
 export function TopAgents({ agents }: { agents: Agent[] }) {

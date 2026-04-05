@@ -111,7 +111,7 @@ export default function SuperAdminLayout({
       <main className="flex-1 flex flex-col min-w-0 bg-neutral-950 overflow-hidden">
         <header className="h-16 flex items-center px-8 border-b border-neutral-800 shrink-0">
           <h1 className="text-sm font-medium text-neutral-400">
-            Interface Système — Ne pas communiquer les identifiants en dehors de l'équipe fondatrice.
+            Interface Système — Ne pas communiquer les identifiants en dehors de l&apos;équipe fondatrice.
           </h1>
         </header>
         <div className="flex-1 overflow-y-auto p-8">

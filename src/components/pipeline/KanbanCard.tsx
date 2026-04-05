@@ -6,7 +6,6 @@ import { cn } from "@/lib/utils";
 import {
   Phone,
   Home,
-  Clock,
   AlertTriangle,
   MessageSquare,
 } from "lucide-react";

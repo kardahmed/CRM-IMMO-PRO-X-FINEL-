@@ -281,7 +281,7 @@ export default function SettingsPage() {
           <TabsContent value="workspace" className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg font-black">Informations de l'entreprise</CardTitle>
+                <CardTitle className="text-lg font-black">Informations de l&apos;entreprise</CardTitle>
                 <CardDescription>Ces informations seront visibles sur vos contrats et emails.</CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
@@ -292,11 +292,11 @@ export default function SettingsPage() {
                   <div className="flex-1 space-y-4 w-full">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="space-y-1.5">
-                        <label className="text-xs font-bold uppercase text-muted-foreground">Nom de l'agence</label>
+                        <label className="text-xs font-bold uppercase text-muted-foreground">Nom de l&apos;agence</label>
                         <Input value={workspaceForm.agencyName} onChange={(e) => setWorkspaceForm((prev) => ({ ...prev, agencyName: e.target.value }))} />
                       </div>
                       <div className="space-y-1.5">
-                        <label className="text-xs font-bold uppercase text-muted-foreground">Type d'activite</label>
+                        <label className="text-xs font-bold uppercase text-muted-foreground">Type d&apos;activite</label>
                         <Input value={workspaceForm.activityType} onChange={(e) => setWorkspaceForm((prev) => ({ ...prev, activityType: e.target.value }))} />
                       </div>
                       <div className="space-y-1.5 md:col-span-2">
@@ -453,7 +453,7 @@ export default function SettingsPage() {
                       <label className="text-xs font-bold uppercase text-muted-foreground">Cle API (NEXT_PUBLIC_GOOGLE_MAPS_API_KEY)</label>
                       <Input type="password" value="************************" readOnly className="font-mono text-xs" />
                     </div>
-                    <Button variant="outline" size="sm" className="w-full font-bold text-muted-foreground" disabled>Gere via Variables d'Env</Button>
+                    <Button variant="outline" size="sm" className="w-full font-bold text-muted-foreground" disabled>Gere via Variables d&apos;Env</Button>
                   </CardContent>
                 </Card>
 

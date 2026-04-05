@@ -337,7 +337,7 @@ export default function LandingPage() {
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <Link href="/sign-up">
                 <Button className="h-14 px-10 bg-white text-indigo-700 hover:bg-neutral-100 font-black text-lg rounded-full">
-                  Commencer l'essai gratuit
+                  Commencer l&apos;essai gratuit
                 </Button>
               </Link>
               <Link href="/sign-up">

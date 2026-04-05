@@ -43,7 +43,7 @@ export function TabEcheances({ totalAmount, paidAmount }: TabEcheancesProps) {
         {totalAmount === 0 ? (
           <div className="text-center py-6 text-muted-foreground text-sm">
             <AlertCircle className="h-6 w-6 mx-auto mb-2 opacity-50" />
-            Aucun échéancier généré. Le prix du bien n'est pas défini.
+            Aucun échéancier généré. Le prix du bien n&apos;est pas défini.
           </div>
         ) : (
           <div className="relative border-l-2 border-accent ml-3 mt-4 space-y-8 pb-4">

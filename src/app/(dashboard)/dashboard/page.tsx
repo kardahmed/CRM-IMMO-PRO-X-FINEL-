@@ -129,7 +129,7 @@ export default function DashboardPage() {
       <div className="space-y-8 pb-10">
         <header>
           <h1 className="text-3xl font-black tracking-tight text-neutral-900 dark:text-neutral-100 uppercase">
-            Vue d'ensemble <span className="text-primary italic">Executive</span>
+            Vue d&apos;ensemble <span className="text-primary italic">Executive</span>
           </h1>
           <p className="text-muted-foreground mt-1 font-medium">Analyse des performances immobilieres en temps reel.</p>
         </header>
@@ -185,7 +185,7 @@ export default function DashboardPage() {
            <RefreshCw className="absolute -right-4 -bottom-4 h-32 w-32 text-white/5 group-hover:rotate-180 transition-transform duration-1000" />
            <div className="relative">
              <h3 className="text-xl font-bold mb-2">Relances du jour</h3>
-             <p className="text-neutral-400 text-sm">Vous avez {agentStats.todayFollowUps} clients a recontacter aujourd'hui.</p>
+             <p className="text-neutral-400 text-sm">Vous avez {agentStats.todayFollowUps} clients a recontacter aujourd&apos;hui.</p>
            </div>
            <Button
              className="mt-8 bg-white text-black hover:bg-neutral-200 font-bold relative"

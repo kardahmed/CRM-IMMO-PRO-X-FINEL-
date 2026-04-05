@@ -4,7 +4,6 @@ import { useState, useEffect, useCallback } from "react";
 import {
   Building2,
   XCircle,
-  Loader2,
   MapPin,
   CalendarDays,
   Home,

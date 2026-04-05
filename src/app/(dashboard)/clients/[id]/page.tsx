@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useParams } from "next/navigation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -177,7 +177,7 @@ export default function ClientDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
 
-  async function fetchClient() {
+  const fetchClient = useCallback(async () => {
     setLoading(true);
     setError(false);
     try {
@@ -193,11 +193,11 @@ export default function ClientDetailPage() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [clientId]);
 
   useEffect(() => {
     fetchClient();
-  }, [clientId]);
+  }, [fetchClient]);
 
   if (loading) {
     return (
