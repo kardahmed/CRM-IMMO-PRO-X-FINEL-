@@ -3,6 +3,7 @@
 import { auth, clerkClient, currentUser } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
+import * as Sentry from "@sentry/nextjs";
 
 const DEMO_DURATION_DAYS = 14;
 
@@ -120,7 +121,7 @@ export async function createWorkspace(formData: FormData) {
         },
       });
     } catch {
-      console.warn("[createWorkspace] DemoLead creation skipped (table may not exist)");
+      Sentry.captureMessage("[createWorkspace] DemoLead creation skipped (table may not exist)", "warning");
     }
 
     // 3. Update Clerk metadata — unlocks dashboard access
@@ -138,7 +139,7 @@ export async function createWorkspace(formData: FormData) {
   } catch (err: unknown) {
     const message =
       err instanceof Error ? err.message : "Erreur lors de la creation";
-    console.error("[createWorkspace]", message);
+    Sentry.captureException(err, { tags: { context: "createWorkspace" }, extra: { message } });
     return { success: false as const, error: message };
   }
 }

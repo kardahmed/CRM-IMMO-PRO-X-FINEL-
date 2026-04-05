@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { Webhook } from "svix";
 import { prisma } from "@/lib/prisma";
 import type { UserRole } from "@prisma/client";
+import * as Sentry from "@sentry/nextjs";
 
 interface WebhookEvent {
   data: Record<string, unknown>;
@@ -151,7 +152,7 @@ export async function POST(req: Request) {
               where: { id: deletedUser.tenantId },
               data: { status: "SUSPENDED" },
             });
-            console.log(`[Clerk Webhook] Tenant ${deletedUser.tenantId} suspended — no active users remain`);
+            Sentry.captureMessage(`Tenant ${deletedUser.tenantId} suspended — no active users remain`, { level: "info", tags: { context: "Clerk Webhook" } });
           }
         }
       }

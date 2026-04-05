@@ -1,5 +1,6 @@
 "use client";
 
+import * as Sentry from "@sentry/nextjs";
 import { useEffect, useState } from "react";
 import { formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -77,8 +78,8 @@ export default function PaymentsPage() {
           const d = json.data;
           setPayments(Array.isArray(d) ? d : d.payments ?? []);
         }
-      } catch {
-        console.error("Impossible de charger les paiements");
+      } catch (err) {
+        Sentry.captureException(err, { tags: { context: "Payments page" } });
       } finally {
         setLoading(false);
       }

@@ -1,5 +1,6 @@
 "use client";
 
+import * as Sentry from "@sentry/nextjs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -66,7 +67,7 @@ export function TabTaches({ tasks, clientId }: { tasks: Task[]; clientId: string
       setExecModal({ open: false, task: null });
       setExecNote("");
     } catch (err) {
-      console.error(err);
+      Sentry.captureException(err, { tags: { context: "TabTaches" } });
     } finally {
       setExecuting(false);
     }

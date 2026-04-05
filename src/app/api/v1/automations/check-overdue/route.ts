@@ -5,6 +5,7 @@ import {
   checkUpcomingVisits,
   checkOverduePayments,
 } from "@/services/automation-engine";
+import * as Sentry from "@sentry/nextjs";
 
 /**
  * POST /api/v1/automations/check-overdue
@@ -51,7 +52,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Erreur interne";
-    console.error("[CRON check-overdue]", err);
+    Sentry.captureException(err, { tags: { context: "CRON check-overdue" } });
     return NextResponse.json(
       { success: false, error: message },
       { status: 500 },

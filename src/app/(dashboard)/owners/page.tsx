@@ -1,5 +1,6 @@
 "use client";
 
+import * as Sentry from "@sentry/nextjs";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { formatDistanceToNow } from "date-fns";
@@ -63,8 +64,8 @@ export default function OwnersPage() {
         const d = json.data;
         setOwners(Array.isArray(d) ? d : d.owners ?? []);
       }
-    } catch {
-      console.error("Impossible de charger les proprietaires");
+    } catch (err) {
+      Sentry.captureException(err, { tags: { context: "Owners page" } });
     } finally {
       setLoading(false);
     }

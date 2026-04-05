@@ -1,5 +1,6 @@
 "use client";
 
+import * as Sentry from "@sentry/nextjs";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -124,8 +125,8 @@ export default function ClientsPage() {
         const d = json.data;
         setClients(Array.isArray(d) ? d : d.clients ?? []);
       }
-    } catch {
-      console.error("Impossible de charger les clients");
+    } catch (err) {
+      Sentry.captureException(err, { tags: { context: "Clients page" } });
     } finally {
       setLoading(false);
     }

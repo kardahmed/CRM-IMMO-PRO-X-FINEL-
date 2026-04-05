@@ -2,6 +2,7 @@ import { apiHandler, getBody, jsonOk, jsonError } from "@/lib/api-handler";
 import { assignLeadSchema } from "@/lib/validations/facebook-leads";
 import { triggerAutomations } from "@/services/automation-engine";
 import { createNotification } from "@/services/notification.service";
+import * as Sentry from "@sentry/nextjs";
 
 /**
  * POST /api/v1/leads/[id]/assign
@@ -94,7 +95,7 @@ export const POST = apiHandler(
     // Cela lance les tâches d'accueil si configurées
     triggerAutomations(ctx.tenantId, clientId, updated.pipelineStage).catch(
       (err) => {
-        console.error("[Lead assign automation error]", err);
+        Sentry.captureException(err, { tags: { context: "Lead assign automation" } });
       },
     );
 

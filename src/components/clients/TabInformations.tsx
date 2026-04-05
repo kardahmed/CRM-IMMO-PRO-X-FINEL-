@@ -1,5 +1,6 @@
 "use client";
 
+import * as Sentry from "@sentry/nextjs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -77,7 +78,7 @@ export function TabInformations({ client }: TabInformationsProps) {
       });
       setSaved(true);
     } catch (err) {
-      console.error(err);
+      Sentry.captureException(err, { tags: { context: "TabInformations" } });
     } finally {
       setSaving(false);
     }

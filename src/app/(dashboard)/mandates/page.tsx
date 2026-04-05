@@ -1,5 +1,6 @@
 "use client";
 
+import * as Sentry from "@sentry/nextjs";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { formatDistanceToNow, format } from "date-fns";
@@ -72,8 +73,8 @@ export default function MandatesPage() {
           const d = json.data;
           setMandates(Array.isArray(d) ? d : d.mandates ?? []);
         }
-      } catch {
-        console.error("Impossible de charger les mandats");
+      } catch (err) {
+        Sentry.captureException(err, { tags: { context: "Mandates page" } });
       } finally {
         setLoading(false);
       }

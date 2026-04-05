@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { rateLimit, getClientIp, RATE_LIMITS } from "@/lib/rate-limit";
+import * as Sentry from "@sentry/nextjs";
 
 /**
  * GET /api/v1/portal/[token]
@@ -198,7 +199,7 @@ export async function GET(
       },
     });
   } catch (err) {
-    console.error("[Portal API]", err);
+    Sentry.captureException(err, { tags: { context: "Portal API" } });
     return NextResponse.json(
       { success: false, error: "Erreur interne" },
       { status: 500 },

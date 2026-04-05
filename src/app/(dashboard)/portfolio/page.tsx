@@ -1,5 +1,6 @@
 "use client";
 
+import * as Sentry from "@sentry/nextjs";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -119,8 +120,8 @@ export default function PortfolioPage() {
         const d = json.data;
         setProperties(Array.isArray(d) ? d : d.properties ?? []);
       }
-    } catch {
-      console.error("Impossible de charger les biens");
+    } catch (err) {
+      Sentry.captureException(err, { tags: { context: "Portfolio page" } });
     } finally {
       setLoading(false);
     }

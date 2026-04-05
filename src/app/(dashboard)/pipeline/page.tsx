@@ -1,5 +1,6 @@
 "use client";
 
+import * as Sentry from "@sentry/nextjs";
 import { useState, useCallback, useMemo, useEffect } from "react";
 import {
   DragDropContext,
@@ -167,7 +168,7 @@ export default function PipelinePage() {
           stage: destination.droppableId,
           lossReason,
         }),
-      }).catch((err) => console.error("Failed to update stage:", err));
+      }).catch((err) => Sentry.captureException(err, { tags: { context: "Pipeline stage update" } }));
     },
     [],
   );

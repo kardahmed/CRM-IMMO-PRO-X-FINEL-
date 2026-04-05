@@ -9,6 +9,7 @@ import type { IFacebookLeadPayload } from "@/services/facebook-leads.service";
 import { verifyMetaSignature } from "@/lib/webhook-signature";
 import { rateLimit, getClientIp, RATE_LIMITS } from "@/lib/rate-limit";
 import { decrypt, isEncrypted } from "@/lib/encryption";
+import * as Sentry from "@sentry/nextjs";
 
 /**
  * GET /api/v1/webhooks/facebook-leads
@@ -56,12 +57,12 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     // Verify Meta signature (HMAC-SHA256) — MANDATORY
     const appSecret = process.env.FACEBOOK_APP_SECRET;
     if (!appSecret) {
-      console.error("[Facebook Webhook] FACEBOOK_APP_SECRET not configured");
+      Sentry.captureMessage("FACEBOOK_APP_SECRET not configured", { level: "error", tags: { context: "Facebook Webhook" } });
       return NextResponse.json({ error: "Webhook not configured" }, { status: 500 });
     }
     const signature = req.headers.get("x-hub-signature-256");
     if (!verifyMetaSignature(rawBody, signature, appSecret)) {
-      console.warn("[Facebook Webhook] Invalid signature");
+      Sentry.captureMessage("[Facebook Webhook] Invalid signature", "warning");
       return NextResponse.json({ error: "Invalid signature" }, { status: 403 });
     }
 
@@ -81,9 +82,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       // Trouver le tenant associé à cette page Facebook
       const tenant = await findTenantByPageId(pageId);
       if (!tenant) {
-        console.warn(
-          `[Facebook Leads Webhook] No tenant found for page_id: ${pageId}`,
-        );
+        Sentry.captureMessage(`[Facebook Leads Webhook] No tenant found for page_id: ${pageId}`, "warning");
         continue;
       }
 
@@ -96,9 +95,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
           tenant.facebookAccessToken,
         );
         if (!leadData) {
-          console.error(
-            `[Facebook Leads] Failed to fetch lead data for ${leadgen_id}`,
-          );
+          Sentry.captureMessage(`[Facebook Leads] Failed to fetch lead data for ${leadgen_id}`, { level: "error", tags: { context: "Facebook Leads" } });
           continue;
         }
 
@@ -106,9 +103,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
         const fields = extractLeadFields(leadData.field_data);
 
         if (!fields.phone) {
-          console.warn(
-            `[Facebook Leads] Lead ${leadgen_id} has no phone number, skipping`,
-          );
+          Sentry.captureMessage(`[Facebook Leads] Lead ${leadgen_id} has no phone number, skipping`, "warning");
           continue;
         }
 
@@ -129,7 +124,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
     return NextResponse.json({ status: "ok" }, { status: 200 });
   } catch (err) {
-    console.error("[Facebook Leads Webhook Error]", err);
+    Sentry.captureException(err, { tags: { context: "Facebook Leads Webhook" } });
     // Toujours retourner 200 pour éviter les retries de Facebook
     return NextResponse.json({ status: "error" }, { status: 200 });
   }
@@ -193,22 +188,20 @@ async function fetchLeadData(
     });
 
     if (!response.ok) {
-      console.error(
-        `[Facebook Graph API] ${response.status}: ${response.statusText}`,
-      );
+      Sentry.captureMessage(`[Facebook Graph API] ${response.status}: ${response.statusText}`, { level: "error", tags: { context: "Facebook Graph API" } });
       return null;
     }
 
     const data = await response.json();
     const parsed = facebookLeadDataSchema.safeParse(data);
     if (!parsed.success) {
-      console.error("[Facebook Graph API] Invalid lead data", parsed.error);
+      Sentry.captureMessage("[Facebook Graph API] Invalid lead data", { level: "error", tags: { context: "Facebook Graph API" }, extra: { zodError: parsed.error } });
       return null;
     }
 
     return parsed.data;
   } catch (err) {
-    console.error("[Facebook Graph API] Network error", err);
+    Sentry.captureException(err, { tags: { context: "Facebook Graph API" }, extra: { message: "Network error" } });
     return null;
   }
 }

@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { rateLimit, getClientIp, RATE_LIMITS } from "@/lib/rate-limit";
 import { z } from "zod";
 import type { UserRole } from "@prisma/client";
+import * as Sentry from "@sentry/nextjs";
 
 const updateTenantSchema = z.object({
   status: z.enum(["ACTIVE", "DEMO", "SUSPENDED"]).optional(),
@@ -54,7 +55,7 @@ export async function GET(
 
     return NextResponse.json({ success: true, data: tenant });
   } catch (err) {
-    console.error("[Admin Tenant Detail]", err);
+    Sentry.captureException(err, { tags: { context: "Admin Tenant Detail" } });
     return NextResponse.json({ success: false, error: "Erreur interne" }, { status: 500 });
   }
 }
@@ -168,7 +169,7 @@ export async function PUT(
 
     return NextResponse.json({ success: true, data: updated });
   } catch (err) {
-    console.error("[Admin Tenant Update]", err);
+    Sentry.captureException(err, { tags: { context: "Admin Tenant Update" } });
     return NextResponse.json({ success: false, error: "Erreur interne" }, { status: 500 });
   }
 }
@@ -236,7 +237,7 @@ export async function DELETE(
 
     return NextResponse.json({ success: true, data: { deleted: true, usersCleared: tenantUsers.length } });
   } catch (err) {
-    console.error("[Admin Tenant Delete]", err);
+    Sentry.captureException(err, { tags: { context: "Admin Tenant Delete" } });
     return NextResponse.json({ success: false, error: "Erreur interne" }, { status: 500 });
   }
 }

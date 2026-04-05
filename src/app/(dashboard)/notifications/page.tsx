@@ -1,5 +1,6 @@
 "use client";
 
+import * as Sentry from "@sentry/nextjs";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { formatDistanceToNow } from "date-fns";
@@ -70,8 +71,8 @@ export default function NotificationsPage() {
           const d = json.data;
           setNotifications(Array.isArray(d) ? d : d.notifications ?? []);
         }
-      } catch {
-        console.error("Impossible de charger les notifications");
+      } catch (err) {
+        Sentry.captureException(err, { tags: { context: "Notifications page" } });
       } finally {
         setLoading(false);
       }
@@ -90,8 +91,8 @@ export default function NotificationsPage() {
           prev.map((n) => ({ ...n, isRead: true }))
         );
       }
-    } catch {
-      console.error("Impossible de marquer comme lu");
+    } catch (err) {
+      Sentry.captureException(err, { tags: { context: "Notifications markAllAsRead" } });
     } finally {
       setMarkingRead(false);
     }

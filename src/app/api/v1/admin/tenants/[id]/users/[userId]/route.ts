@@ -3,6 +3,7 @@ import { currentUser, clerkClient } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
 import { rateLimit, getClientIp, RATE_LIMITS } from "@/lib/rate-limit";
 import type { UserRole } from "@prisma/client";
+import * as Sentry from "@sentry/nextjs";
 
 /**
  * PATCH /api/v1/admin/tenants/[id]/users/[userId]
@@ -86,7 +87,7 @@ export async function PATCH(
 
     return NextResponse.json({ success: true, data: updated });
   } catch (err) {
-    console.error("[Admin User PATCH]", err);
+    Sentry.captureException(err, { tags: { context: "Admin User PATCH" } });
     return NextResponse.json({ success: false, error: "Erreur interne" }, { status: 500 });
   }
 }
@@ -146,7 +147,7 @@ export async function DELETE(
 
     return NextResponse.json({ success: true, data: { deleted: true } });
   } catch (err) {
-    console.error("[Admin User DELETE]", err);
+    Sentry.captureException(err, { tags: { context: "Admin User DELETE" } });
     return NextResponse.json({ success: false, error: "Erreur interne" }, { status: 500 });
   }
 }

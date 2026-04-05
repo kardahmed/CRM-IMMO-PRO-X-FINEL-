@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { rateLimit, getClientIp, RATE_LIMITS } from "@/lib/rate-limit";
+import * as Sentry from "@sentry/nextjs";
 
 const DEMO_DURATION_DAYS = 14;
 
@@ -139,7 +140,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       },
     });
   } catch (err) {
-    console.error("[Demo Request API]", err);
+    Sentry.captureException(err, { tags: { context: "Demo Request API" } });
     return NextResponse.json(
       { success: false, error: "Erreur interne" },
       { status: 500 },

@@ -5,6 +5,7 @@ import { receiveMessage } from "@/services/whatsapp.service";
 import type { IIncomingWhatsApp } from "@/services/whatsapp.service";
 import { verifyMetaSignature } from "@/lib/webhook-signature";
 import { rateLimit, getClientIp, RATE_LIMITS } from "@/lib/rate-limit";
+import * as Sentry from "@sentry/nextjs";
 
 /**
  * GET /api/v1/webhooks/whatsapp
@@ -52,12 +53,12 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     // Verify Meta signature (HMAC-SHA256) — MANDATORY
     const appSecret = process.env.FACEBOOK_APP_SECRET;
     if (!appSecret) {
-      console.error("[WhatsApp Webhook] FACEBOOK_APP_SECRET not configured");
+      Sentry.captureMessage("FACEBOOK_APP_SECRET not configured", { level: "error", tags: { context: "WhatsApp Webhook" } });
       return NextResponse.json({ error: "Webhook not configured" }, { status: 500 });
     }
     const signature = req.headers.get("x-hub-signature-256");
     if (!verifyMetaSignature(rawBody, signature, appSecret)) {
-      console.warn("[WhatsApp Webhook] Invalid signature");
+      Sentry.captureMessage("[WhatsApp Webhook] Invalid signature", "warning");
       return NextResponse.json({ error: "Invalid signature" }, { status: 403 });
     }
 
@@ -80,9 +81,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
         // Identifier le tenant par phone_number_id dans les settings
         const tenant = await findTenantByPhoneId(metadata.phone_number_id);
         if (!tenant) {
-          console.warn(
-            `[WhatsApp Webhook] No tenant found for phone_number_id: ${metadata.phone_number_id}`,
-          );
+          Sentry.captureMessage(`[WhatsApp Webhook] No tenant found for phone_number_id: ${metadata.phone_number_id}`, "warning");
           continue;
         }
 
@@ -104,7 +103,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
     return NextResponse.json({ status: "ok" }, { status: 200 });
   } catch (err) {
-    console.error("[WhatsApp Webhook Error]", err);
+    Sentry.captureException(err, { tags: { context: "WhatsApp Webhook" } });
     // Toujours retourner 200 pour éviter les retries de Meta
     return NextResponse.json({ status: "error" }, { status: 200 });
   }
