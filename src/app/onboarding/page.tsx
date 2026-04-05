@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { createWorkspace } from "./actions";
 import {
+  ArrowRight,
   Building2,
   Home,
   Loader2,
@@ -28,6 +29,7 @@ import { useSupabaseAuth } from "@/hooks/useSupabaseAuth";
 import { createSupabaseBrowserClient } from "@/lib/supabase-browser";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 
 const STEPS = [
   { label: "Bienvenue", icon: Sparkles },
@@ -215,52 +217,48 @@ export default function OnboardingPage() {
   };
 
   const inputClass =
-    "w-full px-4 py-3 rounded-xl bg-black/50 border border-white/10 text-white placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all disabled:opacity-50";
+    "w-full px-5 py-3.5 rounded-2xl bg-accent/20 border border-border text-foreground placeholder:text-muted-foreground/40 outline-none transition-all focus:border-primary focus:ring-4 focus:ring-primary/10 font-medium";
 
   const selectClass =
-    "w-full px-4 py-3 rounded-xl bg-black/50 border border-white/10 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all disabled:opacity-50 appearance-none";
+    "w-full px-5 py-3.5 rounded-2xl bg-accent/20 border border-border text-foreground outline-none transition-all focus:border-primary focus:ring-4 focus:ring-primary/10 font-medium appearance-none cursor-pointer";
 
-  const labelClass = "text-sm font-medium text-zinc-300";
+  const labelClass = "px-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60";
 
   const renderStepContent = () => {
     switch (currentStep) {
       // ────────── Step 1: Bienvenue ──────────
       case 0:
         return (
-          <div className="text-center space-y-6">
-            <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-gradient-to-br from-blue-500 to-violet-600 shadow-lg shadow-violet-500/25">
-              <Rocket className="w-10 h-10 text-white" />
+          <div className="text-center space-y-8 py-4">
+            <div className="inline-flex items-center justify-center w-24 h-24 rounded-[32px] bg-primary/5 border border-primary/10 shadow-stripe transition-transform hover:scale-105 duration-700">
+              <Rocket className="w-12 h-12 text-primary" />
             </div>
-            <div>
-              <h2 className="text-2xl font-bold text-white mb-3">
+            <div className="space-y-3">
+              <h2 className="text-3xl font-black text-foreground italic uppercase tracking-tight">
                 Bienvenue sur IMMO PRO-X
               </h2>
-              <p className="text-zinc-400 leading-relaxed max-w-sm mx-auto">
-                Le CRM immobilier tout-en-un pour gerer vos clients, biens,
-                transactions et equipes. Configurez votre espace en quelques
-                etapes.
+              <p className="text-muted-foreground leading-relaxed max-w-sm mx-auto font-medium">
+                Le moteur de conversion immobilier tout-en-un. Configurez votre espace en quelques secondes.
               </p>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
-              <div className="p-3 rounded-xl bg-white/5 border border-white/10 text-center">
-                <Users className="h-5 w-5 text-blue-400 mx-auto mb-1.5" />
-                <p className="text-xs text-zinc-400">Gestion clients</p>
-              </div>
-              <div className="p-3 rounded-xl bg-white/5 border border-white/10 text-center">
-                <Home className="h-5 w-5 text-violet-400 mx-auto mb-1.5" />
-                <p className="text-xs text-zinc-400">Portefeuille biens</p>
-              </div>
-              <div className="p-3 rounded-xl bg-white/5 border border-white/10 text-center">
-                <KeyRound className="h-5 w-5 text-amber-400 mx-auto mb-1.5" />
-                <p className="text-xs text-zinc-400">Pipeline de vente</p>
-              </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-4">
+              {[
+                { icon: Users, label: "Gestion Clients", color: "text-primary" },
+                { icon: Home, label: "Portefeuille Biens", color: "text-primary" },
+                { icon: KeyRound, label: "Pipeline Vente", color: "text-primary" },
+              ].map((item, i) => (
+                <div key={i} className="p-4 rounded-2xl bg-accent/10 border border-border/50 text-center space-y-2 group hover:bg-primary/5 transition-colors duration-500">
+                  <item.icon className={cn("h-5 w-5 mx-auto transition-transform group-hover:scale-110 duration-500", item.color)} />
+                  <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest leading-tight">{item.label}</p>
+                </div>
+              ))}
             </div>
             <button
               onClick={goNext}
-              className="w-full py-3 px-4 rounded-xl font-medium text-white bg-gradient-to-r from-blue-600 to-violet-600 hover:from-blue-500 hover:to-violet-500 focus:ring-2 focus:ring-blue-500/50 focus:outline-none transition-all shadow-[0_0_20px_rgba(79,70,229,0.3)] hover:shadow-[0_0_25px_rgba(79,70,229,0.5)] active:scale-[0.98] flex items-center justify-center gap-2"
+              className="w-full h-16 rounded-full bg-primary text-white font-black text-lg uppercase tracking-widest shadow-stripe-lg hover:opacity-90 transition-all flex items-center justify-center gap-2 group"
             >
-              Commencer
-              <ChevronRight className="w-4 h-4" />
+              C&apos;est parti
+              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </button>
           </div>
         );
@@ -268,14 +266,12 @@ export default function OnboardingPage() {
       // ────────── Step 2: Configurer le workspace ──────────
       case 1:
         return (
-          <div className="space-y-5">
-            <div className="text-center mb-2">
-              <h2 className="text-xl font-bold text-white mb-1">
-                Configurer votre workspace
+          <div className="space-y-6">
+            <div className="text-center space-y-2">
+              <h2 className="text-2xl font-black text-foreground italic uppercase tracking-tight">
+                Configuration
               </h2>
-              <p className="text-sm text-zinc-400">
-                Les informations de votre entreprise
-              </p>
+              <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.2em]">Votre environnement de travail</p>
             </div>
 
             {error && (
@@ -287,32 +283,33 @@ export default function OnboardingPage() {
 
             <div className="space-y-2">
               <label className={labelClass}>
-                Nom de l&apos;entreprise <span className="text-red-400">*</span>
+                Dénomination Sociale <span className="text-primary">*</span>
               </label>
-              <div className="relative">
-                <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+              <div className="relative group">
+                <Building2 className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/40 group-focus-within:text-primary transition-colors" />
                 <input
                   type="text"
                   value={workspaceName}
                   onChange={(e) => setWorkspaceName(e.target.value)}
-                  placeholder="Ex: Immobiliere Riviera"
+                  placeholder="Ex: Immobilière Riviera"
                   disabled={isPending}
-                  className={inputClass + " pl-10"}
+                  className={inputClass + " pl-11"}
                 />
               </div>
             </div>
 
             <div className="space-y-3">
               <label className={labelClass}>
-                Type d&apos;activite <span className="text-red-400">*</span>
+                Type d&apos;activité <span className="text-primary">*</span>
               </label>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <label
-                  className={`relative flex flex-col items-center justify-center gap-2 p-4 rounded-xl border cursor-pointer hover:bg-white/5 transition-all group ${
+                  className={cn(
+                    "relative flex flex-col items-center justify-center gap-3 p-6 rounded-[24px] border-2 cursor-pointer transition-all duration-500 group",
                     workspaceType === "AGENCY"
-                      ? "border-blue-500 bg-blue-500/10"
-                      : "border-white/10 bg-black/50"
-                  }`}
+                      ? "border-primary bg-primary/5 shadow-stripe"
+                      : "border-border bg-accent/5 hover:border-primary/20"
+                  )}
                 >
                   <input
                     type="radio"
@@ -323,26 +320,19 @@ export default function OnboardingPage() {
                     className="sr-only"
                     disabled={isPending}
                   />
-                  <Home
-                    className={`w-6 h-6 transition-colors ${
-                      workspaceType === "AGENCY" ? "text-blue-500" : "text-zinc-400 group-hover:text-white"
-                    }`}
-                  />
-                  <span
-                    className={`text-sm font-medium ${
-                      workspaceType === "AGENCY" ? "text-white" : "text-zinc-300"
-                    }`}
-                  >
-                    Agence
-                  </span>
+                  <div className={cn("p-2 rounded-xl transition-transform group-hover:scale-110 duration-500", workspaceType === "AGENCY" ? "bg-primary/10" : "bg-accent/10")}>
+                    <Home className={cn("w-6 h-6", workspaceType === "AGENCY" ? "text-primary" : "text-muted-foreground/40")} />
+                  </div>
+                  <span className="text-[10px] font-bold uppercase tracking-[0.2em]">Agence</span>
                 </label>
 
                 <label
-                  className={`relative flex flex-col items-center justify-center gap-2 p-4 rounded-xl border cursor-pointer hover:bg-white/5 transition-all group ${
+                  className={cn(
+                    "relative flex flex-col items-center justify-center gap-3 p-6 rounded-[24px] border-2 cursor-pointer transition-all duration-500 group",
                     workspaceType === "PROMOTION"
-                      ? "border-violet-500 bg-violet-500/10"
-                      : "border-white/10 bg-black/50"
-                  }`}
+                      ? "border-primary bg-primary/5 shadow-stripe"
+                      : "border-border bg-accent/5 hover:border-primary/20"
+                  )}
                 >
                   <input
                     type="radio"
@@ -353,18 +343,10 @@ export default function OnboardingPage() {
                     className="sr-only"
                     disabled={isPending}
                   />
-                  <Building2
-                    className={`w-6 h-6 transition-colors ${
-                      workspaceType === "PROMOTION" ? "text-violet-500" : "text-zinc-400 group-hover:text-white"
-                    }`}
-                  />
-                  <span
-                    className={`text-sm font-medium ${
-                      workspaceType === "PROMOTION" ? "text-white" : "text-zinc-300"
-                    }`}
-                  >
-                    Promotion
-                  </span>
+                  <div className={cn("p-2 rounded-xl transition-transform group-hover:scale-110 duration-500", workspaceType === "PROMOTION" ? "bg-primary/10" : "bg-accent/10")}>
+                    <Building2 className={cn("w-6 h-6", workspaceType === "PROMOTION" ? "text-primary" : "text-muted-foreground/40")} />
+                  </div>
+                  <span className="text-[10px] font-bold uppercase tracking-[0.2em]">Promotion</span>
                 </label>
               </div>
             </div>
@@ -399,11 +381,11 @@ export default function OnboardingPage() {
               </div>
             </div>
 
-            <div className="flex gap-3 pt-2">
+            <div className="flex gap-4 pt-4">
               <button
                 onClick={goPrev}
                 disabled={isPending}
-                className="px-4 py-3 rounded-xl font-medium text-zinc-400 bg-white/5 border border-white/10 hover:bg-white/10 hover:text-white transition-all disabled:opacity-50 flex items-center gap-1"
+                className="h-14 px-6 rounded-full font-bold text-muted-foreground uppercase tracking-widest bg-accent/20 border border-border hover:bg-accent/40 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
               >
                 <ChevronLeft className="w-4 h-4" />
                 Retour
@@ -411,17 +393,14 @@ export default function OnboardingPage() {
               <button
                 onClick={handleCreateWorkspace}
                 disabled={isPending}
-                className="flex-1 py-3 px-4 rounded-xl font-medium text-white bg-gradient-to-r from-blue-600 to-violet-600 hover:from-blue-500 hover:to-violet-500 focus:ring-2 focus:ring-blue-500/50 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-[0_0_20px_rgba(79,70,229,0.3)] hover:shadow-[0_0_25px_rgba(79,70,229,0.5)] active:scale-[0.98] flex items-center justify-center gap-2"
+                className="flex-1 h-14 rounded-full bg-primary text-white font-black text-sm uppercase tracking-widest shadow-stripe hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2 group"
               >
                 {isPending ? (
-                  <>
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    Creation en cours...
-                  </>
+                  <Loader2 className="h-5 w-5 animate-spin" />
                 ) : (
                   <>
                     Suivant
-                    <ChevronRight className="w-4 h-4" />
+                    <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                   </>
                 )}
               </button>
@@ -757,14 +736,13 @@ export default function OnboardingPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#0a0a0a] text-white p-4">
-      <div className="relative w-full max-w-lg">
-        {/* Background glow effects */}
-        <div className="absolute top-[-20%] left-[-10%] w-72 h-72 bg-blue-600/30 rounded-full blur-[100px] pointer-events-none" />
-        <div className="absolute bottom-[-20%] right-[-10%] w-72 h-72 bg-violet-600/30 rounded-full blur-[100px] pointer-events-none" />
+    <div className="min-h-screen flex items-center justify-center bg-background text-foreground p-6 relative overflow-hidden">
+      {/* Background glow effects */}
+      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/5 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-primary/5 rounded-full blur-[120px] pointer-events-none" />
 
-        <div className="relative bg-white/5 backdrop-blur-xl border border-white/10 p-8 rounded-2xl shadow-2xl overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent pointer-events-none" />
+      <div className="relative w-full max-w-xl animate-in fade-in duration-700 slide-in-from-bottom-4">
+        <div className="relative bg-card/80 backdrop-blur-xl border border-border p-10 rounded-[40px] shadow-stripe-lg overflow-hidden">
 
           {/* ── Stepper ── */}
           <div className="relative z-10 mb-8">
@@ -785,18 +763,19 @@ export default function OnboardingPage() {
                         />
                       )}
                       <div
-                        className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 transition-all duration-300 ${
+                        className={cn(
+                          "w-10 h-10 rounded-full flex items-center justify-center shrink-0 transition-all duration-500",
                           isCompleted
-                            ? "bg-blue-500 text-white shadow-lg shadow-blue-500/30"
+                            ? "bg-primary text-white shadow-stripe"
                             : isActive
-                            ? "bg-gradient-to-br from-blue-500 to-violet-600 text-white shadow-lg shadow-violet-500/30 ring-2 ring-blue-400/30"
-                            : "bg-white/5 text-zinc-600 border border-white/10"
-                        }`}
+                            ? "bg-primary/10 border border-primary text-primary shadow-lg ring-4 ring-primary/10"
+                            : "bg-accent/5 text-muted-foreground/40 border border-border"
+                        )}
                       >
                         {isCompleted ? (
-                          <Check className="w-4 h-4" />
+                          <Check className="w-5 h-5" />
                         ) : (
-                          <StepIcon className="w-4 h-4" />
+                          <StepIcon className="w-5 h-5" />
                         )}
                       </div>
                       {i < STEPS.length - 1 && (

@@ -9,6 +9,7 @@ interface ISimulationState {
   workspaceType: WorkspaceType | null;
   role: UserRole | null;
   plan: PlanType | null;
+  demoBypass: boolean;
 }
 
 interface ISimulationContext extends ISimulationState {
@@ -22,6 +23,7 @@ const COOKIE_NAMES = {
   ROLE: "x-sim-role",
   PLAN: "x-sim-plan",
   ACTIVE: "x-sim-active",
+  BYPASS: "x-sim-bypass",
 };
 
 const SimulationContext = createContext<ISimulationContext | undefined>(undefined);
@@ -52,6 +54,7 @@ export function SimulationProvider({ children }: { children: React.ReactNode }) 
     workspaceType: null,
     role: null,
     plan: null,
+    demoBypass: false,
   });
 
   // Load from cookies on mount
@@ -64,6 +67,7 @@ export function SimulationProvider({ children }: { children: React.ReactNode }) 
         workspaceType: getCookie(COOKIE_NAMES.MODE) as WorkspaceType | null,
         role: getCookie(COOKIE_NAMES.ROLE) as UserRole | null,
         plan: getCookie(COOKIE_NAMES.PLAN) as PlanType | null,
+        demoBypass: getCookie(COOKIE_NAMES.BYPASS) === "true",
       });
     }
   }, []);
@@ -78,6 +82,7 @@ export function SimulationProvider({ children }: { children: React.ReactNode }) 
       if (newState.workspaceType) setCookie(COOKIE_NAMES.MODE, newState.workspaceType);
       if (newState.role) setCookie(COOKIE_NAMES.ROLE, newState.role);
       if (newState.plan) setCookie(COOKIE_NAMES.PLAN, newState.plan);
+      setCookie(COOKIE_NAMES.BYPASS, newState.demoBypass ? "true" : "false");
       
       return newState;
     });
@@ -90,6 +95,7 @@ export function SimulationProvider({ children }: { children: React.ReactNode }) 
       workspaceType: null,
       role: null,
       plan: null,
+      demoBypass: false,
     });
     
     // Clear cookies
@@ -98,6 +104,7 @@ export function SimulationProvider({ children }: { children: React.ReactNode }) 
     deleteCookie(COOKIE_NAMES.MODE);
     deleteCookie(COOKIE_NAMES.ROLE);
     deleteCookie(COOKIE_NAMES.PLAN);
+    deleteCookie(COOKIE_NAMES.BYPASS);
   }, []);
 
   return (

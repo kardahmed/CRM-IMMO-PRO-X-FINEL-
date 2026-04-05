@@ -4,6 +4,9 @@ import { useState } from "react";
 import { createSupabaseBrowserClient } from "@/lib/supabase-browser";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { Logo } from "@/components/ui/Logo";
+import { Button } from "@/components/ui/button";
+import { Loader2 } from "lucide-react";
 
 export default function SignUpPage() {
   const [firstName, setFirstName] = useState("");
@@ -55,24 +58,27 @@ export default function SignUpPage() {
   };
 
   return (
-    <div className="w-full max-w-md">
-      <div className="rounded-2xl border border-gray-800 bg-gray-900/80 px-8 py-10 shadow-2xl backdrop-blur">
+    <div className="w-full max-w-md animate-in fade-in duration-700 slide-in-from-bottom-4">
+      <div className="rounded-[32px] border border-border bg-card/80 px-8 py-10 shadow-stripe-lg backdrop-blur-xl">
         {/* Logo */}
-        <div className="mb-8 text-center">
-          <h1 className="text-3xl font-extrabold tracking-tight text-white">
-            PRO-<span className="text-indigo-500">X</span>
-          </h1>
-          <p className="mt-1 text-sm text-gray-400">CRM Immobilier</p>
+        <div className="mb-10 text-center">
+          <Logo width={40} height={40} className="justify-center mb-4" />
+          <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.3em]">
+            Propulsé par IMMO PRO-X HQ
+          </p>
         </div>
 
         {/* Title */}
-        <h2 className="mb-6 text-center text-xl font-semibold text-white">
-          Créer un compte
-        </h2>
+        <div className="mb-8 text-center space-y-1">
+          <h2 className="text-2xl font-black text-foreground italic uppercase tracking-tight">
+            Créer un compte
+          </h2>
+          <p className="text-xs text-muted-foreground font-medium">Rejoignez le réseau leader en Algérie</p>
+        </div>
 
         {/* Error */}
         {error && (
-          <div className="mb-4 rounded-lg border border-red-800 bg-red-950/50 px-4 py-3 text-sm text-red-400">
+          <div className="mb-6 rounded-2xl border border-destructive/20 bg-destructive/5 px-4 py-3 text-xs font-bold text-destructive animate-in zoom-in-95 duration-300">
             {error}
           </div>
         )}
@@ -80,10 +86,10 @@ export default function SignUpPage() {
         <form onSubmit={handleSubmit} className="space-y-5">
           {/* Name row */}
           <div className="grid grid-cols-2 gap-4">
-            <div>
+            <div className="space-y-2">
               <label
                 htmlFor="firstName"
-                className="mb-1.5 block text-sm font-medium text-gray-300"
+                className="px-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60"
               >
                 Prénom
               </label>
@@ -94,13 +100,13 @@ export default function SignUpPage() {
                 value={firstName}
                 onChange={(e) => setFirstName(e.target.value)}
                 placeholder="Jean"
-                className="w-full rounded-lg border border-gray-700 bg-gray-800 px-4 py-2.5 text-sm text-white placeholder-gray-500 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
+                className="w-full rounded-2xl border border-border bg-accent/20 px-5 py-3.5 text-sm text-foreground placeholder-muted-foreground/40 outline-none transition-all focus:border-primary focus:ring-4 focus:ring-primary/10 font-medium"
               />
             </div>
-            <div>
+            <div className="space-y-2">
               <label
                 htmlFor="lastName"
-                className="mb-1.5 block text-sm font-medium text-gray-300"
+                className="px-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60"
               >
                 Nom
               </label>
@@ -111,18 +117,18 @@ export default function SignUpPage() {
                 value={lastName}
                 onChange={(e) => setLastName(e.target.value)}
                 placeholder="Dupont"
-                className="w-full rounded-lg border border-gray-700 bg-gray-800 px-4 py-2.5 text-sm text-white placeholder-gray-500 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
+                className="w-full rounded-2xl border border-border bg-accent/20 px-5 py-3.5 text-sm text-foreground placeholder-muted-foreground/40 outline-none transition-all focus:border-primary focus:ring-4 focus:ring-primary/10 font-medium"
               />
             </div>
           </div>
 
           {/* Email */}
-          <div>
+          <div className="space-y-2">
             <label
               htmlFor="email"
-              className="mb-1.5 block text-sm font-medium text-gray-300"
+              className="px-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60"
             >
-              Adresse email
+              Adresse Email
             </label>
             <input
               id="email"
@@ -131,17 +137,17 @@ export default function SignUpPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="vous@exemple.com"
-              className="w-full rounded-lg border border-gray-700 bg-gray-800 px-4 py-2.5 text-sm text-white placeholder-gray-500 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
+              className="w-full rounded-2xl border border-border bg-accent/20 px-5 py-3.5 text-sm text-foreground placeholder-muted-foreground/40 outline-none transition-all focus:border-primary focus:ring-4 focus:ring-primary/10 font-medium"
             />
           </div>
 
           {/* Password */}
-          <div>
+          <div className="space-y-2">
             <label
               htmlFor="password"
-              className="mb-1.5 block text-sm font-medium text-gray-300"
+              className="px-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60"
             >
-              Mot de passe
+              Mot de Passe
             </label>
             <input
               id="password"
@@ -150,18 +156,18 @@ export default function SignUpPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
-              className="w-full rounded-lg border border-gray-700 bg-gray-800 px-4 py-2.5 text-sm text-white placeholder-gray-500 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
+              className="w-full rounded-2xl border border-border bg-accent/20 px-5 py-3.5 text-sm text-foreground placeholder-muted-foreground/40 outline-none transition-all focus:border-primary focus:ring-4 focus:ring-primary/10 font-medium"
             />
-            <p className="mt-1 text-xs text-gray-500">Minimum 8 caractères</p>
+            <p className="px-1 text-[10px] text-muted-foreground/40 font-medium italic">8 caractères minimum</p>
           </div>
 
           {/* Confirm password */}
-          <div>
+          <div className="space-y-2">
             <label
               htmlFor="confirmPassword"
-              className="mb-1.5 block text-sm font-medium text-gray-300"
+              className="px-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60"
             >
-              Confirmer le mot de passe
+              Confirmation
             </label>
             <input
               id="confirmPassword"
@@ -170,53 +176,36 @@ export default function SignUpPage() {
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               placeholder="••••••••"
-              className="w-full rounded-lg border border-gray-700 bg-gray-800 px-4 py-2.5 text-sm text-white placeholder-gray-500 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
+              className="w-full rounded-2xl border border-border bg-accent/20 px-5 py-3.5 text-sm text-foreground placeholder-muted-foreground/40 outline-none transition-all focus:border-primary focus:ring-4 focus:ring-primary/10 font-medium"
             />
           </div>
 
           {/* Submit */}
-          <button
+          <Button
             type="submit"
             disabled={loading}
-            className="flex w-full items-center justify-center rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60"
+            className="w-full h-14 rounded-full bg-primary text-white font-black text-sm uppercase tracking-widest shadow-stripe hover:opacity-90 transition-all gap-2"
           >
             {loading ? (
-              <svg
-                className="h-5 w-5 animate-spin text-white"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-              >
-                <circle
-                  className="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  strokeWidth="4"
-                />
-                <path
-                  className="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-                />
-              </svg>
+              <Loader2 className="h-5 w-5 animate-spin" />
             ) : (
-              "Créer un compte"
+              "Créer mon Compte"
             )}
-          </button>
+          </Button>
         </form>
 
         {/* Link to sign-in */}
-        <p className="mt-6 text-center text-sm text-gray-400">
-          Déjà un compte ?{" "}
-          <Link
-            href="/sign-in"
-            className="font-medium text-indigo-400 hover:text-indigo-300 transition"
-          >
-            Se connecter
-          </Link>
-        </p>
+        <div className="mt-8 pt-8 border-t border-border/50 text-center">
+          <p className="text-xs text-muted-foreground font-medium">
+            Déjà inscrit sur la plateforme ?{" "}
+            <Link
+              href="/sign-in"
+              className="font-bold text-primary hover:underline underline-offset-4 decoration-2 transition-all"
+            >
+              Se connecter
+            </Link>
+          </p>
+        </div>
       </div>
     </div>
   );
