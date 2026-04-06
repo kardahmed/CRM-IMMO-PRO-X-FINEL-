@@ -38,7 +38,8 @@ interface Task {
   id: string;
   title: string;
   type: string;
-  deadline: string;
+  dueAt: string | null;
+  deadline?: string;
   status: string;
 }
 
@@ -77,6 +78,11 @@ const CHANNEL_OPTIONS: Record<string, { label: string; icon: LucideIcon; color: 
     { label: "Brouillon email", icon: Mail, color: "bg-rose-500 hover:bg-rose-600 text-white" },
   ],
 };
+
+function getTaskDate(task: Task): Date {
+  const raw = task.dueAt || task.deadline;
+  return raw ? new Date(raw) : new Date();
+}
 
 export function TabTaches({ tasks, clientId }: { tasks: Task[]; clientId: string }) {
   const [execModal, setExecModal] = useState<{
@@ -179,16 +185,16 @@ export function TabTaches({ tasks, clientId }: { tasks: Task[]; clientId: string
     const bIsDone = b.status === "DONE";
     if (aIsDone !== bIsDone) return aIsDone ? 1 : -1;
 
-    const aIsOverdue = a.status !== "DONE" && isPast(new Date(a.deadline));
-    const bIsOverdue = b.status !== "DONE" && isPast(new Date(b.deadline));
+    const aIsOverdue = a.status !== "DONE" && isPast(getTaskDate(a));
+    const bIsOverdue = b.status !== "DONE" && isPast(getTaskDate(b));
     if (aIsOverdue !== bIsOverdue) return aIsOverdue ? -1 : 1;
 
-    return new Date(a.deadline).getTime() - new Date(b.deadline).getTime();
+    return getTaskDate(a).getTime() - getTaskDate(b).getTime();
   });
 
   const pendingCount = tasks.filter((t) => t.status !== "DONE").length;
   const overdueCount = tasks.filter(
-    (t) => t.status !== "DONE" && isPast(new Date(t.deadline))
+    (t) => t.status !== "DONE" && isPast(getTaskDate(t))
   ).length;
 
   return (
@@ -221,7 +227,7 @@ export function TabTaches({ tasks, clientId }: { tasks: Task[]; clientId: string
             <div className="space-y-2">
               {sortedTasks.map((task) => {
                 const isOverdue =
-                  task.status !== "DONE" && isPast(new Date(task.deadline));
+                  task.status !== "DONE" && isPast(getTaskDate(task));
                 const isDone = task.status === "DONE";
                 const TypeIcon = TYPE_ICONS[task.type] || CheckSquare;
 
@@ -270,7 +276,7 @@ export function TabTaches({ tasks, clientId }: { tasks: Task[]; clientId: string
                         <div className="flex items-center gap-2 mt-0.5">
                           <p className="text-xs text-muted-foreground flex items-center gap-1">
                             <Clock className="h-3 w-3" />
-                            {format(new Date(task.deadline), "dd MMM yyyy", {
+                            {format(getTaskDate(task), "dd MMM yyyy", {
                               locale: fr,
                             })}
                           </p>
@@ -336,7 +342,7 @@ export function TabTaches({ tasks, clientId }: { tasks: Task[]; clientId: string
                     <p>{execModal.task.title}</p>
                     <p className="text-xs font-normal text-muted-foreground mt-0.5">
                       {TYPE_LABELS[execModal.task.type] || execModal.task.type} •{" "}
-                      Échéance : {execModal.task && format(new Date(execModal.task.deadline), "dd MMMM yyyy", { locale: fr })}
+                      Échéance : {execModal.task && format(getTaskDate(execModal.task), "dd MMMM yyyy", { locale: fr })}
                     </p>
                   </div>
                 </>

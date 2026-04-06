@@ -75,16 +75,20 @@ interface ITask {
   id: string;
   title: string;
   type: string;
-  deadline: string;
+  dueAt: string | null;
+  deadline?: string;
   status: string;
 }
 
 interface IInteraction {
   id: string;
   type: string;
-  description: string;
+  direction?: string;
+  content?: string;
+  description?: string;
   createdAt: string;
-  userName: string;
+  userName?: string;
+  user?: { id: string; firstName: string; lastName: string };
 }
 
 interface IReservation {
@@ -416,7 +420,15 @@ export default function ClientDetailPage() {
           </TabsContent>
 
           <TabsContent value="historique">
-            <TabHistorique history={client.interactions || []} />
+            <TabHistorique history={(client.interactions || []).map((i: Record<string, unknown>) => ({
+              id: i.id as string,
+              type: i.type as string,
+              description: (i.content || i.description || "") as string,
+              createdAt: i.createdAt as string,
+              userName: i.user
+                ? `${(i.user as Record<string, string>).firstName || ""} ${(i.user as Record<string, string>).lastName || ""}`.trim()
+                : (i.userName as string) || "",
+            }))} />
           </TabsContent>
 
           <TabsContent value="suggestions">
