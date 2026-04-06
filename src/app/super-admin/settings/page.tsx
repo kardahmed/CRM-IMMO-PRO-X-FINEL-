@@ -7,7 +7,6 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import {
   Shield,
@@ -669,7 +668,7 @@ export default function SuperAdminSettings() {
                 </select>
               </FieldGroup>
 
-              <Separator className="my-2" />
+              <div className="border-t border-border my-2" />
 
               <div className="space-y-3">
                 <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Actions de maintenance</p>
