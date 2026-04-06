@@ -56,17 +56,17 @@ export default function SignUpPage() {
 
   return (
     <div className="w-full max-w-md">
-      <div className="rounded-2xl border border-gray-800 bg-gray-900/80 px-8 py-10 shadow-2xl backdrop-blur">
+      <div className="rounded-2xl border border-border bg-card/80 px-8 py-10 shadow-2xl backdrop-blur">
         {/* Logo */}
         <div className="mb-8 text-center">
-          <h1 className="text-3xl font-extrabold tracking-tight text-white">
+          <h1 className="text-3xl font-extrabold tracking-tight text-foreground">
             PRO-<span className="text-indigo-500">X</span>
           </h1>
-          <p className="mt-1 text-sm text-gray-400">CRM Immobilier</p>
+          <p className="mt-1 text-sm text-muted-foreground">CRM Immobilier</p>
         </div>
 
         {/* Title */}
-        <h2 className="mb-6 text-center text-xl font-semibold text-white">
+        <h2 className="mb-6 text-center text-xl font-semibold text-foreground">
           Créer un compte
         </h2>
 
@@ -83,7 +83,7 @@ export default function SignUpPage() {
             <div>
               <label
                 htmlFor="firstName"
-                className="mb-1.5 block text-sm font-medium text-gray-300"
+                className="mb-1.5 block text-sm font-medium text-muted-foreground"
               >
                 Prénom
               </label>
@@ -94,13 +94,13 @@ export default function SignUpPage() {
                 value={firstName}
                 onChange={(e) => setFirstName(e.target.value)}
                 placeholder="Jean"
-                className="w-full rounded-lg border border-gray-700 bg-gray-800 px-4 py-2.5 text-sm text-white placeholder-gray-500 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
+                className="w-full rounded-lg border border-border bg-muted px-4 py-2.5 text-sm text-foreground placeholder-muted-foreground outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
               />
             </div>
             <div>
               <label
                 htmlFor="lastName"
-                className="mb-1.5 block text-sm font-medium text-gray-300"
+                className="mb-1.5 block text-sm font-medium text-muted-foreground"
               >
                 Nom
               </label>
@@ -111,7 +111,7 @@ export default function SignUpPage() {
                 value={lastName}
                 onChange={(e) => setLastName(e.target.value)}
                 placeholder="Dupont"
-                className="w-full rounded-lg border border-gray-700 bg-gray-800 px-4 py-2.5 text-sm text-white placeholder-gray-500 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
+                className="w-full rounded-lg border border-border bg-muted px-4 py-2.5 text-sm text-foreground placeholder-muted-foreground outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
               />
             </div>
           </div>
@@ -120,7 +120,7 @@ export default function SignUpPage() {
           <div>
             <label
               htmlFor="email"
-              className="mb-1.5 block text-sm font-medium text-gray-300"
+              className="mb-1.5 block text-sm font-medium text-muted-foreground"
             >
               Adresse email
             </label>
@@ -131,7 +131,7 @@ export default function SignUpPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="vous@exemple.com"
-              className="w-full rounded-lg border border-gray-700 bg-gray-800 px-4 py-2.5 text-sm text-white placeholder-gray-500 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
+              className="w-full rounded-lg border border-border bg-muted px-4 py-2.5 text-sm text-foreground placeholder-muted-foreground outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
             />
           </div>
 
@@ -139,7 +139,7 @@ export default function SignUpPage() {
           <div>
             <label
               htmlFor="password"
-              className="mb-1.5 block text-sm font-medium text-gray-300"
+              className="mb-1.5 block text-sm font-medium text-muted-foreground"
             >
               Mot de passe
             </label>
@@ -150,16 +150,16 @@ export default function SignUpPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
-              className="w-full rounded-lg border border-gray-700 bg-gray-800 px-4 py-2.5 text-sm text-white placeholder-gray-500 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
+              className="w-full rounded-lg border border-border bg-muted px-4 py-2.5 text-sm text-foreground placeholder-muted-foreground outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
             />
-            <p className="mt-1 text-xs text-gray-500">Minimum 8 caractères</p>
+            <p className="mt-1 text-xs text-muted-foreground">Minimum 8 caractères</p>
           </div>
 
           {/* Confirm password */}
           <div>
             <label
               htmlFor="confirmPassword"
-              className="mb-1.5 block text-sm font-medium text-gray-300"
+              className="mb-1.5 block text-sm font-medium text-muted-foreground"
             >
               Confirmer le mot de passe
             </label>
@@ -170,7 +170,7 @@ export default function SignUpPage() {
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               placeholder="••••••••"
-              className="w-full rounded-lg border border-gray-700 bg-gray-800 px-4 py-2.5 text-sm text-white placeholder-gray-500 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
+              className="w-full rounded-lg border border-border bg-muted px-4 py-2.5 text-sm text-foreground placeholder-muted-foreground outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
             />
           </div>
 
@@ -178,11 +178,11 @@ export default function SignUpPage() {
           <button
             type="submit"
             disabled={loading}
-            className="flex w-full items-center justify-center rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60"
+            className="flex w-full items-center justify-center rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-primary-foreground transition hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60"
           >
             {loading ? (
               <svg
-                className="h-5 w-5 animate-spin text-white"
+                className="h-5 w-5 animate-spin text-primary-foreground"
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
                 viewBox="0 0 24 24"
@@ -208,7 +208,7 @@ export default function SignUpPage() {
         </form>
 
         {/* Link to sign-in */}
-        <p className="mt-6 text-center text-sm text-gray-400">
+        <p className="mt-6 text-center text-sm text-muted-foreground">
           Déjà un compte ?{" "}
           <Link
             href="/sign-in"

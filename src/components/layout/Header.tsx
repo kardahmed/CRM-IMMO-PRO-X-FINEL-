@@ -85,7 +85,7 @@ export function Header() {
         <div className="pl-1">
           <DropdownMenu>
             <DropdownMenuTrigger>
-              <button className="h-8 w-8 md:h-9 md:w-9 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-semibold border-2 border-primary/20 hover:border-primary/50 transition-all cursor-pointer">
+              <button aria-label="Menu utilisateur" className="h-8 w-8 md:h-9 md:w-9 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-semibold border-2 border-primary/20 hover:border-primary/50 transition-all cursor-pointer">
                 {initials}
               </button>
             </DropdownMenuTrigger>

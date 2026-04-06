@@ -39,7 +39,7 @@ const STATUS_BADGES: Record<string, { label: string; className: string }> = {
   NEW: { label: "NOUVEAU", className: "bg-rose-500/10 text-rose-400 border-none font-black uppercase text-xs animate-pulse" },
   CONTACTED: { label: "CONTACTE", className: "bg-cyan-500/10 text-cyan-400 border-none font-bold uppercase text-xs" },
   QUALIFIED: { label: "QUALIFIE", className: "bg-emerald-500/10 text-emerald-400 border-none font-bold uppercase text-xs" },
-  CLOSED: { label: "FERME", className: "bg-neutral-800 text-neutral-400 border-none font-bold uppercase text-xs" },
+  CLOSED: { label: "FERME", className: "bg-muted text-muted-foreground border-none font-bold uppercase text-xs" },
 };
 
 export default function SuperAdminDemoLeads() {
@@ -75,7 +75,7 @@ export default function SuperAdminDemoLeads() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-black text-white tracking-tight flex items-center gap-2">
+          <h1 className="text-2xl font-black text-foreground tracking-tight flex items-center gap-2">
             <Users className="h-6 w-6 text-rose-400" />
             Demandes de Demo
             {newCount > 0 && (
@@ -84,7 +84,7 @@ export default function SuperAdminDemoLeads() {
               </Badge>
             )}
           </h1>
-          <p className="text-sm text-neutral-400 mt-1">
+          <p className="text-sm text-muted-foreground mt-1">
             Toutes les demandes soumises via le formulaire /demo. Un tenant DEMO est cree automatiquement.
           </p>
         </div>
@@ -93,7 +93,7 @@ export default function SuperAdminDemoLeads() {
           size="sm"
           onClick={fetchLeads}
           disabled={loading}
-          className="border-neutral-800 text-neutral-300 hover:text-white hover:bg-neutral-900 gap-2"
+          className="border-border text-muted-foreground hover:text-foreground hover:bg-muted gap-2"
         >
           <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
           Actualiser
@@ -102,7 +102,7 @@ export default function SuperAdminDemoLeads() {
 
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <StatCard label="Total" value={leads.length} color="text-white" />
+        <StatCard label="Total" value={leads.length} color="text-foreground" />
         <StatCard label="Nouveaux" value={newCount} color="text-rose-400" />
         <StatCard label="Contactes" value={leads.filter((l) => l.status === "CONTACTED").length} color="text-cyan-400" />
         <StatCard label="Qualifies" value={leads.filter((l) => l.status === "QUALIFIED").length} color="text-emerald-400" />
@@ -111,7 +111,7 @@ export default function SuperAdminDemoLeads() {
       {/* Loading / Error / Empty */}
       {loading && leads.length === 0 && (
         <div className="flex items-center justify-center py-20">
-          <Loader2 className="h-8 w-8 animate-spin text-neutral-500" />
+          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
         </div>
       )}
 
@@ -123,7 +123,7 @@ export default function SuperAdminDemoLeads() {
       )}
 
       {!loading && !error && leads.length === 0 && (
-        <div className="text-center py-20 text-neutral-500">
+        <div className="text-center py-20 text-muted-foreground">
           <Users className="h-12 w-12 mx-auto mb-4 opacity-30" />
           <p className="font-bold">Aucune demande de demo</p>
           <p className="text-sm mt-1">Les demandes apparaitront ici lorsque des prospects rempliront le formulaire /demo</p>
@@ -138,7 +138,7 @@ export default function SuperAdminDemoLeads() {
           return (
             <Card
               key={lead.id}
-              className="bg-neutral-900/50 border-neutral-800 backdrop-blur-sm hover:border-neutral-700 transition-colors"
+              className="bg-card/50 border-border backdrop-blur-sm hover:border-border transition-colors"
             >
               <CardContent className="p-5 relative">
                 <div className="absolute top-5 right-5">
@@ -147,11 +147,11 @@ export default function SuperAdminDemoLeads() {
 
                 <div className="space-y-4">
                   <div>
-                    <h3 className="font-black text-lg text-white flex items-center gap-2">
-                      <Building className="h-4 w-4 text-neutral-500" />
+                    <h3 className="font-black text-lg text-foreground flex items-center gap-2">
+                      <Building className="h-4 w-4 text-muted-foreground" />
                       {lead.companyName}
                     </h3>
-                    <p className="text-sm text-neutral-400 font-medium">
+                    <p className="text-sm text-muted-foreground font-medium">
                       Par {lead.firstName} {lead.lastName}
                     </p>
                     <div className="flex items-center gap-2 mt-1">
@@ -166,7 +166,7 @@ export default function SuperAdminDemoLeads() {
                         {lead.companyType === "PROMOTION" ? "Promotion" : "Agence"}
                       </Badge>
                       {lead.agentCount && (
-                        <span className="text-xs text-neutral-500 flex items-center gap-1">
+                        <span className="text-xs text-muted-foreground flex items-center gap-1">
                           <UserCheck className="h-3 w-3" /> {lead.agentCount} agents
                         </span>
                       )}
@@ -174,31 +174,31 @@ export default function SuperAdminDemoLeads() {
                   </div>
 
                   <div className="space-y-1.5 text-xs">
-                    <p className="flex items-center gap-2 text-neutral-300">
-                      <Mail className="h-3 w-3 text-neutral-500" /> {lead.email}
+                    <p className="flex items-center gap-2 text-muted-foreground">
+                      <Mail className="h-3 w-3 text-muted-foreground" /> {lead.email}
                     </p>
-                    <p className="flex items-center gap-2 text-neutral-300">
-                      <Phone className="h-3 w-3 text-neutral-500" /> {lead.phone}
+                    <p className="flex items-center gap-2 text-muted-foreground">
+                      <Phone className="h-3 w-3 text-muted-foreground" /> {lead.phone}
                     </p>
                     {lead.wilaya && (
-                      <p className="flex items-center gap-2 text-neutral-300">
-                        <MapPin className="h-3 w-3 text-neutral-500" /> {lead.wilaya}
+                      <p className="flex items-center gap-2 text-muted-foreground">
+                        <MapPin className="h-3 w-3 text-muted-foreground" /> {lead.wilaya}
                       </p>
                     )}
                     {lead.message && (
-                      <p className="text-neutral-500 italic mt-2 line-clamp-2">
+                      <p className="text-muted-foreground italic mt-2 line-clamp-2">
                         &ldquo;{lead.message}&rdquo;
                       </p>
                     )}
-                    <p className="flex items-center gap-2 text-neutral-500 font-medium pt-2">
-                      <Clock className="h-3 w-3 text-neutral-600" />
+                    <p className="flex items-center gap-2 text-muted-foreground font-medium pt-2">
+                      <Clock className="h-3 w-3 text-muted-foreground" />
                       Il y a {formatDistanceToNow(new Date(lead.createdAt), { locale: fr })}
                     </p>
                   </div>
 
                   {lead.tenantId && (
-                    <div className="pt-2 border-t border-neutral-800">
-                      <p className="text-xs text-neutral-500 font-mono truncate">
+                    <div className="pt-2 border-t border-border">
+                      <p className="text-xs text-muted-foreground font-mono truncate">
                         Tenant: {lead.tenantId}
                       </p>
                     </div>
@@ -215,10 +215,10 @@ export default function SuperAdminDemoLeads() {
 
 function StatCard({ label, value, color }: { label: string; value: number; color: string }) {
   return (
-    <Card className="bg-neutral-900/50 border-neutral-800">
+    <Card className="bg-card/50 border-border">
       <CardContent className="p-4 text-center">
         <p className={`text-2xl font-black ${color}`}>{value}</p>
-        <p className="text-xs text-neutral-500 font-bold uppercase tracking-wider mt-1">{label}</p>
+        <p className="text-xs text-muted-foreground font-bold uppercase tracking-wider mt-1">{label}</p>
       </CardContent>
     </Card>
   );

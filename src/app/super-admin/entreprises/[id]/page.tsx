@@ -157,7 +157,7 @@ export default function WorkspaceDetailPanel() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <Loader2 className="h-8 w-8 animate-spin text-neutral-500" />
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
       </div>
     );
   }
@@ -166,9 +166,9 @@ export default function WorkspaceDetailPanel() {
     return (
       <div className="flex flex-col items-center justify-center h-64 gap-4">
         <AlertCircle className="h-12 w-12 text-rose-500" />
-        <p className="text-lg font-bold text-white">Workspace introuvable</p>
+        <p className="text-lg font-bold text-foreground">Workspace introuvable</p>
         <Link href="/super-admin/entreprises">
-          <Button variant="outline" className="border-neutral-800 text-white gap-2">
+          <Button variant="outline" className="border-border text-foreground gap-2">
             <ArrowLeft className="h-4 w-4" /> Retour
           </Button>
         </Link>
@@ -185,10 +185,10 @@ export default function WorkspaceDetailPanel() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-neutral-800 pb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-6">
         <div>
           <div className="flex items-center gap-3 mb-1">
-            <Link href="/super-admin/entreprises" className="text-neutral-500 hover:text-white transition-colors text-sm font-bold">
+            <Link href="/super-admin/entreprises" className="text-muted-foreground hover:text-foreground transition-colors text-sm font-bold">
               ← Retour
             </Link>
             <Badge className={`${statusColor[tenant.status] || ""} border-none font-black uppercase text-xs`}>
@@ -197,12 +197,12 @@ export default function WorkspaceDetailPanel() {
             <Badge className="bg-indigo-500/10 text-indigo-400 border-none font-black uppercase text-xs">
               {tenant.plan}
             </Badge>
-            <Badge variant="outline" className="border-neutral-700 text-neutral-400 font-bold uppercase text-xs">
+            <Badge variant="outline" className="border-border text-muted-foreground font-bold uppercase text-xs">
               {tenant.type}
             </Badge>
           </div>
-          <h1 className="text-3xl font-black text-white tracking-tight">{tenant.name}</h1>
-          <p className="text-sm text-neutral-400 mt-1">
+          <h1 className="text-3xl font-black text-foreground tracking-tight">{tenant.name}</h1>
+          <p className="text-sm text-muted-foreground mt-1">
             Cree le {format(new Date(tenant.createdAt), "dd MMMM yyyy", { locale: fr })}
             {!!tenant.settings?.demoExpiresAt && (
               <> — Demo expire le {format(new Date(tenant.settings.demoExpiresAt as string), "dd MMMM yyyy", { locale: fr })}</>
@@ -233,22 +233,22 @@ export default function WorkspaceDetailPanel() {
         {/* Left: Controls */}
         <div className="lg:col-span-2 space-y-6">
           {/* Status & Plan */}
-          <Card className="bg-neutral-900/50 border-neutral-800 backdrop-blur-sm">
+          <Card className="bg-card/50 border-border backdrop-blur-sm">
             <CardHeader>
-              <CardTitle className="text-white flex items-center gap-2 text-lg">
+              <CardTitle className="text-foreground flex items-center gap-2 text-lg">
                 <Briefcase className="h-5 w-5 text-indigo-400" />
                 Statut et Plan
               </CardTitle>
-              <CardDescription className="text-neutral-400">
+              <CardDescription className="text-muted-foreground">
                 Changez le statut pour activer l&apos;abonnement ou suspendre le workspace.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-neutral-300">Statut</label>
+                  <label className="text-sm font-bold text-muted-foreground">Statut</label>
                   <Select value={newStatus} onValueChange={(v: string | null) => setNewStatus(v || "")}>
-                    <SelectTrigger className="bg-neutral-950 border-neutral-800 text-white">
+                    <SelectTrigger className="bg-background border-border text-foreground">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -265,9 +265,9 @@ export default function WorkspaceDetailPanel() {
                   )}
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-neutral-300">Plan</label>
+                  <label className="text-sm font-bold text-muted-foreground">Plan</label>
                   <Select value={newPlan} onValueChange={(v: string | null) => setNewPlan(v || "")}>
-                    <SelectTrigger className="bg-neutral-950 border-neutral-800 text-white">
+                    <SelectTrigger className="bg-background border-border text-foreground">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -283,9 +283,9 @@ export default function WorkspaceDetailPanel() {
           </Card>
 
           {/* Users */}
-          <Card className="bg-neutral-900/50 border-neutral-800 backdrop-blur-sm">
+          <Card className="bg-card/50 border-border backdrop-blur-sm">
             <CardHeader>
-              <CardTitle className="text-white flex items-center gap-2 text-lg">
+              <CardTitle className="text-foreground flex items-center gap-2 text-lg">
                 <Users className="h-5 w-5 text-cyan-400" />
                 Utilisateurs ({tenant.users.length})
               </CardTitle>
@@ -293,13 +293,13 @@ export default function WorkspaceDetailPanel() {
             <CardContent>
               <div className="space-y-2">
                 {tenant.users.map((u) => (
-                  <div key={u.id} className="flex items-center justify-between p-3 rounded-lg bg-neutral-950 border border-neutral-800">
+                  <div key={u.id} className="flex items-center justify-between p-3 rounded-lg bg-background border border-border">
                     <div>
-                      <p className="font-bold text-white text-sm">{u.firstName} {u.lastName}</p>
-                      <p className="text-xs text-neutral-500">{u.email}</p>
+                      <p className="font-bold text-foreground text-sm">{u.firstName} {u.lastName}</p>
+                      <p className="text-xs text-muted-foreground">{u.email}</p>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Badge className={`text-xs uppercase font-bold ${u.isActive ? "bg-emerald-500/10 text-emerald-400" : "bg-neutral-800 text-neutral-500"} border-none`}>
+                      <Badge className={`text-xs uppercase font-bold ${u.isActive ? "bg-emerald-500/10 text-emerald-400" : "bg-muted text-muted-foreground"} border-none`}>
                         {u.role}
                       </Badge>
                       {u.isActive ? (
@@ -329,7 +329,7 @@ export default function WorkspaceDetailPanel() {
                   </div>
                 ))}
                 {tenant.users.length === 0 && (
-                  <p className="text-neutral-500 text-sm text-center py-4">Aucun utilisateur</p>
+                  <p className="text-muted-foreground text-sm text-center py-4">Aucun utilisateur</p>
                 )}
               </div>
             </CardContent>
@@ -338,35 +338,35 @@ export default function WorkspaceDetailPanel() {
 
         {/* Right: Stats */}
         <div className="space-y-6">
-          <Card className="bg-neutral-900/50 border-neutral-800 backdrop-blur-sm">
+          <Card className="bg-card/50 border-border backdrop-blur-sm">
             <CardHeader>
-              <CardTitle className="text-white flex items-center gap-2 text-lg">
+              <CardTitle className="text-foreground flex items-center gap-2 text-lg">
                 <Activity className="h-5 w-5 text-emerald-400" />
                 Utilisation
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="flex justify-between items-center p-3 rounded-lg bg-neutral-950 border border-neutral-800">
-                <span className="text-sm text-neutral-400">Clients</span>
-                <span className="text-lg font-black text-white">{tenant._count.clients}</span>
+              <div className="flex justify-between items-center p-3 rounded-lg bg-background border border-border">
+                <span className="text-sm text-muted-foreground">Clients</span>
+                <span className="text-lg font-black text-foreground">{tenant._count.clients}</span>
               </div>
-              <div className="flex justify-between items-center p-3 rounded-lg bg-neutral-950 border border-neutral-800">
-                <span className="text-sm text-neutral-400">Biens</span>
-                <span className="text-lg font-black text-white">{tenant._count.properties}</span>
+              <div className="flex justify-between items-center p-3 rounded-lg bg-background border border-border">
+                <span className="text-sm text-muted-foreground">Biens</span>
+                <span className="text-lg font-black text-foreground">{tenant._count.properties}</span>
               </div>
-              <div className="flex justify-between items-center p-3 rounded-lg bg-neutral-950 border border-neutral-800">
-                <span className="text-sm text-neutral-400">Projets</span>
-                <span className="text-lg font-black text-white">{tenant._count.projects}</span>
+              <div className="flex justify-between items-center p-3 rounded-lg bg-background border border-border">
+                <span className="text-sm text-muted-foreground">Projets</span>
+                <span className="text-lg font-black text-foreground">{tenant._count.projects}</span>
               </div>
-              <div className="flex justify-between items-center p-3 rounded-lg bg-neutral-950 border border-neutral-800">
-                <span className="text-sm text-neutral-400">Utilisateurs</span>
-                <span className="text-lg font-black text-white">{tenant.users.length}</span>
+              <div className="flex justify-between items-center p-3 rounded-lg bg-background border border-border">
+                <span className="text-sm text-muted-foreground">Utilisateurs</span>
+                <span className="text-lg font-black text-foreground">{tenant.users.length}</span>
               </div>
 
               {!!tenant.settings?.demoLimits && (
                 <div className="mt-4 p-3 rounded-lg bg-amber-500/5 border border-amber-500/20">
                   <p className="text-xs font-bold text-amber-400 uppercase mb-2">Limites Demo</p>
-                  <div className="space-y-1 text-xs text-neutral-400">
+                  <div className="space-y-1 text-xs text-muted-foreground">
                     <p>Max clients: {(tenant.settings.demoLimits as Record<string, number>)?.maxClients ?? "—"}</p>
                     <p>Max biens: {(tenant.settings.demoLimits as Record<string, number>)?.maxProperties ?? "—"}</p>
                     <p>Max users: {(tenant.settings.demoLimits as Record<string, number>)?.maxUsers ?? "—"}</p>
@@ -380,19 +380,19 @@ export default function WorkspaceDetailPanel() {
 
       {/* Delete Confirmation Dialog */}
       <Dialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
-        <DialogContent className="sm:max-w-md bg-neutral-900 border-neutral-800">
+        <DialogContent className="sm:max-w-md bg-card border-border">
           <DialogHeader>
-            <DialogTitle className="text-xl font-black text-white flex items-center gap-2">
+            <DialogTitle className="text-xl font-black text-foreground flex items-center gap-2">
               <Trash2 className="h-5 w-5 text-rose-500" /> Supprimer le workspace
             </DialogTitle>
-            <DialogDescription className="text-neutral-400">
-              Cette action est irreversible. Le workspace <strong className="text-white">{tenant.name}</strong> sera supprime avec toutes ses donnees (clients, biens, projets). Les comptes Clerk des {tenant.users.length} utilisateur(s) seront nettoyes.
+            <DialogDescription className="text-muted-foreground">
+              Cette action est irreversible. Le workspace <strong className="text-foreground">{tenant.name}</strong> sera supprime avec toutes ses donnees (clients, biens, projets). Les comptes Clerk des {tenant.users.length} utilisateur(s) seront nettoyes.
             </DialogDescription>
           </DialogHeader>
           <div className="flex gap-3 mt-4">
             <Button
               variant="outline"
-              className="flex-1 border-neutral-700 text-white"
+              className="flex-1 border-border text-foreground"
               onClick={() => setIsDeleteOpen(false)}
             >
               Annuler

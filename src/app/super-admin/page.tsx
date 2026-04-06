@@ -131,7 +131,7 @@ export default function SuperAdminDashboard() {
           </CardContent>
         </Card>
         
-        <Card className="bg-neutral-900 text-white border-none shadow-stripe-lg rounded-[32px] p-2 relative overflow-hidden group">
+        <Card className="bg-card text-foreground border-border shadow-stripe-lg rounded-[32px] p-2 relative overflow-hidden group">
           <div className="absolute top-0 right-0 w-48 h-48 bg-primary/20 blur-[80px] group-hover:bg-primary/30 transition-all duration-1000" />
           <CardHeader className="p-8">
             <CardTitle className="text-xl font-black italic uppercase tracking-tight flex items-center gap-3">
@@ -147,16 +147,16 @@ export default function SuperAdminDashboard() {
             ].map((plan, i) => (
               <div key={i} className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-black text-neutral-400 uppercase tracking-[0.25em]">{plan.label}</span>
+                  <span className="text-xs font-black text-muted-foreground uppercase tracking-[0.25em]">{plan.label}</span>
                   <span className="text-xl font-black tabular-nums">{plan.value}%</span>
                 </div>
-                <div className="h-2.5 w-full bg-white/5 rounded-full overflow-hidden p-0.5 border border-white/5">
+                <div className="h-2.5 w-full bg-muted rounded-full overflow-hidden p-0.5 border border-border">
                   <div className={cn("h-full rounded-full transition-all duration-1000", plan.color)} style={{ width: `${plan.value}%` }}></div>
                 </div>
               </div>
             ))}
             
-            <div className="mt-8 pt-8 border-t border-white/5 text-center">
+            <div className="mt-8 pt-8 border-t border-border text-center">
                <p className="text-xs font-bold text-primary uppercase tracking-[0.3em] animate-pulse">Tous les serveurs sont opérationnels</p>
             </div>
           </CardContent>

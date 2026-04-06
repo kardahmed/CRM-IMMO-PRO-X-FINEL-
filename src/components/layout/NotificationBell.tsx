@@ -107,6 +107,7 @@ export function NotificationBell() {
       <DropdownMenuTrigger
         render={
           <button
+            aria-label="Notifications"
             className={cn(
               buttonVariants({ variant: "ghost", size: "icon" }),
               "relative hover:bg-accent/50 outline-none"

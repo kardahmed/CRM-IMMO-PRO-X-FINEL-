@@ -274,7 +274,7 @@ export function CommandPalette() {
               placeholder="Rechercher une page ou une action..."
               className="flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground outline-none"
             />
-            <kbd className="hidden sm:inline-flex items-center gap-1 rounded-md border border-border bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
+            <kbd className="hidden sm:inline-flex items-center gap-1 rounded-md border border-border bg-muted px-1.5 py-0.5 text-xs font-medium text-muted-foreground">
               ESC
             </kbd>
           </div>
@@ -294,18 +294,18 @@ export function CommandPalette() {
           </div>
 
           {/* Footer hint */}
-          <div className="border-t border-border px-4 py-2 flex items-center gap-4 text-[11px] text-muted-foreground">
+          <div className="border-t border-border px-4 py-2 flex items-center gap-4 text-xs text-muted-foreground">
             <span className="flex items-center gap-1">
-              <kbd className="rounded border border-border bg-muted px-1 py-0.5 font-mono text-[10px]">&uarr;</kbd>
-              <kbd className="rounded border border-border bg-muted px-1 py-0.5 font-mono text-[10px]">&darr;</kbd>
+              <kbd className="rounded border border-border bg-muted px-1 py-0.5 font-mono text-xs">&uarr;</kbd>
+              <kbd className="rounded border border-border bg-muted px-1 py-0.5 font-mono text-xs">&darr;</kbd>
               naviguer
             </span>
             <span className="flex items-center gap-1">
-              <kbd className="rounded border border-border bg-muted px-1 py-0.5 font-mono text-[10px]">&crarr;</kbd>
+              <kbd className="rounded border border-border bg-muted px-1 py-0.5 font-mono text-xs">&crarr;</kbd>
               ouvrir
             </span>
             <span className="flex items-center gap-1">
-              <kbd className="rounded border border-border bg-muted px-1 py-0.5 font-mono text-[10px]">esc</kbd>
+              <kbd className="rounded border border-border bg-muted px-1 py-0.5 font-mono text-xs">esc</kbd>
               fermer
             </span>
           </div>
@@ -337,7 +337,7 @@ export function CommandPaletteHint() {
     >
       <Search className="h-3.5 w-3.5" />
       <span>Recherche rapide</span>
-      <kbd className="ml-1 inline-flex items-center gap-0.5 rounded border border-border bg-background px-1.5 py-0.5 text-[10px] font-medium font-mono">
+      <kbd className="ml-1 inline-flex items-center gap-0.5 rounded border border-border bg-background px-1.5 py-0.5 text-xs font-medium font-mono">
         <Command className="h-2.5 w-2.5" />K
       </kbd>
     </button>

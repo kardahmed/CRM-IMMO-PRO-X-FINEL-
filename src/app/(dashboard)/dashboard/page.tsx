@@ -243,7 +243,7 @@ export default function DashboardPage() {
                   <p className="text-xs font-bold text-muted-foreground uppercase tracking-[0.2em] opacity-60">{action.sub}</p>
                 </div>
               </div>
-              <PlusCircle className="h-5 w-5 text-neutral-200 group-hover:text-primary transition-colors" />
+              <PlusCircle className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
             </button>
           ))}
         </div>
@@ -314,7 +314,7 @@ export default function DashboardPage() {
       />
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
          <DailyVisits visits={data.todayVisits ?? []} />
-         <div className="p-10 rounded-[40px] bg-neutral-900 border border-neutral-800 text-white flex flex-col justify-between overflow-hidden relative shadow-stripe-lg group">
+         <div className="p-10 rounded-[40px] bg-card border border-neutral-800 text-foreground flex flex-col justify-between overflow-hidden relative shadow-stripe-lg group">
            <RefreshCw className="absolute -right-6 -bottom-6 h-48 w-48 text-white/5 group-hover:rotate-180 transition-transform duration-1000" />
            <div className="relative space-y-4">
              <div className="h-14 w-14 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center">

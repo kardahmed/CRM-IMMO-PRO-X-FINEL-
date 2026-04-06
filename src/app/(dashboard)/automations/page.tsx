@@ -292,7 +292,7 @@ export default function AutomationsPage() {
       ) : (
         <div className="space-y-16 relative">
           {/* Vertical Visual Guide Line */}
-          <div className="absolute left-[39px] top-10 bottom-0 w-[2px] bg-neutral-100/50 hidden lg:block" />
+          <div className="absolute left-[39px] top-10 bottom-0 w-[2px] bg-muted/50 hidden lg:block" />
 
           {sortedConfigs.map((config) => {
             const meta = STAGE_META[config.pipelineStage] ?? { label: config.pipelineStage, color: "bg-muted text-muted-foreground", order: 99 };
@@ -456,7 +456,7 @@ export default function AutomationsPage() {
                                   />
                                   <div className="mt-2 flex flex-wrap gap-1.5">
                                     {["{clientName}", "{agentName}", "{propertyName}", "{budget}", "{date}"].map(v => (
-                                      <span key={v} className="px-2 py-0.5 rounded-md bg-neutral-100 text-xs font-bold text-muted-foreground border border-neutral-200/50">{v}</span>
+                                      <span key={v} className="px-2 py-0.5 rounded-md bg-muted/50 text-xs font-bold text-muted-foreground border border-border/50">{v}</span>
                                     ))}
                                   </div>
                                 </div>
@@ -472,7 +472,7 @@ export default function AutomationsPage() {
                         size="lg"
                         onClick={() => handleSaveTasks(config)}
                         disabled={isSaving}
-                        className="h-14 px-10 rounded-full font-black uppercase text-xs tracking-[0.25em] bg-neutral-900 text-white shadow-stripe-lg hover:bg-neutral-800 transition-all active:scale-95 italic"
+                        className="h-14 px-10 rounded-full font-black uppercase text-xs tracking-[0.25em] bg-card text-foreground shadow-stripe-lg hover:bg-neutral-800 transition-all active:scale-95 italic"
                       >
                         {isSaving ? "Synchronisation..." : "Optimiser ce flux"}
                       </Button>

@@ -58,7 +58,7 @@ export default function SuperAdminWorkspaces() {
       PRO: "bg-cyan-500/10 text-cyan-400",
     };
     return (
-      <Badge className={`${colors[plan] || "bg-neutral-800 text-neutral-400"} border-none font-black uppercase text-xs`}>
+      <Badge className={`${colors[plan] || "bg-muted text-muted-foreground"} border-none font-black uppercase text-xs`}>
         {plan}
       </Badge>
     );
@@ -69,14 +69,14 @@ export default function SuperAdminWorkspaces() {
       case "ACTIVE": return <div className="flex items-center gap-1.5 text-xs text-emerald-400"><span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />Actif</div>;
       case "SUSPENDED": return <div className="flex items-center gap-1.5 text-xs text-rose-400"><span className="h-2 w-2 rounded-full bg-rose-500" />Suspendu</div>;
       case "DEMO": return <div className="flex items-center gap-1.5 text-xs text-amber-400"><span className="h-2 w-2 rounded-full bg-amber-500" />Demo</div>;
-      default: return <div className="text-xs text-neutral-400">{status}</div>;
+      default: return <div className="text-xs text-muted-foreground">{status}</div>;
     }
   };
 
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <Loader2 className="h-8 w-8 animate-spin text-neutral-500" />
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
       </div>
     );
   }
@@ -85,8 +85,8 @@ export default function SuperAdminWorkspaces() {
     return (
       <div className="flex flex-col items-center justify-center h-64 gap-4">
         <AlertCircle className="h-12 w-12 text-rose-500" />
-        <p className="text-lg font-bold text-white">Impossible de charger les workspaces</p>
-        <Button onClick={fetchTenants} variant="outline" className="border-neutral-800 text-white gap-2">
+        <p className="text-lg font-bold text-foreground">Impossible de charger les workspaces</p>
+        <Button onClick={fetchTenants} variant="outline" className="border-border text-foreground gap-2">
           <RefreshCw className="h-4 w-4" /> Reessayer
         </Button>
       </div>
@@ -97,19 +97,19 @@ export default function SuperAdminWorkspaces() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-black text-white tracking-tight">Workspaces ({tenants.length})</h1>
-          <p className="text-sm text-neutral-400 mt-1">Gerez tous les locataires de la plateforme IMMO PRO-X.</p>
+          <h1 className="text-2xl font-black text-foreground tracking-tight">Workspaces ({tenants.length})</h1>
+          <p className="text-sm text-muted-foreground mt-1">Gerez tous les locataires de la plateforme IMMO PRO-X.</p>
         </div>
       </div>
 
-      <Card className="bg-neutral-900/50 border-neutral-800 backdrop-blur-sm">
+      <Card className="bg-card/50 border-border backdrop-blur-sm">
         <CardContent className="p-0">
-          <div className="p-4 border-b border-neutral-800 flex items-center gap-4">
+          <div className="p-4 border-b border-border flex items-center gap-4">
             <div className="relative flex-1 max-w-md">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-500" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Rechercher une entreprise..."
-                className="pl-9 bg-neutral-950 border-neutral-800 text-white focus:border-indigo-500"
+                className="pl-9 bg-background border-border text-foreground focus:border-indigo-500"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
               />
@@ -117,42 +117,42 @@ export default function SuperAdminWorkspaces() {
           </div>
 
           <Table>
-            <TableHeader className="bg-neutral-950/50 border-b border-neutral-800">
-              <TableRow className="hover:bg-transparent border-neutral-800">
-                <TableHead className="text-neutral-400 font-bold text-xs uppercase tracking-wider">Entreprise</TableHead>
-                <TableHead className="text-neutral-400 font-bold text-xs uppercase tracking-wider">Type</TableHead>
-                <TableHead className="text-neutral-400 font-bold text-xs uppercase tracking-wider">Plan</TableHead>
-                <TableHead className="text-neutral-400 font-bold text-xs uppercase tracking-wider">Statut</TableHead>
-                <TableHead className="text-neutral-400 font-bold text-xs uppercase tracking-wider">Users</TableHead>
-                <TableHead className="text-neutral-400 font-bold text-xs uppercase tracking-wider">Clients</TableHead>
-                <TableHead className="text-neutral-400 font-bold text-xs uppercase tracking-wider">Creation</TableHead>
-                <TableHead className="text-right text-neutral-400 font-bold text-xs uppercase tracking-wider">Actions</TableHead>
+            <TableHeader className="bg-background/50 border-b border-border">
+              <TableRow className="hover:bg-transparent border-border">
+                <TableHead className="text-muted-foreground font-bold text-xs uppercase tracking-wider">Entreprise</TableHead>
+                <TableHead className="text-muted-foreground font-bold text-xs uppercase tracking-wider">Type</TableHead>
+                <TableHead className="text-muted-foreground font-bold text-xs uppercase tracking-wider">Plan</TableHead>
+                <TableHead className="text-muted-foreground font-bold text-xs uppercase tracking-wider">Statut</TableHead>
+                <TableHead className="text-muted-foreground font-bold text-xs uppercase tracking-wider">Users</TableHead>
+                <TableHead className="text-muted-foreground font-bold text-xs uppercase tracking-wider">Clients</TableHead>
+                <TableHead className="text-muted-foreground font-bold text-xs uppercase tracking-wider">Creation</TableHead>
+                <TableHead className="text-right text-muted-foreground font-bold text-xs uppercase tracking-wider">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {filtered.map((tenant) => (
-                <TableRow key={tenant.id} className="border-neutral-800 hover:bg-neutral-800/50 transition-colors">
-                  <TableCell className="font-bold text-white">
+                <TableRow key={tenant.id} className="border-border hover:bg-muted/50 transition-colors">
+                  <TableCell className="font-bold text-foreground">
                     <Link href={`/super-admin/entreprises/${tenant.id}`} className="hover:text-indigo-400 flex items-center gap-2">
                       {tenant.name}
                       <ExternalLink className="h-3 w-3 opacity-50" />
                     </Link>
                   </TableCell>
                   <TableCell>
-                    <Badge variant="outline" className="text-xs font-bold uppercase border-neutral-700 text-neutral-300">
+                    <Badge variant="outline" className="text-xs font-bold uppercase border-border text-muted-foreground">
                       {tenant.type}
                     </Badge>
                   </TableCell>
                   <TableCell>{getPlanBadge(tenant.plan)}</TableCell>
                   <TableCell>{getStatusBadge(tenant.status)}</TableCell>
-                  <TableCell className="text-neutral-300 font-medium">{tenant._count.users}</TableCell>
-                  <TableCell className="text-neutral-300 font-medium">{tenant._count.clients}</TableCell>
-                  <TableCell className="text-xs text-neutral-400">
+                  <TableCell className="text-muted-foreground font-medium">{tenant._count.users}</TableCell>
+                  <TableCell className="text-muted-foreground font-medium">{tenant._count.clients}</TableCell>
+                  <TableCell className="text-xs text-muted-foreground">
                     {format(new Date(tenant.createdAt), "dd MMM yyyy", { locale: fr })}
                   </TableCell>
                   <TableCell className="text-right">
                     <Link href={`/super-admin/entreprises/${tenant.id}`}>
-                      <Button size="icon" variant="ghost" aria-label="Voir les détails de l'entreprise" className="h-8 w-8 text-neutral-400 hover:text-indigo-400 hover:bg-indigo-500/10">
+                      <Button size="icon" variant="ghost" aria-label="Voir les détails de l'entreprise" className="h-8 w-8 text-muted-foreground hover:text-indigo-400 hover:bg-indigo-500/10">
                         <MoreHorizontal className="h-4 w-4" />
                       </Button>
                     </Link>
@@ -161,7 +161,7 @@ export default function SuperAdminWorkspaces() {
               ))}
               {filtered.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={8} className="text-center py-8 text-neutral-500">
+                  <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
                     Aucun workspace trouve
                   </TableCell>
                 </TableRow>

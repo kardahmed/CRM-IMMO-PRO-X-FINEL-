@@ -39,17 +39,17 @@ export default function SignInPage() {
 
   return (
     <div className="w-full max-w-md">
-      <div className="rounded-2xl border border-gray-800 bg-gray-900/80 px-8 py-10 shadow-2xl backdrop-blur">
+      <div className="rounded-2xl border border-border bg-card/80 px-8 py-10 shadow-2xl backdrop-blur">
         {/* Logo */}
         <div className="mb-8 text-center">
-          <h1 className="text-3xl font-extrabold tracking-tight text-white">
+          <h1 className="text-3xl font-extrabold tracking-tight text-foreground">
             PRO-<span className="text-indigo-500">X</span>
           </h1>
-          <p className="mt-1 text-sm text-gray-400">CRM Immobilier</p>
+          <p className="mt-1 text-sm text-muted-foreground">CRM Immobilier</p>
         </div>
 
         {/* Title */}
-        <h2 className="mb-6 text-center text-xl font-semibold text-white">
+        <h2 className="mb-6 text-center text-xl font-semibold text-foreground">
           Connexion
         </h2>
 
@@ -65,7 +65,7 @@ export default function SignInPage() {
           <div>
             <label
               htmlFor="email"
-              className="mb-1.5 block text-sm font-medium text-gray-300"
+              className="mb-1.5 block text-sm font-medium text-muted-foreground"
             >
               Adresse email
             </label>
@@ -76,7 +76,7 @@ export default function SignInPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="vous@exemple.com"
-              className="w-full rounded-lg border border-gray-700 bg-gray-800 px-4 py-2.5 text-sm text-white placeholder-gray-500 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
+              className="w-full rounded-lg border border-border bg-muted px-4 py-2.5 text-sm text-foreground placeholder-muted-foreground outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
             />
           </div>
 
@@ -84,7 +84,7 @@ export default function SignInPage() {
           <div>
             <label
               htmlFor="password"
-              className="mb-1.5 block text-sm font-medium text-gray-300"
+              className="mb-1.5 block text-sm font-medium text-muted-foreground"
             >
               Mot de passe
             </label>
@@ -95,7 +95,7 @@ export default function SignInPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
-              className="w-full rounded-lg border border-gray-700 bg-gray-800 px-4 py-2.5 text-sm text-white placeholder-gray-500 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
+              className="w-full rounded-lg border border-border bg-muted px-4 py-2.5 text-sm text-foreground placeholder-muted-foreground outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
             />
           </div>
 
@@ -103,11 +103,11 @@ export default function SignInPage() {
           <button
             type="submit"
             disabled={loading}
-            className="flex w-full items-center justify-center rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60"
+            className="flex w-full items-center justify-center rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-primary-foreground transition hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60"
           >
             {loading ? (
               <svg
-                className="h-5 w-5 animate-spin text-white"
+                className="h-5 w-5 animate-spin text-primary-foreground"
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
                 viewBox="0 0 24 24"
@@ -133,7 +133,7 @@ export default function SignInPage() {
         </form>
 
         {/* Link to sign-up */}
-        <p className="mt-6 text-center text-sm text-gray-400">
+        <p className="mt-6 text-center text-sm text-muted-foreground">
           Pas de compte ?{" "}
           <Link
             href="/sign-up"
