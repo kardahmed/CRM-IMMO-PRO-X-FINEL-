@@ -19,7 +19,7 @@ export async function getVisibleClients(
     search?: string;
   },
 ): Promise<Client[]> {
-  const db = createTenantPrisma(user.tenantId);
+  const db = createTenantPrisma(user.tenantId!);
 
   const where: Record<string, unknown> = {};
 
@@ -59,7 +59,7 @@ export async function getClientIfAllowed(
   user: ICurrentUser,
   clientId: string,
 ): Promise<Client | null> {
-  const db = createTenantPrisma(user.tenantId);
+  const db = createTenantPrisma(user.tenantId!);
 
   const client = await db.client.findFirst({
     where: { id: clientId },
@@ -102,7 +102,7 @@ export async function reassignClient(
     );
   }
 
-  const db = createTenantPrisma(user.tenantId);
+  const db = createTenantPrisma(user.tenantId!);
 
   // Vérifier que le client existe dans ce tenant
   const client = await db.client.findFirst({

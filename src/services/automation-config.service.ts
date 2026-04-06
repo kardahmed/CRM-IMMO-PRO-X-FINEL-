@@ -48,7 +48,7 @@ export async function upsertAutomationConfig(
   user: ICurrentUser,
   input: IUpsertAutomationConfigInput,
 ): Promise<AutomationConfig> {
-  const db = createTenantPrisma(user.tenantId);
+  const db = createTenantPrisma(user.tenantId!!);
 
   // Vérifier si une config existe déjà pour cette étape
   const existing = await db.automationConfig.findFirst({
@@ -78,7 +78,7 @@ export async function upsertAutomationConfig(
   // Log
   await db.activityLog.create({
     data: {
-      tenantId: user.tenantId,
+      tenantId: user.tenantId!,
       userId: user.userId,
       action: existing ? "AUTOMATION_CONFIG_UPDATED" : "AUTOMATION_CONFIG_CREATED",
       entity: "AutomationConfig",
@@ -103,7 +103,7 @@ export async function toggleAutomationConfig(
   stage: PipelineStage,
   isActive: boolean,
 ): Promise<AutomationConfig> {
-  const db = createTenantPrisma(user.tenantId);
+  const db = createTenantPrisma(user.tenantId!!);
 
   const existing = await db.automationConfig.findFirst({
     where: { pipelineStage: stage },
@@ -120,7 +120,7 @@ export async function toggleAutomationConfig(
 
   await db.activityLog.create({
     data: {
-      tenantId: user.tenantId,
+      tenantId: user.tenantId!,
       userId: user.userId,
       action: isActive ? "AUTOMATION_CONFIG_ENABLED" : "AUTOMATION_CONFIG_DISABLED",
       entity: "AutomationConfig",

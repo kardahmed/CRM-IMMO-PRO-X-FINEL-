@@ -61,7 +61,7 @@ export async function createClient(
   const normalizedPhone = normalizePhone(input.phone);
 
   // 1. Dedup
-  const dedup = await checkDuplicates(user.tenantId, {
+  const dedup = await checkDuplicates(user.tenantId!, {
     phone: normalizedPhone,
     email: input.email,
     firstName: input.firstName,
@@ -81,7 +81,7 @@ export async function createClient(
   }
 
   // 3. Créer le client
-  const db = createTenantPrisma(user.tenantId);
+  const db = createTenantPrisma(user.tenantId!!);
   // tenantId est auto-injecté par createTenantPrisma via $extends
   const client = await (db.client.create as unknown as (...args: unknown[]) => Promise<unknown>)({
     data: {
@@ -104,7 +104,7 @@ export async function createClient(
   // 4. Log
   await db.activityLog.create({
     data: {
-      tenantId: user.tenantId,
+      tenantId: user.tenantId!,
       userId: user.userId,
       action: "CLIENT_CREATED",
       entity: "Client",
@@ -130,7 +130,7 @@ export async function createClient(
       supervisors
         .filter((s) => s.id !== user.userId) // ne pas notifier l'auteur
         .map((s) => ({
-          tenantId: user.tenantId,
+          tenantId: user.tenantId!,
           userId: s.id,
           title: "Nouveau client",
           message: `${input.firstName} ${input.lastName} ajouté par ${user.firstName} ${user.lastName}`,
@@ -165,7 +165,7 @@ export async function reassignClient(
     );
   }
 
-  const db = createTenantPrisma(user.tenantId);
+  const db = createTenantPrisma(user.tenantId!!);
 
   // Vérifier que le client existe
   const client = await db.client.findFirst({
@@ -194,7 +194,7 @@ export async function reassignClient(
   // Log historique
   await db.activityLog.create({
     data: {
-      tenantId: user.tenantId,
+      tenantId: user.tenantId!,
       userId: user.userId,
       action: "CLIENT_REASSIGNED",
       entity: "Client",
@@ -213,7 +213,7 @@ export async function reassignClient(
 
   if (previousAgentId) {
     notifInputs.push({
-      tenantId: user.tenantId,
+      tenantId: user.tenantId!,
       userId: previousAgentId,
       title: "Client réassigné",
       message: `${client.firstName} ${client.lastName} a été réassigné à un autre agent`,
@@ -223,7 +223,7 @@ export async function reassignClient(
   }
 
   notifInputs.push({
-    tenantId: user.tenantId,
+    tenantId: user.tenantId!,
     userId: newAgentId,
     title: "Nouveau client assigné",
     message: `${client.firstName} ${client.lastName} vous a été assigné`,
@@ -249,7 +249,7 @@ export async function changeClientStage(
   clientId: string,
   newStage: PipelineStage,
 ): Promise<Client> {
-  const db = createTenantPrisma(user.tenantId);
+  const db = createTenantPrisma(user.tenantId!!);
 
   const client = await db.client.findFirst({
     where: { id: clientId },
@@ -283,7 +283,7 @@ export async function changeClientStage(
   // Log
   await db.activityLog.create({
     data: {
-      tenantId: user.tenantId,
+      tenantId: user.tenantId!,
       userId: user.userId,
       action: "CLIENT_STAGE_CHANGED",
       entity: "Client",
@@ -313,7 +313,7 @@ export async function changeClientStage(
   // Notifier l'agent assigné (s'il n'est pas l'auteur)
   if (client.assignedAgentId && client.assignedAgentId !== user.userId) {
     await createNotification({
-      tenantId: user.tenantId,
+      tenantId: user.tenantId!,
       userId: client.assignedAgentId,
       title: "Changement d'étape",
       message: `${client.firstName} ${client.lastName} → ${stageLabels[newStage] ?? newStage}`,
@@ -332,7 +332,7 @@ export async function changeClientStage(
     if (supervisors.length > 0) {
       await createNotificationBulk(
         supervisors.map((s) => ({
-          tenantId: user.tenantId,
+          tenantId: user.tenantId!,
           userId: s.id,
           title: `Pipeline : ${stageLabels[newStage] ?? newStage}`,
           message: `${client.firstName} ${client.lastName} est passé en ${stageLabels[newStage] ?? newStage}`,
@@ -344,7 +344,7 @@ export async function changeClientStage(
   }
 
   // Déclencher les automatisations configurées pour cette étape (non-bloquant)
-  triggerAutomations(user.tenantId, clientId, newStage).catch((err) => {
+  triggerAutomations(user.tenantId!, clientId, newStage).catch((err) => {
     Sentry.captureException(err, { tags: { context: "Automation trigger error" } });
   });
 

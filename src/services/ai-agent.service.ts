@@ -245,7 +245,7 @@ export async function generateMessage(
 ): Promise<IGenerateMessageResult> {
   // 1. Vérifier le plan du tenant
   const tenant = await prisma.tenant.findUnique({
-    where: { id: user.tenantId },
+    where: { id: user.tenantId! },
     select: { plan: true },
   });
   if (!tenant) {
@@ -253,11 +253,11 @@ export async function generateMessage(
   }
 
   // 2. Vérifier la limite mensuelle
-  await checkMonthlyLimit(user.tenantId, tenant.plan);
+  await checkMonthlyLimit(user.tenantId!, tenant.plan);
 
   // 3. Charger le contexte complet
   const promptContext = await loadContext(
-    user.tenantId,
+    user.tenantId!,
     input.taskId,
     input.channel,
     input.language,
@@ -292,7 +292,7 @@ export async function generateMessage(
 
   const generation = await prisma.aIGeneration.create({
     data: {
-      tenantId: user.tenantId,
+      tenantId: user.tenantId!,
       userId: user.userId,
       clientId: promptContext.clientId,
       prompt,
@@ -304,10 +304,10 @@ export async function generateMessage(
   });
 
   // 7. Log dans ActivityLog
-  const db = createTenantPrisma(user.tenantId);
+  const db = createTenantPrisma(user.tenantId!);
   await db.activityLog.create({
     data: {
-      tenantId: user.tenantId,
+      tenantId: user.tenantId!,
       userId: user.userId,
       action: "AI_MESSAGE_GENERATED",
       entity: "AIGeneration",

@@ -22,12 +22,18 @@ async function getTenantInfo(): Promise<ITenantInfo | null> {
     const userId = authUser?.id;
     if (!userId) return null;
 
+    // Super admin plateforme — pas de tenant sauf en simulation
+    const isSuperAdmin = authUser.email === "contact@sensium-x.com";
+
     // Check for simulated context (Super Admin only)
     const sim = await getSimulatedContext();
     let tenantIdToFetch: string | null = null;
 
     if (sim.isSimulating && sim.tenantId) {
       tenantIdToFetch = sim.tenantId;
+    } else if (isSuperAdmin) {
+      // Super admin sans simulation — pas de tenant à charger
+      return null;
     } else {
       const dbUser = await prisma.user.findFirst({
         where: { supabaseId: userId, isActive: true },

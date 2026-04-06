@@ -78,7 +78,7 @@ async function logApiAccess(
 
   await prisma.activityLog.create({
     data: {
-      tenantId: user.tenantId,
+      tenantId: user.tenantId!,
       userId: user.userId,
       action: `API_${method}`,
       entity: "API",

@@ -47,7 +47,7 @@ export async function canAccessClient(clientId: string): Promise<boolean> {
   const client = await prisma.client.findFirst({
     where: {
       id: clientId,
-      tenantId: user.tenantId,
+      tenantId: user.tenantId!,
     },
     select: {
       assignedAgentId: true,

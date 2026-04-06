@@ -29,12 +29,11 @@ export default function SuperAdminLayout({
 }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { role, isLoaded, user, email } = useSupabaseAuth();
+  const { isLoaded, user, isSuperAdmin } = useSupabaseAuth();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-  // Guard: seul SUPER_ADMIN ou ADMIN (ou bypass email) peut accéder
-  const isSuperAdminEmail = email === "contact@sensium-x.com";
-  const isAllowed = role === "SUPER_ADMIN" || role === "ADMIN" || isSuperAdminEmail;
+  // Guard: seul le super admin plateforme peut accéder
+  const isAllowed = isSuperAdmin;
 
   useEffect(() => {
     if (isLoaded && !isAllowed) {

@@ -98,13 +98,28 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(signInUrl);
   }
 
-  // Super admin — skip onboarding entirely
-  if (isOnboardingRoute(pathname) && user.email === "contact@sensium-x.com") {
-    return NextResponse.redirect(new URL("/super-admin", req.url));
+  // Super Admin plateforme — propriétaire, pas de tenant
+  const isSuperAdmin = user.email === "contact@sensium-x.com";
+
+  if (isSuperAdmin) {
+    // Super admin ne passe jamais par l'onboarding
+    if (isOnboardingRoute(pathname)) {
+      return NextResponse.redirect(new URL("/super-admin", req.url));
+    }
+    // Super admin accédant au dashboard sans simulation → rediriger vers /super-admin
+    if (isDashboardRoute(pathname)) {
+      const simTenantId = user.user_metadata?.simulatedTenantId as string | undefined;
+      if (!simTenantId) {
+        return NextResponse.redirect(new URL("/super-admin", req.url));
+      }
+    }
+    // /super-admin et API → toujours autorisé
+    return supabaseResponse;
   }
 
+  // --- Utilisateurs normaux (tenants) ---
+
   // Onboarding — redirect to dashboard if user already has a tenant
-  // (We check user_metadata for tenantId set during workspace creation)
   if (isOnboardingRoute(pathname)) {
     const tenantId = user.user_metadata?.tenantId as string | undefined;
     if (tenantId) {
@@ -113,14 +128,15 @@ export async function middleware(req: NextRequest) {
     return supabaseResponse;
   }
 
-  // Super admin bypass — never redirect to onboarding
-  const isSuperAdmin = user.email === "contact@sensium-x.com";
-
-  // Dashboard & Super Admin — require tenant (except super admin)
+  // Dashboard & routes protégées — require tenant
   if (isDashboardRoute(pathname) || isSuperAdminRoute(pathname)) {
     const tenantId = user.user_metadata?.tenantId as string | undefined;
-    if (!tenantId && !isSuperAdminRoute(pathname) && !isSuperAdmin) {
+    if (!tenantId) {
       return NextResponse.redirect(new URL("/onboarding", req.url));
+    }
+    // Utilisateurs normaux ne peuvent pas accéder à /super-admin
+    if (isSuperAdminRoute(pathname)) {
+      return NextResponse.redirect(new URL("/dashboard", req.url));
     }
     return supabaseResponse;
   }

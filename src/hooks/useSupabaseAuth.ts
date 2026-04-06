@@ -74,12 +74,12 @@ export function useSupabaseAuth() {
     session: state.session,
     isLoaded: state.isLoaded,
     signOut,
-    // Convenience accessors matching what Clerk publicMetadata provided
-    // Override with simulation if Super Admin and simulation is active
-    tenantId: (isSuperAdmin && isSimulating) ? simTenantId : (metadata.tenantId ?? null),
-    role: (isSuperAdmin && isSimulating) ? simRole : (metadata.role ?? null),
-    workspaceType: (isSuperAdmin && isSimulating) ? simWorkspaceType : (metadata.workspaceType ?? null),
-    plan: (isSuperAdmin && isSimulating) ? simPlan : (metadata.plan ?? null),
+    // Super Admin = propriétaire plateforme, pas de tenant, rôle SUPER_ADMIN
+    // Simulation: override avec le contexte simulé
+    tenantId: (isSuperAdmin && isSimulating) ? simTenantId : (isSuperAdmin ? null : (metadata.tenantId ?? null)),
+    role: (isSuperAdmin && isSimulating) ? simRole : (isSuperAdmin ? "SUPER_ADMIN" : (metadata.role ?? null)),
+    workspaceType: (isSuperAdmin && isSimulating) ? simWorkspaceType : (isSuperAdmin ? null : (metadata.workspaceType ?? null)),
+    plan: (isSuperAdmin && isSimulating) ? simPlan : (isSuperAdmin ? null : (metadata.plan ?? null)),
     tenantName: metadata.tenantName ?? null,
     dbUserId: metadata.dbUserId ?? null,
     firstName: metadata.firstName ?? state.user?.user_metadata?.firstName ?? null,

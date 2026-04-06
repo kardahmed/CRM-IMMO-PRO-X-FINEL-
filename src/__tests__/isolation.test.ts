@@ -296,6 +296,7 @@ describe("Agent Isolation Logic", () => {
       firstName: "Agent",
       lastName: "Test",
       email: "agent@test.com",
+      isSuperAdmin: false,
     };
 
     await expect(
@@ -314,6 +315,7 @@ describe("Agent Isolation Logic", () => {
       firstName: "Assistant",
       lastName: "Test",
       email: "assistant@test.com",
+      isSuperAdmin: false,
     };
 
     await expect(
@@ -332,6 +334,7 @@ describe("Agent Isolation Logic", () => {
       firstName: "Assistant",
       lastName: "Test",
       email: "assistant@test.com",
+      isSuperAdmin: false,
     };
 
     expect(canModifyClient(assistantUser)).toBe(false);
@@ -348,6 +351,7 @@ describe("Agent Isolation Logic", () => {
       firstName: "CEO",
       lastName: "Test",
       email: "ceo@test.com",
+      isSuperAdmin: false,
     };
 
     expect(canModifyClient(ceoUser)).toBe(true);

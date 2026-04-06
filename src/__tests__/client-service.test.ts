@@ -93,6 +93,7 @@ function makeUser(overrides: Partial<ICurrentUser> = {}): ICurrentUser {
     firstName: "Ali",
     lastName: "Agent",
     email: "ali@test.com",
+    isSuperAdmin: false,
     ...overrides,
   };
 }

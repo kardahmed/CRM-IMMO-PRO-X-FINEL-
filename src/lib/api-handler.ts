@@ -5,6 +5,7 @@ import type { ModuleId } from "@/lib/modules";
 import type { PermissionAction } from "@/lib/permissions-matrix";
 import { hasPermission } from "@/lib/permissions-matrix";
 import { getCurrentUser, type ICurrentUser } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
 import { createTenantPrisma, type TenantPrismaClient } from "@/lib/prisma-tenant";
 import { rateLimit, getClientIp, RATE_LIMITS } from "@/lib/rate-limit";
 
@@ -78,12 +79,13 @@ export function apiHandler(options: IApiHandlerOptions, handler: ApiHandlerFn) {
         return jsonError("Non authentifié", 401);
       }
 
-      if (!user.tenantId) {
+      // Super Admin plateforme — accès total, pas de tenant requis
+      if (!user.isSuperAdmin && !user.tenantId) {
         return jsonError("Aucun tenant associé", 403);
       }
 
-      // 2. Permission
-      if (options.module && options.action) {
+      // 2. Permission (Super Admin a accès à tout)
+      if (options.module && options.action && !user.isSuperAdmin) {
         if (!hasPermission(user.role, options.module, options.action)) {
           return jsonError(
             `Permission refusée : ${options.action} sur ${options.module}`,
@@ -111,10 +113,14 @@ export function apiHandler(options: IApiHandlerOptions, handler: ApiHandlerFn) {
       }
 
       // 4. Build context
-      const db = createTenantPrisma(user.tenantId);
+      // Super admin sans tenant → client Prisma global (cast pour compatibilité de type)
+      const tenantId = user.tenantId ?? "";
+      const db = tenantId
+        ? createTenantPrisma(tenantId)
+        : (prisma as unknown as TenantPrismaClient);
       const params = context?.params ? await context.params : {};
 
-      const ctx: IApiContext = { req, user, tenantId: user.tenantId, db, params };
+      const ctx: IApiContext = { req, user, tenantId, db, params };
 
       // 5. Execute handler
       return await handler(ctx);

@@ -66,6 +66,7 @@ function makeUser(): ICurrentUser {
     firstName: "CEO",
     lastName: "Test",
     email: "ceo@test.com",
+    isSuperAdmin: false,
   };
 }
 
