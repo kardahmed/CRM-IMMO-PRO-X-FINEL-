@@ -114,8 +114,8 @@ export default function DemoExpiredPage() {
           </div>
 
           {/* Contact */}
-          <div className="bg-indigo-500/10 border border-indigo-500/20 rounded-xl p-4 mb-6">
-            <p className="text-sm font-bold text-indigo-300 mb-1">Contactez-nous pour activer votre plan</p>
+          <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-4 mb-6">
+            <p className="text-sm font-bold text-emerald-300 mb-1">Contactez-nous pour activer votre plan</p>
             <p className="text-xs text-zinc-500 mb-3">
               {selectedPlan
                 ? `Vous avez selectionne le plan ${PLANS.find((p) => p.id === selectedPlan)?.name}. Contactez-nous pour finaliser.`
@@ -144,7 +144,7 @@ export default function DemoExpiredPage() {
           <div className="flex flex-col gap-3">
             <Link
               href="/"
-              className="w-full py-3 px-4 rounded-xl font-medium text-white bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-center text-sm transition-all"
+              className="w-full py-3 px-4 rounded-xl font-medium text-white bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-center text-sm transition-all"
             >
               Retour a l&apos;accueil
             </Link>

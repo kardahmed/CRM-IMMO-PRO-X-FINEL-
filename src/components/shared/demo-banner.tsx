@@ -74,7 +74,7 @@ export function DemoBanner({ expiresAt }: DemoBannerProps) {
         className={`flex items-center justify-between gap-4 px-4 py-2.5 text-sm font-medium ${
           isExpiring
             ? "bg-amber-500/10 border-b border-amber-500/20 text-amber-300"
-            : "bg-indigo-500/10 border-b border-indigo-500/20 text-indigo-300"
+            : "bg-emerald-500/10 border-b border-emerald-500/20 text-emerald-300"
         }`}
       >
         <div className="flex items-center gap-2 min-w-0">
@@ -103,7 +103,7 @@ export function DemoBanner({ expiresAt }: DemoBannerProps) {
           className={`h-7 text-xs font-bold rounded-full px-3 gap-1 shrink-0 ${
             isExpiring
               ? "bg-amber-500 hover:bg-amber-600 text-black"
-              : "bg-indigo-600 hover:bg-indigo-700 text-white"
+              : "bg-primary hover:bg-primary/90 text-white"
           }`}
         >
           Passer au Pro <ArrowRight className="h-3 w-3" />

@@ -348,7 +348,7 @@ export default function SuperAdminWorkspaces() {
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Rechercher une entreprise..."
-                className="pl-9 bg-background border-border text-foreground focus:border-indigo-500"
+                className="pl-9 bg-background border-border text-foreground focus:border-primary"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
               />
@@ -372,7 +372,7 @@ export default function SuperAdminWorkspaces() {
               {filtered.map((tenant) => (
                 <TableRow key={tenant.id} className="border-border hover:bg-muted/50 transition-colors">
                   <TableCell className="font-bold text-foreground">
-                    <Link href={`/super-admin/entreprises/${tenant.id}`} className="hover:text-indigo-400 flex items-center gap-2">
+                    <Link href={`/super-admin/entreprises/${tenant.id}`} className="hover:text-primary flex items-center gap-2">
                       {tenant.name}
                       <ExternalLink className="h-3 w-3 opacity-50" />
                     </Link>
@@ -391,7 +391,7 @@ export default function SuperAdminWorkspaces() {
                   </TableCell>
                   <TableCell className="text-right">
                     <Link href={`/super-admin/entreprises/${tenant.id}`}>
-                      <Button size="icon" variant="ghost" aria-label="Voir les détails de l'entreprise" className="h-8 w-8 text-muted-foreground hover:text-indigo-400 hover:bg-indigo-500/10">
+                      <Button size="icon" variant="ghost" aria-label="Voir les détails de l'entreprise" className="h-8 w-8 text-muted-foreground hover:text-primary hover:bg-primary/10">
                         <MoreHorizontal className="h-4 w-4" />
                       </Button>
                     </Link>

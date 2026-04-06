@@ -464,7 +464,7 @@ export function TaskExecutionDialog({
                   <Button
                     size="sm"
                     variant="secondary"
-                    className="gap-1.5 font-bold text-indigo-600 bg-indigo-50 border border-indigo-100 hover:bg-indigo-100 h-8"
+                    className="gap-1.5 font-bold text-emerald-600 bg-emerald-50 border border-emerald-100 hover:bg-emerald-100 h-8"
                     onClick={handleGenerateMessage}
                     disabled={generatingMessage}
                   >
@@ -482,7 +482,7 @@ export function TaskExecutionDialog({
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
                   placeholder="Rédigez votre message ici ou prenez des notes d'appel..."
-                  className="resize-none h-24 bg-white dark:bg-black focus-visible:ring-indigo-500"
+                  className="resize-none h-24 bg-white dark:bg-black focus-visible:ring-emerald-500"
                 />
 
                 {message.trim().length > 0 && (

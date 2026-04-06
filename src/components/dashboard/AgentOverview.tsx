@@ -27,7 +27,7 @@ export function AgentOverview({ welcomeMessage, stats, tasks }: AgentOverviewPro
     <div className="space-y-6">
       {/* Welcome Header */}
       <div className="flex flex-col gap-1">
-        <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-primary to-indigo-600 bg-clip-text text-transparent">
+        <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-primary to-emerald-600 bg-clip-text text-transparent">
           {welcomeMessage}
         </h1>
         <p className="text-muted-foreground italic">C&apos;est une excellente journée pour conclure une vente.</p>

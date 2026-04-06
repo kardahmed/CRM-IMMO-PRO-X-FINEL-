@@ -347,7 +347,7 @@ export default function WorkspaceDetailPanel() {
             <Badge className={`${statusColor[tenant.status] || ""} border-none font-black uppercase text-xs`}>
               {tenant.status}
             </Badge>
-            <Badge className="bg-indigo-500/10 text-indigo-400 border-none font-black uppercase text-xs">
+            <Badge className="bg-primary/10 text-primary border-none font-black uppercase text-xs">
               {tenant.plan}
             </Badge>
             <Badge variant="outline" className="border-border text-muted-foreground font-bold uppercase text-xs">
@@ -372,7 +372,7 @@ export default function WorkspaceDetailPanel() {
                   size="sm"
                   onClick={handleSaveName}
                   disabled={savingName}
-                  className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold gap-1 h-8"
+                  className="bg-primary hover:bg-primary/90 text-white font-bold gap-1 h-8"
                 >
                   {savingName ? <Loader2 className="h-3 w-3 animate-spin" /> : <CheckCircle2 className="h-3 w-3" />}
                   OK
@@ -440,7 +440,7 @@ export default function WorkspaceDetailPanel() {
           <Button
             onClick={handleSave}
             disabled={saving}
-            className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold gap-2"
+            className="bg-primary hover:bg-primary/90 text-white font-bold gap-2"
           >
             {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
             Sauvegarder
@@ -455,7 +455,7 @@ export default function WorkspaceDetailPanel() {
           <Card className="bg-card/50 border-border backdrop-blur-sm">
             <CardHeader>
               <CardTitle className="text-foreground flex items-center gap-2 text-lg">
-                <Briefcase className="h-5 w-5 text-indigo-400" />
+                <Briefcase className="h-5 w-5 text-primary" />
                 Statut et Plan
               </CardTitle>
               <CardDescription className="text-muted-foreground">
@@ -512,7 +512,7 @@ export default function WorkspaceDetailPanel() {
                 <Button
                   size="sm"
                   onClick={() => setIsAddUserOpen(true)}
-                  className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold gap-2"
+                  className="bg-primary hover:bg-primary/90 text-white font-bold gap-2"
                 >
                   <UserPlus className="h-4 w-4" />
                   Ajouter un utilisateur
@@ -643,7 +643,7 @@ export default function WorkspaceDetailPanel() {
         <DialogContent className="sm:max-w-lg bg-card border-border">
           <DialogHeader>
             <DialogTitle className="text-xl font-black text-foreground flex items-center gap-2">
-              <UserPlus className="h-5 w-5 text-indigo-400" /> Ajouter un utilisateur
+              <UserPlus className="h-5 w-5 text-primary" /> Ajouter un utilisateur
             </DialogTitle>
             <DialogDescription className="text-muted-foreground">
               Creez un nouvel utilisateur dans le workspace <strong className="text-foreground">{tenant.name}</strong>.
@@ -724,7 +724,7 @@ export default function WorkspaceDetailPanel() {
               Annuler
             </Button>
             <Button
-              className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold gap-2"
+              className="flex-1 bg-primary hover:bg-primary/90 text-white font-bold gap-2"
               onClick={handleAddUser}
               disabled={addingUser || !newUserForm.firstName || !newUserForm.lastName || !newUserForm.email || !newUserForm.password}
             >

@@ -69,7 +69,7 @@ export function MapClientMatcher({ onMatch, matchedCount }: MapClientMatcherProp
   return (
     <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-3 bg-white dark:bg-neutral-900 border rounded-xl shadow-sm">
       <div className="flex items-center gap-3">
-        <div className="p-2 bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 rounded-lg shrink-0">
+        <div className="p-2 bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 rounded-lg shrink-0">
           <Sparkles className="h-5 w-5" />
         </div>
         <div>
@@ -99,7 +99,7 @@ export function MapClientMatcher({ onMatch, matchedCount }: MapClientMatcherProp
             size="sm" 
             onClick={handleSend}
             disabled={sending || matchedCount === 0}
-            className="gap-1.5 font-bold whitespace-nowrap bg-indigo-600 hover:bg-indigo-700 text-white"
+            className="gap-1.5 font-bold whitespace-nowrap bg-primary hover:bg-primary/90 text-white"
           >
             {sending ? (
               <span className="h-4 w-4 rounded-full border-2 border-t-white border-white/30 animate-spin" />

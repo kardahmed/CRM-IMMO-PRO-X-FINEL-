@@ -117,7 +117,7 @@ export default function SuperAdminAI() {
             <div className="space-y-2">
               <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Anthropic API Key</label>
               <div className="flex gap-2">
-                <Input type="password" value={apiKey} onChange={(e) => setApiKey(e.target.value)} placeholder="sk-ant-api03-..." className="bg-background border-border text-foreground focus:border-indigo-500" />
+                <Input type="password" value={apiKey} onChange={(e) => setApiKey(e.target.value)} placeholder="sk-ant-api03-..." className="bg-background border-border text-foreground focus:border-primary" />
                 <Button variant="outline" className="border-border text-foreground hover:bg-muted">
                   <RefreshCw className="h-4 w-4" />
                 </Button>
@@ -127,7 +127,7 @@ export default function SuperAdminAI() {
               <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Modele par defaut</label>
               <Input disabled value="claude-3-opus-20240229" className="bg-background opacity-50 border-border text-foreground" />
             </div>
-            <Button className="w-full bg-indigo-600 hover:bg-indigo-700 text-primary-foreground font-bold mt-4">
+            <Button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold mt-4">
               Mettre a jour la cle
             </Button>
           </CardContent>
