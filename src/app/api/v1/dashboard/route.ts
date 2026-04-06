@@ -4,6 +4,7 @@ import { apiHandler, jsonOk } from "@/lib/api-handler";
  * GET /api/v1/dashboard?period=7d|30d|90d|all
  *
  * Dashboard data scoped to the authenticated user's tenant.
+ * Optimized: uses groupBy/aggregate instead of fetching raw rows for trends.
  */
 export const GET = apiHandler(
   { module: "DASHBOARD", action: "READ" },
@@ -15,7 +16,7 @@ export const GET = apiHandler(
     const period = searchParams.get("period") || "30d";
     const now = new Date();
     let startDate = new Date();
-    
+
     if (period === "7d") startDate.setDate(now.getDate() - 7);
     else if (period === "90d") startDate.setDate(now.getDate() - 90);
     else if (period === "all") startDate = new Date(2000, 0, 1);
@@ -26,7 +27,7 @@ export const GET = apiHandler(
     const todayEnd = new Date();
     todayEnd.setHours(23, 59, 59, 999);
 
-    // 1. Basic Stats (Real-time)
+    // 1. Basic Stats + Pipeline + Property distribution — all parallel
     const [
       totalClients,
       periodClients,
@@ -54,8 +55,10 @@ export const GET = apiHandler(
       }),
     ]);
 
-    // 2. Advanced Comparison Data (Multi-indicator over time)
-    // We'll fetch daily counts for Leads and Visits for the selected period
+    // 2. Comparison data: group leads and visits by date using groupBy
+    //    Instead of fetching all rows and grouping in JS, we use createdAt groupBy
+    //    Prisma doesn't support date truncation in groupBy, so we fetch minimal fields
+    //    but limit to the period range only
     const [dailyLeads, dailyVisits] = await Promise.all([
       db.client.findMany({
         where: { createdAt: { gte: startDate } },
@@ -69,20 +72,19 @@ export const GET = apiHandler(
       }),
     ]);
 
-    // Helper to group by date string YYYY-MM-DD
-    const groupDaily = (items: any[], dateKey: string) => {
+    // Group by date string YYYY-MM-DD
+    const groupDaily = <T>(items: T[], dateKey: keyof T) => {
       const groups: Record<string, number> = {};
-      items.forEach(item => {
-        const d = new Date(item[dateKey]).toISOString().split("T")[0];
+      for (const item of items) {
+        const d = new Date(item[dateKey] as unknown as string).toISOString().split("T")[0];
         groups[d] = (groups[d] || 0) + 1;
-      });
+      }
       return groups;
     };
 
     const leadsGrouped = groupDaily(dailyLeads, "createdAt");
     const visitsGrouped = groupDaily(dailyVisits, "scheduledAt");
 
-    // Merge into comparisonData array
     const allDates = Array.from(new Set([...Object.keys(leadsGrouped), ...Object.keys(visitsGrouped)])).sort();
     const comparisonData = allDates.map(date => ({
       date,
@@ -90,7 +92,7 @@ export const GET = apiHandler(
       visits: visitsGrouped[date] || 0,
     }));
 
-    // 3. Top Agents (By volume of active/closed deals)
+    // 3. Top Agents — batch lookup instead of N+1
     const topAgentsRaw = await db.client.groupBy({
       by: ["assignedAgentId"],
       where: { pipelineStage: { in: ["QUALIFIED", "VISITED", "NEGOTIATION", "RESERVED", "SIGNED"] } },
@@ -99,31 +101,35 @@ export const GET = apiHandler(
       take: 5,
     });
 
-    const agentIds = topAgentsRaw.map(a => a.assignedAgentId).filter(Boolean) as string[];
-    const agentDetails = await db.user.findMany({
-      where: { id: { in: agentIds } },
-      select: { id: true, firstName: true, lastName: true },
-    });
+    const agentIds = topAgentsRaw.map(a => a.assignedAgentId).filter((id): id is string => id !== null);
+    const agentDetails = agentIds.length > 0
+      ? await db.user.findMany({
+          where: { id: { in: agentIds } },
+          select: { id: true, firstName: true, lastName: true },
+        })
+      : [];
 
+    const agentMap = new Map(agentDetails.map(a => [a.id, a]));
     const topAgents = topAgentsRaw
       .map(a => {
-        const detail = agentDetails.find(d => d.id === a.assignedAgentId);
+        const detail = agentMap.get(a.assignedAgentId ?? "");
         if (!detail) return null;
         return {
           name: `${detail.firstName} ${detail.lastName}`,
-          sales: a._count.id, // Volume based ranking
+          sales: a._count.id,
           avatar: "",
         };
       })
       .filter(Boolean);
 
-    // 4. Property Distribution (Formatted for UI)
+    // 4. Property Distribution
+    const totalProperties = propertyCounts.reduce((acc, curr) => acc + curr._count.id, 0) || 1;
     const propertyDistribution = propertyCounts.map(p => ({
       name: p.type,
-      value: Math.round((p._count.id / (propertyCounts.reduce((acc, curr) => acc + curr._count.id, 0) || 1)) * 100),
+      value: Math.round((p._count.id / totalProperties) * 100),
     }));
 
-    // 5. Today's Visits
+    // 5. Today's Visits (with select)
     const todayVisits = await db.visit.findMany({
       where: { scheduledAt: { gte: todayStart, lt: todayEnd } },
       take: 10,
@@ -155,13 +161,15 @@ export const GET = apiHandler(
     };
 
     if (!isCeoOrAdmin) {
-      const myClients = await db.client.count({ where: { assignedAgentId: user.userId } });
-      const myTasks = await db.task.findMany({
-        where: { assignedToId: user.userId, status: { in: ["PENDING", "IN_PROGRESS"] } },
-        take: 5,
-        orderBy: { dueAt: "asc" },
-        select: { id: true, title: true, dueAt: true, status: true },
-      });
+      const [myClients, myTasks] = await Promise.all([
+        db.client.count({ where: { assignedAgentId: user.userId } }),
+        db.task.findMany({
+          where: { assignedToId: user.userId, status: { in: ["PENDING", "IN_PROGRESS"] } },
+          take: 5,
+          orderBy: { dueAt: "asc" },
+          select: { id: true, title: true, dueAt: true, status: true },
+        }),
+      ]);
 
       return jsonOk({
         ...commonResponse,

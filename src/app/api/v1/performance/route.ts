@@ -5,6 +5,7 @@ import { apiHandler, jsonOk } from "@/lib/api-handler";
  *
  * Performance analytics data scoped to the authenticated user's tenant.
  * Returns stats, top agents, and monthly trend (last 6 months).
+ * Optimized: uses aggregations and batch lookups.
  */
 export const GET = apiHandler(
   { module: "PERFORMANCE", action: "READ" },
@@ -13,8 +14,6 @@ export const GET = apiHandler(
 
     const now = new Date();
     const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-
-    // Compute 6 months ago start
     const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 5, 1);
 
     const [
@@ -24,34 +23,22 @@ export const GET = apiHandler(
       closedClients,
       revenueAgg,
       agentGroups,
-      monthlyClients,
       pipelineCounts,
     ] = await Promise.all([
-      // Total clients
       db.client.count(),
-
-      // New clients this month
       db.client.count({
         where: { createdAt: { gte: monthStart } },
       }),
-
-      // Visits this month
       db.visit.count({
         where: { scheduledAt: { gte: monthStart } },
       }),
-
-      // Closed clients (for conversion rate)
       db.client.count({
         where: { pipelineStage: "CLOSED" },
       }),
-
-      // Revenue: sum of completed payments
       db.payment.aggregate({
         _sum: { amount: true },
         where: { status: "COMPLETED" },
       }),
-
-      // Top agents: group clients by assignedAgentId
       db.client.groupBy({
         by: ["assignedAgentId"],
         _count: { id: true },
@@ -59,14 +46,6 @@ export const GET = apiHandler(
         orderBy: { _count: { id: "desc" } },
         take: 10,
       }),
-
-      // Monthly trend: clients created last 6 months
-      db.client.findMany({
-        where: { createdAt: { gte: sixMonthsAgo } },
-        select: { createdAt: true },
-      }),
-
-      // Pipeline funnel counts
       db.client.groupBy({
         by: ["pipelineStage"],
         _count: { id: true },
@@ -84,7 +63,7 @@ export const GET = apiHandler(
       ? Number(revenueAgg._sum.amount)
       : 0;
 
-    // Resolve agent names
+    // Resolve agent names — single batch query
     const agentIds = agentGroups
       .map((g) => g.assignedAgentId)
       .filter((id): id is string => id !== null);
@@ -111,7 +90,13 @@ export const GET = apiHandler(
       };
     });
 
-    // Monthly trend: group by year-month
+    // Monthly trend: fetch only createdAt from last 6 months, minimal select
+    const monthlyClients = await db.client.findMany({
+      where: { createdAt: { gte: sixMonthsAgo } },
+      select: { createdAt: true },
+    });
+
+    // Group by year-month in JS (Prisma doesn't support date_trunc in groupBy)
     const trendMap = new Map<string, number>();
     for (let i = 5; i >= 0; i--) {
       const d = new Date(now.getFullYear(), now.getMonth() - i, 1);

@@ -105,7 +105,7 @@ export default function PipelinePage() {
     try {
       setLoading(true);
       setError(null);
-      const res = await fetch("/api/v1/clients?limit=250");
+      const res = await fetch("/api/v1/clients?limit=100");
       if (!res.ok) throw new Error(`Erreur ${res.status}`);
       const json = await res.json();
       if (!json.success) throw new Error(json.error || "Erreur inconnue");

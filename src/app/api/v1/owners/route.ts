@@ -53,25 +53,26 @@ export const POST = apiHandler(
 
     const body = getBody<z.infer<typeof createOwnerSchema>>(ctx.req);
 
-    // Check duplicate phone
-    const existing = await ctx.db.ownerMandate.findFirst({
-      where: { phone: body.phone },
-    });
-    if (existing) {
-      return jsonError("Un proprietaire avec ce numero existe deja", 409);
+    // Use try/catch to handle unique constraint race condition
+    try {
+      const owner = await ctx.db.ownerMandate.create({
+        data: {
+          tenantId: ctx.tenantId,
+          firstName: body.firstName,
+          lastName: body.lastName,
+          phone: body.phone,
+          email: body.email ?? null,
+          address: body.address ?? null,
+        },
+      });
+
+      return jsonOk(owner, 201);
+    } catch (err: unknown) {
+      // Prisma unique constraint violation (P2002)
+      if (err && typeof err === "object" && "code" in err && err.code === "P2002") {
+        return jsonError("Un proprietaire avec ce numero existe deja", 409);
+      }
+      throw err;
     }
-
-    const owner = await ctx.db.ownerMandate.create({
-      data: {
-        tenantId: ctx.tenantId,
-        firstName: body.firstName,
-        lastName: body.lastName,
-        phone: body.phone,
-        email: body.email ?? null,
-        address: body.address ?? null,
-      },
-    });
-
-    return jsonOk(owner, 201);
   },
 );

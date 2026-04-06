@@ -13,9 +13,21 @@ export const GET = apiHandler(
       where: { id },
       include: {
         assignedAgent: { select: { id: true, firstName: true, lastName: true, email: true } },
-        interactions: { orderBy: { createdAt: "desc" }, take: 10 },
-        visits: { orderBy: { scheduledAt: "desc" }, take: 10, include: { property: { select: { id: true, name: true } } } },
-        tasks: { orderBy: { createdAt: "desc" }, take: 10 },
+        interactions: {
+          orderBy: { createdAt: "desc" },
+          take: 10,
+          select: { id: true, type: true, direction: true, content: true, createdAt: true, user: { select: { id: true, firstName: true, lastName: true } } },
+        },
+        visits: {
+          orderBy: { scheduledAt: "desc" },
+          take: 10,
+          select: { id: true, scheduledAt: true, status: true, feedback: true, property: { select: { id: true, name: true } } },
+        },
+        tasks: {
+          orderBy: { createdAt: "desc" },
+          take: 10,
+          select: { id: true, title: true, type: true, status: true, dueAt: true, isAutomated: true, createdAt: true },
+        },
       },
     });
 
