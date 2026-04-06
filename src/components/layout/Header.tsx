@@ -42,8 +42,9 @@ export function Header() {
           PRO-X
         </span>
 
-        <div className="hidden sm:block flex-1">
+        <div className="hidden sm:flex items-center gap-3 flex-1">
           <GlobalSearch />
+          <CommandPaletteHint />
         </div>
       </div>
 
