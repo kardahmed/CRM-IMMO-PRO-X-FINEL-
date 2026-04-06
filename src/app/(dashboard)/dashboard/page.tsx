@@ -71,13 +71,22 @@ interface IPropertyDistribution {
   value: number;
 }
 
+interface ISupervisorStats {
+  teamSize: number;
+  unassignedLeads: number;
+  teamClients: number;
+  todayVisits: number;
+  overdueTasks: number;
+}
+
 interface IDashboardData {
   role: string;
-  stats: ICeoStats | IAgentStats;
+  stats: ICeoStats | IAgentStats | ISupervisorStats;
   conversionData?: Array<{ date: string; value: number }>;
   comparisonData?: Array<{ date: string; leads: number; visits: number }>;
   pipelineData?: IPipelineItem[];
   topAgents?: Array<{ name: string; sales: number; avatar: string }>;
+  teamPerformance?: Array<{ name: string; clients: number }>;
   todayVisits?: IVisit[];
   propertyDistribution?: IPropertyDistribution[];
   welcomeMessage?: string;
@@ -297,6 +306,109 @@ export default function DashboardPage() {
 
           <div className="space-y-10">
              <DailyVisits visits={data.todayVisits ?? []} />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // SUPERVISOR VIEW
+  if (data.role === "SUPERVISOR") {
+    const supStats = data.stats as ISupervisorStats;
+    return (
+      <div className="space-y-10 pb-20 animate-in fade-in duration-700">
+        <header className="space-y-1">
+          <h1 className="text-4xl font-black tracking-tighter text-foreground flex items-center gap-3">
+            Gestion d&apos;équipe
+            <span className="text-primary italic text-2xl font-medium tracking-normal opacity-40">superviseur</span>
+          </h1>
+          <p className="text-xs font-bold text-muted-foreground uppercase tracking-[0.3em] opacity-60">
+            {data.welcomeMessage || "Vue d'ensemble de votre équipe"}
+          </p>
+        </header>
+
+        {/* Supervisor KPI Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+          {[
+            { label: "Agents actifs", value: supStats.teamSize, icon: Users, color: "text-blue-600 bg-blue-50 border-blue-100" },
+            { label: "Leads non assignés", value: supStats.unassignedLeads, icon: AlertCircle, color: supStats.unassignedLeads > 0 ? "text-red-600 bg-red-50 border-red-100" : "text-emerald-600 bg-emerald-50 border-emerald-100" },
+            { label: "Total clients", value: supStats.teamClients, icon: Users, color: "text-purple-600 bg-purple-50 border-purple-100" },
+            { label: "Visites aujourd'hui", value: supStats.todayVisits, icon: Calendar, color: "text-cyan-600 bg-cyan-50 border-cyan-100" },
+            { label: "Tâches en retard", value: supStats.overdueTasks, icon: Clock, color: supStats.overdueTasks > 0 ? "text-orange-600 bg-orange-50 border-orange-100" : "text-emerald-600 bg-emerald-50 border-emerald-100" },
+          ].map((card, i) => (
+            <div key={i} className={cn("p-5 rounded-2xl border bg-card shadow-sm", card.color.split(" ").slice(1).join(" "))}>
+              <div className="flex items-center gap-3 mb-2">
+                <card.icon className={cn("h-5 w-5", card.color.split(" ")[0])} />
+                <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">{card.label}</span>
+              </div>
+              <p className={cn("text-3xl font-black tabular-nums", card.color.split(" ")[0])}>{card.value}</p>
+            </div>
+          ))}
+        </div>
+
+        {/* Quick actions */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <button onClick={() => window.location.href = "/clients?stage=NEW&unassigned=true"} className="flex items-center gap-4 p-5 rounded-2xl bg-card border border-border shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all text-left group">
+            <div className="p-3 rounded-xl bg-red-50 border border-red-100 group-hover:scale-110 transition-transform">
+              <Zap className="h-5 w-5 text-red-600" />
+            </div>
+            <div>
+              <p className="font-bold text-sm text-foreground">Assigner les leads</p>
+              <p className="text-xs text-muted-foreground">{supStats.unassignedLeads} leads en attente</p>
+            </div>
+          </button>
+          <button onClick={() => window.location.href = "/pipeline"} className="flex items-center gap-4 p-5 rounded-2xl bg-card border border-border shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all text-left group">
+            <div className="p-3 rounded-xl bg-primary/10 border border-primary/20 group-hover:scale-110 transition-transform">
+              <ArrowRight className="h-5 w-5 text-primary" />
+            </div>
+            <div>
+              <p className="font-bold text-sm text-foreground">Vue Pipeline</p>
+              <p className="text-xs text-muted-foreground">Suivre la progression</p>
+            </div>
+          </button>
+          <button onClick={() => window.location.href = "/performance"} className="flex items-center gap-4 p-5 rounded-2xl bg-card border border-border shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all text-left group">
+            <div className="p-3 rounded-xl bg-purple-50 border border-purple-100 group-hover:scale-110 transition-transform">
+              <CheckCircle2 className="h-5 w-5 text-purple-600" />
+            </div>
+            <div>
+              <p className="font-bold text-sm text-foreground">Performance équipe</p>
+              <p className="text-xs text-muted-foreground">Analyser les résultats</p>
+            </div>
+          </button>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Team performance */}
+          <div className="lg:col-span-2 space-y-6">
+            <div className="p-8 rounded-[32px] bg-card border border-border shadow-sm">
+              <h3 className="font-black text-xl uppercase tracking-tight mb-6 text-foreground">Performance par agent</h3>
+              <div className="space-y-4">
+                {(data.teamPerformance ?? []).map((agent, i) => {
+                  const maxClients = Math.max(...(data.teamPerformance ?? []).map(a => a.clients), 1);
+                  return (
+                    <div key={i} className="flex items-center gap-4">
+                      <span className="text-sm font-bold w-40 truncate text-foreground">{agent.name}</span>
+                      <div className="flex-1 h-8 bg-accent rounded-lg overflow-hidden">
+                        <div
+                          className="h-full bg-primary/80 rounded-lg flex items-center justify-end pr-3 transition-all duration-700"
+                          style={{ width: `${Math.max((agent.clients / maxClients) * 100, 8)}%` }}
+                        >
+                          <span className="text-xs font-bold text-white">{agent.clients}</span>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+                {(data.teamPerformance ?? []).length === 0 && (
+                  <p className="text-sm text-muted-foreground text-center py-8">Aucun agent avec des clients assignés</p>
+                )}
+              </div>
+            </div>
+            <PipelineChart data={data.pipelineData ?? []} />
+          </div>
+
+          <div className="space-y-6">
+            <DailyVisits visits={data.todayVisits ?? []} />
           </div>
         </div>
       </div>

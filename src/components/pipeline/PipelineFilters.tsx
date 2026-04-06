@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -8,14 +9,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { 
-  Search, 
-  SlidersHorizontal, 
-  Filter, 
-  LayoutGrid, 
-  Wallet, 
+import {
+  Search,
+  SlidersHorizontal,
+  Filter,
+  LayoutGrid,
+  Wallet,
   Users,
-  Target
+  Target,
+  Bookmark,
+  X,
+  Save,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -23,6 +27,14 @@ import { Badge } from "@/components/ui/badge";
 interface FilterOption {
   id: string;
   label: string;
+}
+
+interface SavedFilter {
+  name: string;
+  agent: string;
+  project: string;
+  source: string;
+  minBudget: string;
 }
 
 interface PipelineFiltersProps {
@@ -41,6 +53,8 @@ interface PipelineFiltersProps {
   agents: FilterOption[];
   projects: FilterOption[];
 }
+
+const STORAGE_KEY = "crm-pipeline-saved-filters";
 
 const SOURCES = [
   { id: "all", label: "Toutes les sources" },
@@ -68,6 +82,43 @@ export function PipelineFilters({
   agents,
   projects,
 }: PipelineFiltersProps) {
+  const [savedFilters, setSavedFilters] = useState<SavedFilter[]>([]);
+  const [filterName, setFilterName] = useState("");
+  const [showSaveInput, setShowSaveInput] = useState(false);
+
+  // Load saved filters from localStorage
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      if (stored) setSavedFilters(JSON.parse(stored));
+    } catch {
+      // ignore
+    }
+  }, []);
+
+  const saveCurrentFilter = () => {
+    if (!filterName.trim() || activeFiltersCount === 0) return;
+    const newFilter: SavedFilter = { name: filterName.trim(), agent, project, source, minBudget };
+    const updated = [...savedFilters.filter(f => f.name !== newFilter.name), newFilter];
+    setSavedFilters(updated);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+    setFilterName("");
+    setShowSaveInput(false);
+  };
+
+  const applyFilter = (f: SavedFilter) => {
+    onAgentChange(f.agent);
+    onProjectChange(f.project);
+    onSourceChange(f.source);
+    onMinBudgetChange(f.minBudget);
+  };
+
+  const deleteFilter = (name: string) => {
+    const updated = savedFilters.filter(f => f.name !== name);
+    setSavedFilters(updated);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+  };
+
   return (
     <div className="flex flex-col gap-4 w-full bg-white dark:bg-neutral-900 p-4 rounded-2xl border-2 border-border shadow-sm">
       <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4">
@@ -163,7 +214,58 @@ export function PipelineFilters({
             className="pl-9 h-9 bg-transparent border-none ring-1 ring-neutral-100 dark:ring-neutral-800 rounded-lg text-xs font-bold focus:ring-1"
           />
         </div>
+
+        {/* Save filter button */}
+        {activeFiltersCount > 0 && !showSaveInput && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setShowSaveInput(true)}
+            className="text-xs font-bold text-muted-foreground hover:text-primary gap-1.5"
+          >
+            <Save className="h-3 w-3" /> Sauvegarder
+          </Button>
+        )}
+        {showSaveInput && (
+          <div className="flex items-center gap-2">
+            <Input
+              value={filterName}
+              onChange={(e) => setFilterName(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && saveCurrentFilter()}
+              placeholder="Nom du filtre..."
+              className="h-8 w-[160px] text-xs rounded-lg"
+              autoFocus
+            />
+            <Button size="sm" onClick={saveCurrentFilter} className="h-8 text-xs px-3 rounded-lg">OK</Button>
+            <Button size="sm" variant="ghost" onClick={() => setShowSaveInput(false)} className="h-8 w-8 p-0">
+              <X className="h-3 w-3" />
+            </Button>
+          </div>
+        )}
       </div>
+
+      {/* Saved Filters */}
+      {savedFilters.length > 0 && (
+        <div className="flex items-center gap-2 pt-2 border-t border-border overflow-x-auto scrollbar-none">
+          <Bookmark className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+          <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground shrink-0">Filtres :</span>
+          {savedFilters.map((f) => (
+            <button
+              key={f.name}
+              onClick={() => applyFilter(f)}
+              className="group/filter flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-accent/60 hover:bg-primary/10 border border-transparent hover:border-primary/20 transition-all text-xs font-bold text-foreground shrink-0"
+            >
+              {f.name}
+              <span
+                onClick={(e) => { e.stopPropagation(); deleteFilter(f.name); }}
+                className="opacity-0 group-hover/filter:opacity-100 text-muted-foreground hover:text-red-500 transition-opacity cursor-pointer"
+              >
+                <X className="h-3 w-3" />
+              </span>
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

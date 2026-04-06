@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useSupabaseAuth } from "@/hooks/useSupabaseAuth";
 import { supabase } from "@/lib/supabase";
+import { toast } from "sonner";
 import type { RealtimeChannel } from "@supabase/supabase-js";
 
 // ============================================================================
@@ -28,6 +29,22 @@ interface IUseNotificationsReturn {
   refresh: () => Promise<void>;
 }
 
+// Notification type → emoji for toast
+const TYPE_EMOJI: Record<string, string> = {
+  FACEBOOK_LEAD: "📱",
+  WHATSAPP_IN: "💬",
+  LEAD_ASSIGNED: "👤",
+  REASSIGNMENT: "🔄",
+  STAGE_CHANGED: "📊",
+  TASK_OVERDUE: "⏰",
+  VISIT_REMINDER: "🏠",
+  NEW_CLIENT: "🆕",
+  PAYMENT_OVERDUE: "💰",
+  OBJECTIVE_REACHED: "🎯",
+  ESCALATION: "🚨",
+  INFO: "ℹ️",
+};
+
 // ============================================================================
 // Hook
 // ============================================================================
@@ -36,6 +53,7 @@ interface IUseNotificationsReturn {
  * Hook pour les notifications en temps réel.
  * - Charge les notifications depuis l'API
  * - S'abonne aux nouvelles notifications via Supabase Realtime
+ * - Affiche un toast instantané à chaque nouvelle notification
  * - Fournit des méthodes pour marquer comme lues
  */
 export function useNotifications(): IUseNotificationsReturn {
@@ -103,6 +121,21 @@ export function useNotifications(): IUseNotificationsReturn {
           if (!newNotif.isRead) {
             setUnreadCount((prev) => prev + 1);
           }
+
+          // Toast temps réel
+          const emoji = TYPE_EMOJI[newNotif.type] ?? "🔔";
+          toast(`${emoji} ${newNotif.title}`, {
+            description: newNotif.message,
+            action: newNotif.link
+              ? {
+                  label: "Voir",
+                  onClick: () => {
+                    window.location.href = newNotif.link!;
+                  },
+                }
+              : undefined,
+            duration: 6000,
+          });
         },
       )
       .subscribe();

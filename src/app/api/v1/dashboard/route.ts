@@ -160,6 +160,65 @@ export const GET = apiHandler(
       propertyDistribution,
     };
 
+    // SUPERVISOR VIEW — stats équipe + leads non assignés
+    if (user.role === "SUPERVISOR") {
+      const [teamMembers, unassignedLeads, teamClients, myTasks, teamOverdueTasks, teamPipelineGroups] = await Promise.all([
+        db.user.findMany({
+          where: { role: "AGENT", isActive: true },
+          select: { id: true, firstName: true, lastName: true },
+        }),
+        db.client.count({ where: { assignedAgentId: null, pipelineStage: "NEW" } }),
+        db.client.count(),
+        db.task.findMany({
+          where: { assignedToId: user.userId, status: { in: ["PENDING", "IN_PROGRESS"] } },
+          take: 5,
+          orderBy: { dueAt: "asc" },
+          select: { id: true, title: true, dueAt: true, status: true },
+        }),
+        db.task.count({
+          where: { status: { in: ["PENDING", "IN_PROGRESS"] }, dueAt: { lt: now } },
+        }),
+        db.client.groupBy({
+          by: ["assignedAgentId"],
+          _count: { id: true },
+          where: { assignedAgentId: { not: null } },
+          orderBy: { _count: { id: "desc" } },
+          take: 10,
+        }),
+      ]);
+
+      // Build team performance data
+      const teamAgentIds = teamPipelineGroups.map(g => g.assignedAgentId).filter((id): id is string => id !== null);
+      const teamAgentDetails = teamAgentIds.length > 0
+        ? await db.user.findMany({
+            where: { id: { in: teamAgentIds } },
+            select: { id: true, firstName: true, lastName: true },
+          })
+        : [];
+      const teamAgentMap = new Map(teamAgentDetails.map(a => [a.id, a]));
+      const teamPerformance = teamPipelineGroups.map(g => {
+        const agent = teamAgentMap.get(g.assignedAgentId ?? "");
+        return {
+          name: agent ? `${agent.firstName} ${agent.lastName}` : "Inconnu",
+          clients: g._count.id,
+        };
+      });
+
+      return jsonOk({
+        ...commonResponse,
+        stats: {
+          teamSize: teamMembers.length,
+          unassignedLeads,
+          teamClients,
+          todayVisits: todayVisitsCount,
+          overdueTasks: teamOverdueTasks,
+        },
+        teamPerformance,
+        tasks: myTasks,
+      });
+    }
+
+    // AGENT VIEW
     if (!isCeoOrAdmin) {
       const [myClients, myTasks] = await Promise.all([
         db.client.count({ where: { assignedAgentId: user.userId } }),

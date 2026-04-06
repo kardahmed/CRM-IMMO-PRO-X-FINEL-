@@ -6,7 +6,6 @@ import { cn } from "@/lib/utils";
 import {
   Phone,
   Home,
-  AlertTriangle,
   MessageSquare,
   MoreVertical,
   PhoneCall,
@@ -14,19 +13,27 @@ import {
   Zap,
   Globe,
   UserPlus,
-  Share2
+  Share2,
+  Calendar,
+  Clock,
+  Timer,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Draggable } from "@hello-pangea/dnd";
 import { formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
-import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 export interface PipelineClient {
   id: string;
@@ -53,6 +60,15 @@ function formatBudgetDA(budget: number): string {
   return `${budget.toLocaleString("fr-DZ")} DA`;
 }
 
+// Timer visuel progressif : vert → jaune → orange → rouge selon les jours
+function getTimerConfig(days: number) {
+  if (days <= 2) return { color: "text-emerald-600", bg: "bg-emerald-50 border-emerald-200", bar: "bg-emerald-500", percent: (days / 14) * 100, label: "Récent" };
+  if (days <= 5) return { color: "text-blue-600", bg: "bg-blue-50 border-blue-200", bar: "bg-blue-500", percent: (days / 14) * 100, label: "Normal" };
+  if (days <= 7) return { color: "text-amber-600", bg: "bg-amber-50 border-amber-200", bar: "bg-amber-500", percent: (days / 14) * 100, label: "Attention" };
+  if (days <= 14) return { color: "text-orange-600", bg: "bg-orange-50 border-orange-200", bar: "bg-orange-500", percent: (days / 14) * 100, label: "En retard" };
+  return { color: "text-red-600", bg: "bg-red-50 border-red-200", bar: "bg-red-500", percent: 100, label: "Critique" };
+}
+
 export function KanbanCard({
   client,
   index,
@@ -73,6 +89,11 @@ export function KanbanCard({
     window.open(`https://wa.me/${cleanPhone}`, "_blank");
   };
 
+  const handleScheduleVisit = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    router.push(`/planning?action=new&clientId=${client.id}`);
+  };
+
   const getSourceIcon = (source?: string) => {
     switch (source) {
       case "FACEBOOK": return <Share2 className="h-3 w-3 text-blue-500" />;
@@ -81,6 +102,8 @@ export function KanbanCard({
       default: return <Globe className="h-3 w-3 text-muted-foreground" />;
     }
   };
+
+  const timer = getTimerConfig(client.daysInStage);
 
   return (
     <Draggable draggableId={client.id} index={index}>
@@ -94,8 +117,8 @@ export function KanbanCard({
             "p-4 rounded-2xl border-2 bg-white dark:bg-neutral-900 cursor-pointer shadow-sm relative",
             "transition-all duration-300 group ring-offset-background",
             "hover:shadow-xl hover:border-primary/40 hover:-translate-y-1.5 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
-            snapshot.isDragging ? 
-              "shadow-2xl rotate-[3deg] border-primary ring-4 ring-primary/10 z-50 brightness-105" : 
+            snapshot.isDragging ?
+              "shadow-2xl rotate-[3deg] border-primary ring-4 ring-primary/10 z-50 brightness-105" :
               "border-transparent"
           )}
         >
@@ -106,6 +129,45 @@ export function KanbanCard({
                 !
               </div>
             )}
+          </div>
+
+          {/* Quick Actions — visible on hover */}
+          <div className="absolute -top-2 -right-2 flex items-center gap-1 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
+            <TooltipProvider delayDuration={200}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    onClick={handleCall}
+                    className="h-7 w-7 rounded-full bg-emerald-500 text-white flex items-center justify-center shadow-lg hover:scale-110 transition-transform"
+                  >
+                    <PhoneCall className="h-3.5 w-3.5" />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent side="top"><p className="text-xs">Appeler</p></TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    onClick={handleWhatsApp}
+                    className="h-7 w-7 rounded-full bg-green-500 text-white flex items-center justify-center shadow-lg hover:scale-110 transition-transform"
+                  >
+                    <Zap className="h-3.5 w-3.5" />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent side="top"><p className="text-xs">WhatsApp</p></TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    onClick={handleScheduleVisit}
+                    className="h-7 w-7 rounded-full bg-blue-500 text-white flex items-center justify-center shadow-lg hover:scale-110 transition-transform"
+                  >
+                    <Calendar className="h-3.5 w-3.5" />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent side="top"><p className="text-xs">Planifier visite</p></TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           </div>
 
           {/* Header: Name + Actions */}
@@ -135,6 +197,9 @@ export function KanbanCard({
                 <DropdownMenuItem onClick={handleWhatsApp}>
                   <Zap className="mr-2 h-4 w-4" /> WhatsApp
                 </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleScheduleVisit}>
+                  <Calendar className="mr-2 h-4 w-4" /> Planifier visite
+                </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => router.push(`/clients/${client.id}`)}>
                   <ExternalLink className="mr-2 h-4 w-4" /> Voir profil
                 </DropdownMenuItem>
@@ -142,16 +207,33 @@ export function KanbanCard({
             </DropdownMenu>
           </div>
 
-          {/* Budget Display - Prominent */}
-          <div className="bg-primary/5 dark:bg-primary/10 rounded-lg p-2.5 mb-4 border border-primary/10">
+          {/* Budget Display */}
+          <div className="bg-primary/5 dark:bg-primary/10 rounded-lg p-2.5 mb-3 border border-primary/10">
             <div className="text-xs font-bold text-primary uppercase tracking-wider mb-0.5 opacity-70">Budget estimé</div>
             <div className="text-sm font-bold text-primary tabular-nums">
               {formatBudgetDA(client.budget)}
             </div>
           </div>
 
+          {/* Timer visuel progressif */}
+          <div className={cn("rounded-lg p-2 mb-3 border", timer.bg)}>
+            <div className="flex items-center justify-between mb-1">
+              <div className="flex items-center gap-1.5">
+                <Timer className={cn("h-3 w-3", timer.color)} />
+                <span className={cn("text-xs font-bold", timer.color)}>{client.daysInStage}j dans cette étape</span>
+              </div>
+              <span className={cn("text-[10px] font-bold uppercase tracking-wider", timer.color)}>{timer.label}</span>
+            </div>
+            <div className="h-1.5 w-full bg-white/60 dark:bg-black/20 rounded-full overflow-hidden">
+              <div
+                className={cn("h-full rounded-full transition-all duration-700", timer.bar)}
+                style={{ width: `${Math.min(timer.percent, 100)}%` }}
+              />
+            </div>
+          </div>
+
           {/* Property Info */}
-          <div className="space-y-2 mb-4">
+          <div className="space-y-2 mb-3">
             <div className="flex items-center gap-2 text-xs text-muted-foreground/80 font-medium">
               <Home className="h-3.5 w-3.5 shrink-0 text-indigo-500/70" />
               <span className="truncate">{client.property}</span>
@@ -191,19 +273,12 @@ export function KanbanCard({
               </div>
             </div>
 
-            <div className="flex flex-col items-end">
-              <Badge
-                variant="outline"
-                className={cn(
-                  "text-xs font-bold h-5 px-1.5 tabular-nums uppercase tracking-tighter",
-                  client.daysInStage > 7
-                    ? "border-orange-200 text-orange-600 bg-orange-50/50"
-                    : "border-border text-muted-foreground"
-                )}
-              >
-                {client.daysInStage} JOURS
+            {client.overdueTasks > 0 && (
+              <Badge variant="outline" className="text-[10px] font-bold border-red-200 text-red-600 bg-red-50/50 h-5 px-1.5">
+                <Clock className="h-2.5 w-2.5 mr-0.5" />
+                {client.overdueTasks} retard
               </Badge>
-            </div>
+            )}
           </div>
         </div>
       )}

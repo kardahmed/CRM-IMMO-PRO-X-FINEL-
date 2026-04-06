@@ -31,19 +31,21 @@ import {
   UserPlus,
   ListTodo,
   Command,
+  Phone,
+  Loader2,
   type LucideIcon,
 } from "lucide-react";
 import {
   Dialog,
-  DialogContent,
   DialogOverlay,
   DialogPortal,
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Dialog as DialogPrimitive } from "@base-ui/react/dialog";
+import { Badge } from "@/components/ui/badge";
 
 // ============================================================================
-// Icon mapping (matches navigation.ts icon strings to Lucide components)
+// Icon mapping
 // ============================================================================
 
 const ICON_MAP: Record<string, LucideIcon> = {
@@ -74,7 +76,7 @@ const ICON_MAP: Record<string, LucideIcon> = {
 };
 
 // ============================================================================
-// Static data for the palette
+// Static items
 // ============================================================================
 
 interface ICommandItem {
@@ -83,7 +85,7 @@ interface ICommandItem {
   description: string;
   icon: LucideIcon;
   href: string;
-  group: "pages" | "actions";
+  group: "pages" | "actions" | "clients" | "properties" | "projects";
 }
 
 const PAGE_ITEMS: ICommandItem[] = [
@@ -116,7 +118,20 @@ const ACTION_ITEMS: ICommandItem[] = [
   { id: "search-client", label: "Rechercher un client", description: "Trouver un client par nom ou telephone", icon: Search, href: "/clients?focus=search", group: "actions" },
 ];
 
-const ALL_ITEMS = [...PAGE_ITEMS, ...ACTION_ITEMS];
+const STATIC_ITEMS = [...PAGE_ITEMS, ...ACTION_ITEMS];
+
+// Pipeline stage labels
+const STAGE_LABELS: Record<string, string> = {
+  NEW: "Nouveau",
+  CONTACTED: "Contacté",
+  QUALIFIED: "Qualifié",
+  VISIT_SCHEDULED: "Prospection",
+  VISITED: "Visité",
+  NEGOTIATION: "Négociation",
+  RESERVED: "Réservé",
+  SIGNED: "Signé",
+  CLOSED: "Fermé",
+};
 
 // ============================================================================
 // Component
@@ -126,8 +141,11 @@ export function CommandPalette() {
   const [open, setOpen] = React.useState(false);
   const [query, setQuery] = React.useState("");
   const [selectedIndex, setSelectedIndex] = React.useState(0);
+  const [liveResults, setLiveResults] = React.useState<ICommandItem[]>([]);
+  const [isSearching, setIsSearching] = React.useState(false);
   const inputRef = React.useRef<HTMLInputElement>(null);
   const listRef = React.useRef<HTMLDivElement>(null);
+  const debounceRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
   const router = useRouter();
 
   // Keyboard shortcut to open
@@ -147,30 +165,105 @@ export function CommandPalette() {
     if (open) {
       setQuery("");
       setSelectedIndex(0);
-      // Small delay to let the dialog render
+      setLiveResults([]);
       const timer = setTimeout(() => inputRef.current?.focus(), 50);
       return () => clearTimeout(timer);
     }
   }, [open]);
 
-  // Filter items
+  // Live search with debounce
+  React.useEffect(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+
+    const q = query.trim();
+    if (q.length < 2) {
+      setLiveResults([]);
+      setIsSearching(false);
+      return;
+    }
+
+    setIsSearching(true);
+    debounceRef.current = setTimeout(async () => {
+      try {
+        const res = await fetch(`/api/v1/search?q=${encodeURIComponent(q)}`);
+        if (!res.ok) { setIsSearching(false); return; }
+        const json = await res.json();
+        const data = json.data ?? json;
+
+        const results: ICommandItem[] = [];
+
+        // Clients
+        for (const c of data.clients ?? []) {
+          results.push({
+            id: `client-${c.id}`,
+            label: `${c.firstName} ${c.lastName}`,
+            description: `${c.phone} · ${STAGE_LABELS[c.pipelineStage] ?? c.pipelineStage}`,
+            icon: Users,
+            href: `/clients/${c.id}`,
+            group: "clients",
+          });
+        }
+
+        // Properties
+        for (const p of data.properties ?? []) {
+          results.push({
+            id: `property-${p.id}`,
+            label: p.name,
+            description: `${p.type} · ${p.status}${p.lotNumber ? ` · Lot ${p.lotNumber}` : ""}`,
+            icon: Home,
+            href: `/portfolio/${p.id}`,
+            group: "properties",
+          });
+        }
+
+        // Projects
+        for (const pr of data.projects ?? []) {
+          results.push({
+            id: `project-${pr.id}`,
+            label: pr.name,
+            description: `${pr.address ?? ""} · ${pr.status}`,
+            icon: Building2,
+            href: `/projects/${pr.id}`,
+            group: "projects",
+          });
+        }
+
+        setLiveResults(results);
+      } catch {
+        // fail silently
+      } finally {
+        setIsSearching(false);
+      }
+    }, 300);
+
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+  }, [query]);
+
+  // Filter static items
   const normalizedQuery = query.toLowerCase().trim();
-  const filtered = normalizedQuery
-    ? ALL_ITEMS.filter(
+  const filteredStatic = normalizedQuery
+    ? STATIC_ITEMS.filter(
         (item) =>
           item.label.toLowerCase().includes(normalizedQuery) ||
           item.description.toLowerCase().includes(normalizedQuery)
       )
-    : ALL_ITEMS;
+    : STATIC_ITEMS;
 
-  const pageResults = filtered.filter((i) => i.group === "pages");
-  const actionResults = filtered.filter((i) => i.group === "actions");
-  const flatResults = [...actionResults, ...pageResults];
+  const actionResults = filteredStatic.filter((i) => i.group === "actions");
+  const pageResults = filteredStatic.filter((i) => i.group === "pages");
+  const clientResults = liveResults.filter((i) => i.group === "clients");
+  const propertyResults = liveResults.filter((i) => i.group === "properties");
+  const projectResults = liveResults.filter((i) => i.group === "projects");
+
+  // Build flat results: live results first, then static
+  const flatResults = [...clientResults, ...propertyResults, ...projectResults, ...actionResults, ...pageResults];
 
   // Reset index when filter changes
   React.useEffect(() => {
     setSelectedIndex(0);
-  }, [query]);
+  }, [query, liveResults.length]);
 
   // Navigate to item
   function navigateTo(item: ICommandItem) {
@@ -178,7 +271,7 @@ export function CommandPalette() {
     router.push(item.href);
   }
 
-  // Keyboard navigation inside the list
+  // Keyboard navigation
   function handleKeyDown(e: React.KeyboardEvent) {
     if (e.key === "ArrowDown") {
       e.preventDefault();
@@ -203,12 +296,15 @@ export function CommandPalette() {
   }, [selectedIndex]);
 
   // Render a group of items
-  function renderGroup(title: string, items: ICommandItem[], indexOffset: number) {
+  function renderGroup(title: string, items: ICommandItem[], indexOffset: number, badge?: string) {
     if (items.length === 0) return null;
     return (
       <div key={title}>
-        <div className="px-3 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+        <div className="px-3 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-2">
           {title}
+          {badge && (
+            <Badge variant="secondary" className="text-[10px] h-4 px-1.5 font-bold">{badge}</Badge>
+          )}
         </div>
         {items.map((item, i) => {
           const globalIndex = indexOffset + i;
@@ -252,6 +348,14 @@ export function CommandPalette() {
     );
   }
 
+  // Calculate offsets for indexing
+  let offset = 0;
+  const clientOffset = offset; offset += clientResults.length;
+  const propertyOffset = offset; offset += propertyResults.length;
+  const projectOffset = offset; offset += projectResults.length;
+  const actionOffset = offset; offset += actionResults.length;
+  const pageOffset = offset;
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogPortal>
@@ -264,14 +368,18 @@ export function CommandPalette() {
 
           {/* Search input */}
           <div className="flex items-center gap-3 border-b border-border px-4 py-3">
-            <Search className="h-5 w-5 text-muted-foreground shrink-0" />
+            {isSearching ? (
+              <Loader2 className="h-5 w-5 text-primary shrink-0 animate-spin" />
+            ) : (
+              <Search className="h-5 w-5 text-muted-foreground shrink-0" />
+            )}
             <input
               ref={inputRef}
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="Rechercher une page ou une action..."
+              placeholder="Rechercher clients, biens, pages..."
               className="flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground outline-none"
             />
             <kbd className="hidden sm:inline-flex items-center gap-1 rounded-md border border-border bg-muted px-1.5 py-0.5 text-xs font-medium text-muted-foreground">
@@ -281,14 +389,20 @@ export function CommandPalette() {
 
           {/* Results */}
           <div ref={listRef} className="max-h-[60vh] overflow-y-auto p-2">
-            {flatResults.length === 0 ? (
+            {flatResults.length === 0 && !isSearching ? (
               <div className="py-12 text-center text-sm text-muted-foreground">
-                Aucun resultat pour &laquo;{query}&raquo;
+                {query.length >= 2
+                  ? <>Aucun resultat pour &laquo;{query}&raquo;</>
+                  : "Tapez pour rechercher clients, biens ou naviguer..."
+                }
               </div>
             ) : (
               <>
-                {renderGroup("Actions rapides", actionResults, 0)}
-                {renderGroup("Pages", pageResults, actionResults.length)}
+                {renderGroup("Clients", clientResults, clientOffset, clientResults.length > 0 ? `${clientResults.length}` : undefined)}
+                {renderGroup("Biens", propertyResults, propertyOffset, propertyResults.length > 0 ? `${propertyResults.length}` : undefined)}
+                {renderGroup("Programmes", projectResults, projectOffset, projectResults.length > 0 ? `${projectResults.length}` : undefined)}
+                {renderGroup("Actions rapides", actionResults, actionOffset)}
+                {renderGroup("Pages", pageResults, pageOffset)}
               </>
             )}
           </div>
@@ -323,7 +437,6 @@ export function CommandPaletteHint() {
   return (
     <button
       onClick={() => {
-        // Dispatch Ctrl+K to open the palette
         document.dispatchEvent(
           new KeyboardEvent("keydown", {
             key: "k",
