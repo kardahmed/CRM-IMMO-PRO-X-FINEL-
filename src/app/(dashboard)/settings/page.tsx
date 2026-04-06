@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import {
   Settings2,
   MessageCircle,
-  Facebook,
+  Send,
   MapPin,
   Building2,
   Users2,
@@ -365,7 +365,7 @@ export default function SettingsPage() {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-500/10">
-                    <Facebook className="h-5 w-5 text-blue-600" />
+                    <Send className="h-5 w-5 text-blue-600" />
                   </div>
                   <div>
                     <CardTitle className="text-base font-semibold">
