@@ -10,7 +10,6 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import {
-  Settings,
   Shield,
   Globe,
   Mail,
@@ -69,6 +68,7 @@ interface IPlatformConfig {
   sessionTimeoutMinutes: number;
 }
 
+// TODO: charger la config depuis /api/v1/admin/config
 const DEFAULT_CONFIG: IPlatformConfig = {
   platformName: "CRM IMMO PRO-X",
   platformUrl: "https://crm-immo-pro-x.vercel.app",
@@ -219,36 +219,6 @@ function ToggleField({
         <p className="text-xs text-muted-foreground">{description}</p>
       </div>
       <Switch checked={checked} onCheckedChange={onChange} />
-    </div>
-  );
-}
-
-/* -------------------------------------------------------------------------- */
-/*  Status Indicators                                                         */
-/* -------------------------------------------------------------------------- */
-
-function ServiceStatus({ name, status, detail }: { name: string; status: "ok" | "warning" | "error"; detail: string }) {
-  const colors = {
-    ok: "text-emerald-500 bg-emerald-500/10",
-    warning: "text-amber-500 bg-amber-500/10",
-    error: "text-red-500 bg-red-500/10",
-  };
-  const icons = {
-    ok: CheckCircle2,
-    warning: AlertTriangle,
-    error: AlertTriangle,
-  };
-  const StatusIcon = icons[status];
-
-  return (
-    <div className="flex items-center justify-between py-3 px-4 rounded-2xl bg-accent/30 border border-border/50">
-      <div className="flex items-center gap-3">
-        <div className={cn("p-1.5 rounded-lg", colors[status])}>
-          <StatusIcon className="h-3.5 w-3.5" />
-        </div>
-        <span className="text-sm font-bold text-foreground">{name}</span>
-      </div>
-      <span className="text-xs text-muted-foreground font-mono">{detail}</span>
     </div>
   );
 }
@@ -604,15 +574,16 @@ export default function SuperAdminSettings() {
 
             <div className="md:col-span-2">
               <ConfigSection icon={Shield} title="Audit de sécurité" description="Vérification en temps réel des services">
-                <div className="grid gap-3 md:grid-cols-2">
-                  <ServiceStatus name="Supabase Auth" status="ok" detail="v2.72.0 — Healthy" />
-                  <ServiceStatus name="PostgreSQL" status="ok" detail="15.6 — 42 connexions actives" />
-                  <ServiceStatus name="Supabase Realtime" status="ok" detail="2 channels actifs" />
-                  <ServiceStatus name="API Rate Limiter" status="ok" detail="0 IP bloquées" />
-                  <ServiceStatus name="Sentry Monitoring" status="warning" detail="DSN non configuré" />
-                  <ServiceStatus name="Stripe Billing" status="warning" detail="Mode test actif" />
+                <div className="py-6 px-4 rounded-2xl bg-accent/30 border border-border/50 text-center space-y-2">
+                  <p className="text-sm text-muted-foreground">
+                    Les vérifications de santé seront disponibles après connexion aux services de monitoring.
+                  </p>
                 </div>
-                <Button variant="outline" className="w-full border-border text-foreground hover:bg-accent rounded-xl mt-2">
+                <Button
+                  variant="outline"
+                  className="w-full border-border text-foreground hover:bg-accent rounded-xl mt-2"
+                  onClick={() => toast.info("Fonctionnalité en cours de développement")}
+                >
                   <RefreshCw className="h-4 w-4 mr-2" />
                   Relancer le diagnostic
                 </Button>
@@ -627,12 +598,9 @@ export default function SuperAdminSettings() {
             <ConfigSection icon={Server} title="Environnement" description="Informations sur le déploiement actuel">
               <div className="space-y-3">
                 {[
-                  { label: "Runtime", value: "Next.js 14 (App Router)" },
-                  { label: "Hosting", value: "Vercel — Edge Runtime" },
-                  { label: "Région", value: "eu-west-1 (Ireland)" },
-                  { label: "Base de données", value: "Supabase PostgreSQL 15.6" },
-                  { label: "Auth Provider", value: "Supabase Auth" },
-                  { label: "Node.js", value: "v20.x LTS" },
+                  { label: "Framework", value: "Next.js 14" },
+                  { label: "Base de données", value: "Supabase PostgreSQL" },
+                  { label: "Auth", value: "Supabase Auth" },
                 ].map((info) => (
                   <div key={info.label} className="flex items-center justify-between py-2 px-4 rounded-xl bg-accent/30 border border-border/50">
                     <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">{info.label}</span>
@@ -683,44 +651,17 @@ export default function SuperAdminSettings() {
 
             <div className="md:col-span-2">
               <ConfigSection icon={FileText} title="Version & Changelog" description="Historique des mises à jour de la plateforme">
-                <div className="space-y-4">
-                  {[
-                    { version: "v1.4.0", date: "06 Avr 2026", status: "current", changes: "Architecture super admin, découplage tenant, audit UI/UX complet" },
-                    { version: "v1.3.0", date: "28 Mar 2026", changes: "Migration Supabase Auth, suppression Clerk, Command Palette" },
-                    { version: "v1.2.0", date: "15 Mar 2026", changes: "Pipeline 9 étapes, automatisations, assistant IA intégré" },
-                    { version: "v1.1.0", date: "01 Mar 2026", changes: "Multi-tenant RLS, rôles utilisateurs, Facebook Leads" },
-                    { version: "v1.0.0", date: "15 Fév 2026", changes: "Lancement initial — Dashboard, clients, gestion de biens" },
-                  ].map((release) => (
-                    <div
-                      key={release.version}
-                      className={cn(
-                        "flex flex-col md:flex-row md:items-center gap-3 py-4 px-5 rounded-2xl border",
-                        release.status === "current"
-                          ? "bg-primary/5 border-primary/20"
-                          : "bg-accent/30 border-border/50"
-                      )}
-                    >
-                      <div className="flex items-center gap-3 shrink-0">
-                        <Badge
-                          variant="outline"
-                          className={cn(
-                            "font-mono font-black text-sm",
-                            release.status === "current"
-                              ? "text-primary border-primary/30"
-                              : "text-muted-foreground border-border"
-                          )}
-                        >
-                          {release.version}
-                        </Badge>
-                        <span className="text-xs text-muted-foreground font-bold tabular-nums">{release.date}</span>
-                        {release.status === "current" && (
-                          <Badge className="bg-primary/10 text-primary border-0 text-xs font-bold uppercase">Actuelle</Badge>
-                        )}
-                      </div>
-                      <p className="text-sm text-muted-foreground">{release.changes}</p>
-                    </div>
-                  ))}
+                <div className="flex items-center gap-3 py-4 px-5 rounded-2xl bg-primary/5 border border-primary/20">
+                  <Badge variant="outline" className="font-mono font-black text-sm text-primary border-primary/30">
+                    v1.4.0
+                  </Badge>
+                  <Badge className="bg-primary/10 text-primary border-0 text-xs font-bold uppercase">
+                    Version actuelle
+                  </Badge>
                 </div>
+                <p className="text-sm text-muted-foreground">
+                  Consultez le dépôt Git pour l&apos;historique complet des versions.
+                </p>
               </ConfigSection>
             </div>
           </div>
