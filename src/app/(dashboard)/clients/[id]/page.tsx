@@ -283,8 +283,15 @@ export default function ClientDetailPage() {
       <PipelineStepper currentStage={client.pipelineStage} />
 
       {/* Tabs */}
-      <Tabs defaultValue="visites" className="w-full mt-4">
+      <Tabs defaultValue="taches" className="w-full mt-4">
         <TabsList className="flex w-full justify-start overflow-x-auto border-b bg-transparent h-auto p-0 rounded-none gap-0 no-scrollbar">
+          <TabsTrigger
+            value="taches"
+            className="flex-shrink-0 gap-1.5 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none font-bold text-sm px-5 py-3"
+          >
+            <CheckSquare className="h-4 w-4" />
+            Tâches
+          </TabsTrigger>
           <TabsTrigger
             value="visites"
             className="flex-shrink-0 gap-1.5 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none font-bold text-sm px-5 py-3"
@@ -342,13 +349,6 @@ export default function ClientDetailPage() {
              Notes
            </TabsTrigger>
           <TabsTrigger
-            value="taches"
-            className="flex-shrink-0 gap-1.5 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none font-bold text-sm px-5 py-3"
-          >
-            <CheckSquare className="h-4 w-4" />
-            Tâches
-          </TabsTrigger>
-          <TabsTrigger
             value="historique"
             className="flex-shrink-0 gap-1.5 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none font-bold text-sm px-5 py-3"
           >
@@ -372,6 +372,10 @@ export default function ClientDetailPage() {
         </TabsList>
 
         <div className="mt-4">
+          <TabsContent value="taches">
+            <TabTaches tasks={client.tasks || []} clientId={client.id} />
+          </TabsContent>
+
           <TabsContent value="visites">
             <TabVisites visits={client.visits || []} />
           </TabsContent>
@@ -409,10 +413,6 @@ export default function ClientDetailPage() {
 
           <TabsContent value="notes">
             <TabNotes notes={client.notesLog || []} />
-          </TabsContent>
-
-          <TabsContent value="taches">
-            <TabTaches tasks={client.tasks || []} clientId={client.id} />
           </TabsContent>
 
           <TabsContent value="historique">
