@@ -67,6 +67,7 @@ async function getTenantInfo(): Promise<ITenantInfo | null> {
 }
 
 import { SuperSwitcher } from "@/components/admin/SuperSwitcher";
+import { CommandPalette } from "@/components/shared/CommandPalette";
 
 export default async function DashboardLayout({
   children,
@@ -99,6 +100,7 @@ export default async function DashboardLayout({
           </main>
         </div>
       </div>
+      <CommandPalette />
       <SuperSwitcher />
       <Toaster richColors position="top-right" toastOptions={{ className: "font-sans" }} />
     </SidebarProvider>

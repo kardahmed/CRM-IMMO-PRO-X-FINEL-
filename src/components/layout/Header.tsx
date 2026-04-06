@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { NotificationBell } from "@/components/layout/NotificationBell";
 import { useSidebar } from "@/hooks/useSidebar";
 import { GlobalSearch } from "@/components/layout/GlobalSearch";
+import { CommandPaletteHint } from "@/components/shared/CommandPalette";
 import { useSupabaseAuth } from "@/hooks/useSupabaseAuth";
 import {
   DropdownMenu,

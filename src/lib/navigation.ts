@@ -28,6 +28,7 @@ export interface INavSection {
 // ============================================================================
 
 const NAV_ITEMS: Record<ModuleId, INavItem> = {
+  // --- PRINCIPAL (daily workflow) ---
   DASHBOARD: {
     id: "dashboard",
     label: "Tableau de bord",
@@ -51,20 +52,13 @@ const NAV_ITEMS: Record<ModuleId, INavItem> = {
   },
   PLANNING: {
     id: "planning",
-    label: "Planning",
+    label: "Taches",
     icon: "calendar",
     href: "/planning",
     moduleId: "PLANNING",
   },
-  NOTIFICATIONS: {
-    id: "notifications",
-    label: "Notifications",
-    icon: "bell",
-    href: "/notifications",
-    moduleId: "NOTIFICATIONS",
-  },
 
-  // PROMOTION
+  // --- IMMOBILIER (property management) ---
   PROJECTS: {
     id: "projects",
     label: "Programmes",
@@ -72,29 +66,6 @@ const NAV_ITEMS: Record<ModuleId, INavItem> = {
     href: "/projects",
     moduleId: "PROJECTS",
   },
-  CONSTRUCTION_PROGRESS: {
-    id: "construction",
-    label: "Avancement",
-    icon: "hard-hat",
-    href: "/construction",
-    moduleId: "CONSTRUCTION_PROGRESS",
-  },
-  AVAILABILITY_GRID: {
-    id: "availability",
-    label: "Disponibilite",
-    icon: "grid-3x3",
-    href: "/availability",
-    moduleId: "AVAILABILITY_GRID",
-  },
-  PAYMENT_SCHEDULE: {
-    id: "payments",
-    label: "Echeancier",
-    icon: "banknote",
-    href: "/payments",
-    moduleId: "PAYMENT_SCHEDULE",
-  },
-
-  // AGENCY
   PORTFOLIO: {
     id: "portfolio",
     label: "Portefeuille",
@@ -102,36 +73,22 @@ const NAV_ITEMS: Record<ModuleId, INavItem> = {
     href: "/portfolio",
     moduleId: "PORTFOLIO",
   },
-  OWNERS: {
-    id: "owners",
-    label: "Proprietaires",
-    icon: "user-check",
-    href: "/owners",
-    moduleId: "OWNERS",
+  GEOMAP: {
+    id: "geomap",
+    label: "Carte",
+    icon: "map",
+    href: "/map",
+    moduleId: "GEOMAP",
   },
-  MANDATES: {
-    id: "mandates",
-    label: "Mandats",
-    icon: "file-signature",
-    href: "/mandates",
-    moduleId: "MANDATES",
-  },
-  COMMISSIONS: {
-    id: "commissions",
-    label: "Commissions",
-    icon: "percent",
-    href: "/commissions",
-    moduleId: "COMMISSIONS",
-  },
-  TRANSACTION_TYPE: {
-    id: "transaction-type",
-    label: "Type transaction",
-    icon: "arrow-left-right",
-    href: "/transaction-type",
-    moduleId: "TRANSACTION_TYPE",
+  DOCUMENTS: {
+    id: "documents",
+    label: "Documents",
+    icon: "file-text",
+    href: "/documents",
+    moduleId: "DOCUMENTS",
   },
 
-  // Optionnels
+  // --- AUTOMATISATION (tools) ---
   AUTOMATIONS: {
     id: "automations",
     label: "Automatisations",
@@ -146,41 +103,6 @@ const NAV_ITEMS: Record<ModuleId, INavItem> = {
     href: "/ai",
     moduleId: "AI_AGENT",
   },
-  GEOMAP: {
-    id: "geomap",
-    label: "Carte",
-    icon: "map",
-    href: "/map",
-    moduleId: "GEOMAP",
-  },
-  CADASTRE: {
-    id: "cadastre",
-    label: "Cadastre",
-    icon: "map-pin",
-    href: "/cadastre",
-    moduleId: "CADASTRE",
-  },
-  PORTAL: {
-    id: "portal",
-    label: "Portail client",
-    icon: "globe",
-    href: "/portal-manager",
-    moduleId: "PORTAL",
-  },
-  PERFORMANCE: {
-    id: "performance",
-    label: "Performance",
-    icon: "trending-up",
-    href: "/performance",
-    moduleId: "PERFORMANCE",
-  },
-  DOCUMENTS: {
-    id: "documents",
-    label: "Documents",
-    icon: "file-text",
-    href: "/documents",
-    moduleId: "DOCUMENTS",
-  },
   OBJECTIVES: {
     id: "objectives",
     label: "Objectifs",
@@ -189,7 +111,7 @@ const NAV_ITEMS: Record<ModuleId, INavItem> = {
     moduleId: "OBJECTIVES",
   },
 
-  // Admin
+  // --- ADMINISTRATION ---
   SETTINGS: {
     id: "settings",
     label: "Parametres",
@@ -197,12 +119,101 @@ const NAV_ITEMS: Record<ModuleId, INavItem> = {
     href: "/settings",
     moduleId: "SETTINGS",
   },
+  PERFORMANCE: {
+    id: "performance",
+    label: "Performance",
+    icon: "trending-up",
+    href: "/performance",
+    moduleId: "PERFORMANCE",
+  },
   AUDIT_LOG: {
     id: "audit-log",
-    label: "Journal",
+    label: "Journal d'audit",
     icon: "scroll-text",
     href: "/audit-log",
     moduleId: "AUDIT_LOG",
+  },
+
+  // --- Removed from sidebar (merged into other pages) ---
+  // Notifications -> bell icon in header
+  NOTIFICATIONS: {
+    id: "notifications",
+    label: "Notifications",
+    icon: "bell",
+    href: "/notifications",
+    moduleId: "NOTIFICATIONS",
+  },
+  // Cadastre -> merged into Carte (GEOMAP)
+  CADASTRE: {
+    id: "cadastre",
+    label: "Cadastre",
+    icon: "map-pin",
+    href: "/cadastre",
+    moduleId: "CADASTRE",
+  },
+  // Disponibilite -> part of Portefeuille / Programmes
+  AVAILABILITY_GRID: {
+    id: "availability",
+    label: "Disponibilite",
+    icon: "grid-3x3",
+    href: "/availability",
+    moduleId: "AVAILABILITY_GRID",
+  },
+  // Construction -> part of Programmes detail
+  CONSTRUCTION_PROGRESS: {
+    id: "construction",
+    label: "Avancement",
+    icon: "hard-hat",
+    href: "/construction",
+    moduleId: "CONSTRUCTION_PROGRESS",
+  },
+  // Echeancier -> in client detail
+  PAYMENT_SCHEDULE: {
+    id: "payments",
+    label: "Echeancier",
+    icon: "banknote",
+    href: "/payments",
+    moduleId: "PAYMENT_SCHEDULE",
+  },
+  // Proprietaires -> part of Portefeuille
+  OWNERS: {
+    id: "owners",
+    label: "Proprietaires",
+    icon: "user-check",
+    href: "/owners",
+    moduleId: "OWNERS",
+  },
+  // Mandats -> part of Portefeuille
+  MANDATES: {
+    id: "mandates",
+    label: "Mandats",
+    icon: "file-signature",
+    href: "/mandates",
+    moduleId: "MANDATES",
+  },
+  // Commissions -> part of Performance
+  COMMISSIONS: {
+    id: "commissions",
+    label: "Commissions",
+    icon: "percent",
+    href: "/commissions",
+    moduleId: "COMMISSIONS",
+  },
+  // Transaction type -> in Settings
+  TRANSACTION_TYPE: {
+    id: "transaction-type",
+    label: "Type transaction",
+    icon: "arrow-left-right",
+    href: "/transaction-type",
+    moduleId: "TRANSACTION_TYPE",
+  },
+  // Portail client -> in Settings
+  PORTAL: {
+    id: "portal",
+    label: "Portail client",
+    icon: "globe",
+    href: "/portal-manager",
+    moduleId: "PORTAL",
   },
 };
 
@@ -216,40 +227,16 @@ const SECTION_ORDER: { title: string; modules: ModuleId[] }[] = [
     modules: ["DASHBOARD", "PIPELINE", "CLIENTS", "PLANNING"],
   },
   {
-    title: "Promotion",
-    modules: [
-      "PROJECTS",
-      "CONSTRUCTION_PROGRESS",
-      "AVAILABILITY_GRID",
-      "PAYMENT_SCHEDULE",
-    ],
+    title: "Immobilier",
+    modules: ["PORTFOLIO", "PROJECTS", "GEOMAP", "DOCUMENTS"],
   },
   {
-    title: "Agence",
-    modules: [
-      "PORTFOLIO",
-      "OWNERS",
-      "MANDATES",
-      "COMMISSIONS",
-      "TRANSACTION_TYPE",
-    ],
-  },
-  {
-    title: "Outils",
-    modules: [
-      "AUTOMATIONS",
-      "AI_AGENT",
-      "GEOMAP",
-      "CADASTRE",
-      "DOCUMENTS",
-      "OBJECTIVES",
-      "PERFORMANCE",
-      "PORTAL",
-    ],
+    title: "Automatisation",
+    modules: ["AUTOMATIONS", "AI_AGENT", "OBJECTIVES"],
   },
   {
     title: "Administration",
-    modules: ["NOTIFICATIONS", "SETTINGS", "AUDIT_LOG"],
+    modules: ["SETTINGS", "PERFORMANCE", "AUDIT_LOG"],
   },
 ];
 

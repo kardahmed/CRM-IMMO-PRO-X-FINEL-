@@ -1,28 +1,38 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { Building2, Settings2, Users2, Workflow, Link2, KeyRound, Mail, MessageCircle, Send, CheckCircle2, ShieldAlert, Loader2, UserPlus } from "lucide-react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Settings2,
+  MessageCircle,
+  Facebook,
+  MapPin,
+  Building2,
+  Users2,
+  Loader2,
+  Save,
+  Mail,
+  CalendarDays,
+  ExternalLink,
+  HelpCircle,
+} from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
+
+/* -------------------------------------------------------------------------- */
+/*  Types                                                                     */
+/* -------------------------------------------------------------------------- */
 
 interface ITenantSettings {
   agencyName?: string;
@@ -32,6 +42,14 @@ interface ITenantSettings {
   contactEmail?: string;
   smtp?: { host?: string; port?: string };
   facebookPageId?: string;
+  whatsappEnabled?: boolean;
+  whatsappApiToken?: string;
+  whatsappPhoneNumberId?: string;
+  facebookEnabled?: boolean;
+  facebookAppSecret?: string;
+  facebookWebhookToken?: string;
+  googleMapsEnabled?: boolean;
+  googleMapsApiKey?: string;
 }
 
 interface ITeamMember {
@@ -54,48 +72,64 @@ interface ITenant {
   users?: ITeamMember[];
 }
 
-interface IAutomationRule {
-  title: string;
-  description: string;
-  channel: string;
-  channelLabel: string;
-  pipelineStage: string;
-  isActive: boolean;
+/* -------------------------------------------------------------------------- */
+/*  Helpers                                                                   */
+/* -------------------------------------------------------------------------- */
+
+function planLabel(plan: string): string {
+  const map: Record<string, string> = {
+    STARTER: "Starter",
+    PRO: "Pro",
+    BUSINESS: "Business",
+    ENTERPRISE: "Enterprise",
+  };
+  return map[plan] ?? plan;
 }
 
-const DEFAULT_AUTOMATIONS: IAutomationRule[] = [
-  { title: "Visite Confirmee - Tache de rappel", description: "Creer automatiquement une tache \"Rappel Visite\" 24h avant.", channel: "internal", channelLabel: "Via Interne", pipelineStage: "VISIT_SCHEDULED", isActive: true },
-  { title: "Passage en \"Vendu\" - Email Bravo", description: "Envoyer le Template Email \"Felicitations\" au client.", channel: "smtp", channelLabel: "Via SMTP", pipelineStage: "SIGNED", isActive: false },
-  { title: "Nouveau Lead entrant - Message WhatsApp", description: "Envoyer un message de bienvenue automatique sur WhatsApp.", channel: "whatsapp", channelLabel: "Via WhatsApp API", pipelineStage: "NEW", isActive: true },
-];
+function typeLabel(type: string): string {
+  return type === "PROMOTION" ? "Promotion" : type === "AGENCY" ? "Agence" : type;
+}
+
+function planVariant(plan: string): "default" | "secondary" | "outline" {
+  if (plan === "ENTERPRISE" || plan === "BUSINESS") return "default";
+  if (plan === "PRO") return "secondary";
+  return "outline";
+}
+
+function formatDate(dateStr: string): string {
+  return new Date(dateStr).toLocaleDateString("fr-FR", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+}
+
+/* -------------------------------------------------------------------------- */
+/*  Component                                                                 */
+/* -------------------------------------------------------------------------- */
 
 export default function SettingsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [saving, setSaving] = useState(false);
   const [tenant, setTenant] = useState<ITenant | null>(null);
-
-  const [workspaceForm, setWorkspaceForm] = useState({
-    agencyName: "",
-    activityType: "",
-    address: "",
-    rcNumber: "",
-    contactEmail: "",
-  });
-
-  const [smtpForm, setSmtpForm] = useState({
-    host: "",
-    port: "",
-  });
-
-  const [facebookForm, setFacebookForm] = useState({
-    pageId: "",
-  });
-
   const [users, setUsers] = useState<ITeamMember[]>([]);
-  const [automationRules, setAutomationRules] = useState<IAutomationRule[]>(DEFAULT_AUTOMATIONS);
-  const [isInviteOpen, setIsInviteOpen] = useState(false);
-  const [inviteForm, setInviteForm] = useState({ email: "", firstName: "", lastName: "", role: "AGENT" });
+
+  /* -- Integration state -------------------------------------------------- */
+  const [whatsappEnabled, setWhatsappEnabled] = useState(false);
+  const [whatsappApiToken, setWhatsappApiToken] = useState("");
+  const [whatsappPhoneNumberId, setWhatsappPhoneNumberId] = useState("");
+  const [savingWhatsapp, setSavingWhatsapp] = useState(false);
+
+  const [facebookEnabled, setFacebookEnabled] = useState(false);
+  const [facebookAppSecret, setFacebookAppSecret] = useState("");
+  const [facebookWebhookToken, setFacebookWebhookToken] = useState("");
+  const [savingFacebook, setSavingFacebook] = useState(false);
+
+  const [googleMapsEnabled, setGoogleMapsEnabled] = useState(false);
+  const [googleMapsApiKey, setGoogleMapsApiKey] = useState("");
+  const [savingMaps, setSavingMaps] = useState(false);
+
+  /* -- Fetch -------------------------------------------------------------- */
 
   const fetchSettings = useCallback(async () => {
     try {
@@ -107,22 +141,16 @@ export default function SettingsPage() {
       if (data.users) setUsers(data.users);
 
       const s = data.settings ?? {};
-      setWorkspaceForm({
-        agencyName: s.agencyName ?? data.name ?? "",
-        activityType: s.activityType ?? "",
-        address: s.address ?? "",
-        rcNumber: s.rcNumber ?? "",
-        contactEmail: s.contactEmail ?? "",
-      });
-      setSmtpForm({
-        host: s.smtp?.host ?? "",
-        port: s.smtp?.port ?? "",
-      });
-      setFacebookForm({
-        pageId: s.facebookPageId ?? "",
-      });
+      setWhatsappEnabled(s.whatsappEnabled ?? false);
+      setWhatsappApiToken(s.whatsappApiToken ?? "");
+      setWhatsappPhoneNumberId(s.whatsappPhoneNumberId ?? "");
+      setFacebookEnabled(s.facebookEnabled ?? false);
+      setFacebookAppSecret(s.facebookAppSecret ?? "");
+      setFacebookWebhookToken(s.facebookWebhookToken ?? "");
+      setGoogleMapsEnabled(s.googleMapsEnabled ?? false);
+      setGoogleMapsApiKey(s.googleMapsApiKey ?? "");
     } catch {
-      setError("Erreur de chargement des données");
+      setError("Erreur de chargement des parametres");
       toast.error("Impossible de charger les parametres");
     } finally {
       setLoading(false);
@@ -133,7 +161,12 @@ export default function SettingsPage() {
     fetchSettings();
   }, [fetchSettings]);
 
-  async function saveSettings(settings: Partial<ITenantSettings>) {
+  /* -- Save helpers ------------------------------------------------------- */
+
+  async function saveSettings(
+    settings: Partial<ITenantSettings>,
+    setSaving: (v: boolean) => void,
+  ) {
     setSaving(true);
     try {
       const res = await fetch("/api/v1/settings", {
@@ -152,62 +185,39 @@ export default function SettingsPage() {
     }
   }
 
-  function handleSaveWorkspace() {
-    saveSettings({
-      agencyName: workspaceForm.agencyName,
-      activityType: workspaceForm.activityType,
-      address: workspaceForm.address,
-      rcNumber: workspaceForm.rcNumber,
-      contactEmail: workspaceForm.contactEmail,
-    });
-  }
-
-  function handleSaveSmtp() {
-    saveSettings({
-      smtp: { host: smtpForm.host, port: smtpForm.port },
-    });
+  function handleSaveWhatsapp() {
+    saveSettings(
+      {
+        whatsappEnabled,
+        whatsappApiToken,
+        whatsappPhoneNumberId,
+      },
+      setSavingWhatsapp,
+    );
   }
 
   function handleSaveFacebook() {
-    saveSettings({
-      facebookPageId: facebookForm.pageId,
-    });
+    saveSettings(
+      {
+        facebookEnabled,
+        facebookAppSecret,
+        facebookWebhookToken,
+      },
+      setSavingFacebook,
+    );
   }
 
-  async function handleToggleAutomation(index: number, isActive: boolean) {
-    const rule = automationRules[index];
-    setAutomationRules((prev) => prev.map((r, i) => i === index ? { ...r, isActive } : r));
-    try {
-      const res = await fetch("/api/v1/automations/config", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ pipelineStage: rule.pipelineStage, isActive }),
-      });
-      const json = await res.json();
-      if (!json.success) throw new Error(json.error ?? "Erreur");
-      toast.success(`Automatisation ${isActive ? "activee" : "desactivee"}`);
-    } catch {
-      setAutomationRules((prev) => prev.map((r, i) => i === index ? { ...r, isActive: !isActive } : r));
-      toast.error("Erreur lors de la mise a jour");
-    }
+  function handleSaveGoogleMaps() {
+    saveSettings(
+      {
+        googleMapsEnabled,
+        googleMapsApiKey,
+      },
+      setSavingMaps,
+    );
   }
 
-  async function handleInviteMember() {
-    if (!inviteForm.email || !inviteForm.firstName || !inviteForm.lastName) {
-      toast.error("Veuillez remplir tous les champs");
-      return;
-    }
-    setSaving(true);
-    try {
-      // For now, show a toast that the invite was "sent"
-      // A full invite system would require Clerk invite API integration
-      toast.success(`Invitation envoyee a ${inviteForm.email}`);
-      setIsInviteOpen(false);
-      setInviteForm({ email: "", firstName: "", lastName: "", role: "AGENT" });
-    } finally {
-      setSaving(false);
-    }
-  }
+  /* -- Loading / Error ---------------------------------------------------- */
 
   if (loading) {
     return (
@@ -221,324 +231,420 @@ export default function SettingsPage() {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
         <p className="text-destructive font-medium">{error}</p>
-        <Button variant="outline" onClick={() => { setError(null); fetchSettings(); }}>
-          Réessayer
+        <Button
+          variant="outline"
+          onClick={() => {
+            setError(null);
+            fetchSettings();
+          }}
+        >
+          Reessayer
         </Button>
       </div>
     );
   }
 
+  const activeUsersCount = users.filter((u) => u.isActive).length;
+
+  /* -- Render ------------------------------------------------------------- */
+
   return (
-    <div className="space-y-6 pb-10">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+    <div className="mx-auto max-w-4xl space-y-8 pb-16">
+      {/* ------------------------------------------------------------------ */}
+      {/*  Page header                                                       */}
+      {/* ------------------------------------------------------------------ */}
+      <div className="flex flex-col gap-1">
         <div className="flex items-center gap-3">
-          <div className="p-2.5 rounded-xl bg-slate-500/10 text-slate-600 dark:bg-slate-800 dark:text-slate-300">
-            <Settings2 className="h-6 w-6" />
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
+            <Settings2 className="h-5 w-5" />
           </div>
           <div>
-            <h1 className="text-2xl font-black uppercase tracking-tight">Parametres</h1>
-            <p className="text-sm text-muted-foreground font-medium">Configuration globale du Workspace</p>
+            <h1 className="text-2xl font-bold tracking-tight text-foreground">
+              Parametres
+            </h1>
+            <p className="text-sm text-muted-foreground">
+              Gerez vos integrations et la configuration de votre workspace.
+            </p>
           </div>
         </div>
-        {tenant && (
-          <Badge variant="outline" className="text-xs font-bold uppercase">
-            {tenant.plan} - {tenant.type}
-          </Badge>
-        )}
       </div>
 
-      <Tabs defaultValue="workspace" className="w-full">
-        <TabsList className="w-full justify-start border-b bg-transparent h-auto p-0 rounded-none gap-6 overflow-x-auto">
-          <TabsTrigger
-            value="workspace"
-            className="gap-2 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none font-bold px-1 py-3"
-          >
-            <Building2 className="h-4 w-4" /> Profil Workspace
-          </TabsTrigger>
-          <TabsTrigger
-            value="users"
-            className="gap-2 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none font-bold px-1 py-3"
-          >
-            <Users2 className="h-4 w-4" /> Utilisateurs
-          </TabsTrigger>
-          <TabsTrigger
-            value="integrations"
-            className="gap-2 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none font-bold px-1 py-3"
-          >
-            <Link2 className="h-4 w-4" /> Integrations
-          </TabsTrigger>
-          <TabsTrigger
-            value="automations"
-            className="gap-2 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none font-bold px-1 py-3"
-          >
-            <Workflow className="h-4 w-4" /> Automatisations
-          </TabsTrigger>
-        </TabsList>
-
-        <div className="mt-6">
-          {/* TAB: WORKSPACE */}
-          <TabsContent value="workspace" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg font-black">Informations de l&apos;entreprise</CardTitle>
-                <CardDescription>Ces informations seront visibles sur vos contrats et emails.</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="flex flex-col sm:flex-row gap-6 items-start">
-                  <div className="w-24 h-24 rounded-xl border-2 border-dashed flex items-center justify-center bg-accent/50 cursor-pointer hover:bg-accent transition-colors">
-                    <span className="text-xs font-bold text-muted-foreground text-center">Upload Logo</span>
-                  </div>
-                  <div className="flex-1 space-y-4 w-full">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="space-y-1.5">
-                        <label className="text-xs font-bold uppercase text-muted-foreground">Nom de l&apos;agence</label>
-                        <Input value={workspaceForm.agencyName} onChange={(e) => setWorkspaceForm((prev) => ({ ...prev, agencyName: e.target.value }))} />
-                      </div>
-                      <div className="space-y-1.5">
-                        <label className="text-xs font-bold uppercase text-muted-foreground">Type d&apos;activite</label>
-                        <Input value={workspaceForm.activityType} onChange={(e) => setWorkspaceForm((prev) => ({ ...prev, activityType: e.target.value }))} />
-                      </div>
-                      <div className="space-y-1.5 md:col-span-2">
-                        <label className="text-xs font-bold uppercase text-muted-foreground">Adresse complete</label>
-                        <Textarea value={workspaceForm.address} onChange={(e) => setWorkspaceForm((prev) => ({ ...prev, address: e.target.value }))} className="resize-none" />
-                      </div>
-                      <div className="space-y-1.5">
-                        <label className="text-xs font-bold uppercase text-muted-foreground">N RC / SIRET</label>
-                        <Input value={workspaceForm.rcNumber} onChange={(e) => setWorkspaceForm((prev) => ({ ...prev, rcNumber: e.target.value }))} />
-                      </div>
-                      <div className="space-y-1.5">
-                        <label className="text-xs font-bold uppercase text-muted-foreground">Email de contact principal</label>
-                        <Input value={workspaceForm.contactEmail} onChange={(e) => setWorkspaceForm((prev) => ({ ...prev, contactEmail: e.target.value }))} />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div className="flex justify-end pt-4 border-t">
-                  <Button className="font-bold" onClick={handleSaveWorkspace} disabled={saving}>
-                    {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    Sauvegarder les modifications
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* TAB: USERS */}
-          <TabsContent value="users" className="space-y-6">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between pb-4 border-b">
-                <div>
-                  <CardTitle className="text-lg font-black">Membres de l&apos;equipe</CardTitle>
-                  <CardDescription>Gerez les acces et les roles de vos collaborateurs.</CardDescription>
-                </div>
-                <Button size="sm" className="font-bold gap-1.5" onClick={() => setIsInviteOpen(true)}>
-                  <UserPlus className="h-4 w-4" /> Ajouter un membre
-                </Button>
-              </CardHeader>
-              <CardContent className="p-0">
-                {users.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
-                    <Users2 className="h-10 w-10 mb-3 opacity-40" />
-                    <p className="font-bold">Aucun utilisateur</p>
-                  </div>
-                ) : (
-                  <table className="w-full text-sm text-left">
-                    <thead className="text-xs uppercase bg-accent/30 text-muted-foreground">
-                      <tr>
-                        <th className="px-6 py-4 font-bold">Utilisateur</th>
-                        <th className="px-6 py-4 font-bold">Role</th>
-                        <th className="px-6 py-4 font-bold">Statut</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {users.map((u) => (
-                        <tr key={u.id} className="border-b last:border-0 hover:bg-accent/10">
-                          <td className="px-6 py-4">
-                            <p className="font-bold">{u.firstName} {u.lastName}</p>
-                            <p className="text-xs text-muted-foreground">{u.email}</p>
-                          </td>
-                          <td className="px-6 py-4">
-                            <Badge variant="outline" className="font-black text-xs uppercase">{u.role}</Badge>
-                          </td>
-                          <td className="px-6 py-4">
-                            {u.isActive ? (
-                              <Badge className="bg-green-100 text-green-700 hover:bg-green-100 border-none">Actif</Badge>
-                            ) : (
-                              <Badge variant="secondary" className="text-muted-foreground">Inactif</Badge>
-                            )}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Invite Member Dialog */}
-            <Dialog open={isInviteOpen} onOpenChange={setIsInviteOpen}>
-              <DialogContent className="sm:max-w-md">
-                <DialogHeader>
-                  <DialogTitle className="text-xl font-black flex items-center gap-2">
-                    <UserPlus className="h-5 w-5 text-primary" /> Inviter un membre
-                  </DialogTitle>
-                </DialogHeader>
-                <div className="space-y-4 py-4">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <label className="text-xs font-bold uppercase text-muted-foreground">Prenom</label>
-                      <Input value={inviteForm.firstName} onChange={(e) => setInviteForm((p) => ({ ...p, firstName: e.target.value }))} placeholder="Prenom" />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-xs font-bold uppercase text-muted-foreground">Nom</label>
-                      <Input value={inviteForm.lastName} onChange={(e) => setInviteForm((p) => ({ ...p, lastName: e.target.value }))} placeholder="Nom" />
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-xs font-bold uppercase text-muted-foreground">Email</label>
-                    <Input type="email" value={inviteForm.email} onChange={(e) => setInviteForm((p) => ({ ...p, email: e.target.value }))} placeholder="email@exemple.com" />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-xs font-bold uppercase text-muted-foreground">Role</label>
-                    <Select value={inviteForm.role} onValueChange={(v: string | null) => setInviteForm((p) => ({ ...p, role: v ?? "AGENT" }))}>
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="CEO">CEO</SelectItem>
-                        <SelectItem value="SUPERVISOR">Superviseur</SelectItem>
-                        <SelectItem value="AGENT">Agent</SelectItem>
-                        <SelectItem value="ASSISTANT">Assistant</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-                <Button className="w-full font-bold" onClick={handleInviteMember} disabled={saving}>
-                  {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Envoyer l&apos;invitation
-                </Button>
-              </DialogContent>
-            </Dialog>
-          </TabsContent>
-
-          {/* TAB: INTEGRATIONS */}
-          <TabsContent value="integrations" className="space-y-6">
-             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <Card>
-                  <CardHeader className="pb-3 border-b">
-                    <CardTitle className="text-base font-black flex items-center justify-between">
-                      <span className="flex items-center gap-2"><MessageCircle className="h-5 w-5 text-green-500" /> WhatsApp API</span>
-                      <Badge className="bg-green-100 text-green-700 bg-opacity-100 gap-1"><CheckCircle2 className="h-3 w-3" /> Connecte</Badge>
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="pt-4 space-y-4">
-                    <div className="space-y-1.5">
-                      <label className="text-xs font-bold uppercase text-muted-foreground">Access Token</label>
-                      <Input type="password" value="************************" readOnly className="font-mono text-xs" />
-                    </div>
-                    <Button variant="outline" size="sm" className="w-full font-bold">Reconfigurer</Button>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader className="pb-3 border-b">
-                    <CardTitle className="text-base font-black flex items-center justify-between">
-                      <span className="flex items-center gap-2"><KeyRound className="h-5 w-5 text-blue-500" /> Google Maps API</span>
-                      <Badge className="bg-green-100 text-green-700 bg-opacity-100 gap-1"><CheckCircle2 className="h-3 w-3" /> Connecte</Badge>
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="pt-4 space-y-4">
-                    <div className="space-y-1.5">
-                      <label className="text-xs font-bold uppercase text-muted-foreground">Cle API (NEXT_PUBLIC_GOOGLE_MAPS_API_KEY)</label>
-                      <Input type="password" value="************************" readOnly className="font-mono text-xs" />
-                    </div>
-                    <Button variant="outline" size="sm" className="w-full font-bold text-muted-foreground" disabled>Gere via Variables d&apos;Env</Button>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader className="pb-3 border-b">
-                    <CardTitle className="text-base font-black flex items-center justify-between">
-                      <span className="flex items-center gap-2"><Mail className="h-5 w-5 text-gray-500" /> SMTP Email</span>
-                      <Badge variant="secondary" className="text-muted-foreground gap-1"><ShieldAlert className="h-3 w-3" /> Non Configure</Badge>
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="pt-4 space-y-4">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                       <div className="space-y-1.5">
-                        <label className="text-xs font-bold uppercase text-muted-foreground">Hote SMTP</label>
-                        <Input placeholder="smtp.mailtrap.io" value={smtpForm.host} onChange={(e) => setSmtpForm((prev) => ({ ...prev, host: e.target.value }))} />
-                      </div>
-                      <div className="space-y-1.5">
-                        <label className="text-xs font-bold uppercase text-muted-foreground">Port</label>
-                        <Input placeholder="587" value={smtpForm.port} onChange={(e) => setSmtpForm((prev) => ({ ...prev, port: e.target.value }))} />
-                      </div>
-                    </div>
-                    <Button size="sm" className="w-full font-bold" onClick={handleSaveSmtp} disabled={saving}>
-                      {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                      Connecter SMTP
-                    </Button>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader className="pb-3 border-b">
-                    <CardTitle className="text-base font-black flex items-center justify-between">
-                      <span className="flex items-center gap-2"><Send className="h-5 w-5 text-blue-600" /> Facebook Leads</span>
-                      <Badge variant="secondary" className="text-muted-foreground gap-1"><ShieldAlert className="h-3 w-3" /> Non Configure</Badge>
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="pt-4 space-y-4">
-                    <div className="space-y-1.5">
-                      <label className="text-xs font-bold uppercase text-muted-foreground">ID Page Facebook</label>
-                      <Input placeholder="1234567890" value={facebookForm.pageId} onChange={(e) => setFacebookForm((prev) => ({ ...prev, pageId: e.target.value }))} />
-                    </div>
-                    <Button size="sm" className="w-full font-bold bg-[#1877F2] text-white hover:bg-[#1877F2]/90" onClick={handleSaveFacebook} disabled={saving}>
-                      {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                      Connexion Facebook
-                    </Button>
-                  </CardContent>
-                </Card>
-             </div>
-          </TabsContent>
-
-          {/* TAB: AUTOMATIONS */}
-          <TabsContent value="automations" className="space-y-6">
-            <Card>
-              <CardHeader className="border-b pb-4">
-                <CardTitle className="text-lg font-black flex items-center gap-2">
-                  <Workflow className="h-5 w-5 text-primary" /> Moteur de Regles Automatiques
-                </CardTitle>
-                <CardDescription>Automatisez les taches chronophages lors des changements d&apos;etapes dans le pipeline.</CardDescription>
-              </CardHeader>
-              <CardContent className="p-0">
-                {automationRules.map((rule, index) => (
-                  <div key={index} className={`p-4 flex items-center justify-between hover:bg-accent/10 transition-colors ${index < automationRules.length - 1 ? "border-b" : ""}`}>
-                    <div>
-                      <h4 className="font-black text-sm">{rule.title}</h4>
-                      <p className="text-xs text-muted-foreground mt-0.5">{rule.description}</p>
-                    </div>
-                    <div className="flex flex-col items-end gap-2">
-                      <Switch
-                        checked={rule.isActive}
-                        onCheckedChange={(checked: boolean) => handleToggleAutomation(index, checked)}
-                        size="sm"
-                      />
-                      <Badge
-                        variant="outline"
-                        className={`text-xs uppercase font-bold ${rule.channel === "whatsapp" ? "text-green-600 border-green-200" : ""}`}
-                      >
-                        {rule.channelLabel}
-                      </Badge>
-                    </div>
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
-          </TabsContent>
+      {/* ------------------------------------------------------------------ */}
+      {/*  Section: Integrations Messagerie                                  */}
+      {/* ------------------------------------------------------------------ */}
+      <section className="space-y-4">
+        <div>
+          <h2 className="text-lg font-semibold text-foreground">
+            Integrations Messagerie
+          </h2>
+          <p className="text-sm text-muted-foreground">
+            Connectez vos canaux de communication pour automatiser vos echanges.
+          </p>
         </div>
-      </Tabs>
+
+        <div className="grid grid-cols-1 gap-4">
+          {/* WhatsApp Business -------------------------------------------- */}
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-green-500/10">
+                    <MessageCircle className="h-5 w-5 text-green-600" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-base font-semibold">
+                      WhatsApp Business
+                    </CardTitle>
+                    <CardDescription>
+                      Envoyez des messages automatiques via l&apos;API WhatsApp
+                      Business.
+                    </CardDescription>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Label htmlFor="whatsapp-toggle" className="text-xs text-muted-foreground">
+                    {whatsappEnabled ? "Actif" : "Inactif"}
+                  </Label>
+                  <Switch
+                    id="whatsapp-toggle"
+                    checked={whatsappEnabled}
+                    onCheckedChange={(val: boolean) => setWhatsappEnabled(val)}
+                  />
+                </div>
+              </div>
+            </CardHeader>
+
+            {whatsappEnabled && (
+              <>
+                <CardContent className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="wa-token" className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                      API Token
+                    </Label>
+                    <Input
+                      id="wa-token"
+                      type="password"
+                      placeholder="EAAxxxxxxx..."
+                      value={whatsappApiToken}
+                      onChange={(e) => setWhatsappApiToken(e.target.value)}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="wa-phone" className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                      Phone Number ID
+                    </Label>
+                    <Input
+                      id="wa-phone"
+                      placeholder="1234567890"
+                      value={whatsappPhoneNumberId}
+                      onChange={(e) => setWhatsappPhoneNumberId(e.target.value)}
+                    />
+                  </div>
+                </CardContent>
+                <CardFooter className="justify-end">
+                  <Button
+                    size="sm"
+                    onClick={handleSaveWhatsapp}
+                    disabled={savingWhatsapp}
+                  >
+                    {savingWhatsapp ? (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    ) : (
+                      <Save className="mr-2 h-4 w-4" />
+                    )}
+                    Sauvegarder
+                  </Button>
+                </CardFooter>
+              </>
+            )}
+          </Card>
+
+          {/* Facebook Leads ----------------------------------------------- */}
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-500/10">
+                    <Facebook className="h-5 w-5 text-blue-600" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-base font-semibold">
+                      Facebook Leads
+                    </CardTitle>
+                    <CardDescription>
+                      Importez automatiquement vos leads depuis Facebook Ads.
+                    </CardDescription>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Label htmlFor="facebook-toggle" className="text-xs text-muted-foreground">
+                    {facebookEnabled ? "Actif" : "Inactif"}
+                  </Label>
+                  <Switch
+                    id="facebook-toggle"
+                    checked={facebookEnabled}
+                    onCheckedChange={(val: boolean) => setFacebookEnabled(val)}
+                  />
+                </div>
+              </div>
+            </CardHeader>
+
+            {facebookEnabled && (
+              <>
+                <CardContent className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="fb-secret" className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                      App Secret
+                    </Label>
+                    <Input
+                      id="fb-secret"
+                      type="password"
+                      placeholder="Votre App Secret Facebook"
+                      value={facebookAppSecret}
+                      onChange={(e) => setFacebookAppSecret(e.target.value)}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="fb-webhook" className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                      Webhook Verify Token
+                    </Label>
+                    <Input
+                      id="fb-webhook"
+                      placeholder="Token de verification du webhook"
+                      value={facebookWebhookToken}
+                      onChange={(e) => setFacebookWebhookToken(e.target.value)}
+                    />
+                  </div>
+                </CardContent>
+                <CardFooter className="justify-end">
+                  <Button
+                    size="sm"
+                    onClick={handleSaveFacebook}
+                    disabled={savingFacebook}
+                  >
+                    {savingFacebook ? (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    ) : (
+                      <Save className="mr-2 h-4 w-4" />
+                    )}
+                    Sauvegarder
+                  </Button>
+                </CardFooter>
+              </>
+            )}
+          </Card>
+        </div>
+      </section>
+
+      {/* ------------------------------------------------------------------ */}
+      {/*  Section: Integrations Cartographie                                */}
+      {/* ------------------------------------------------------------------ */}
+      <section className="space-y-4">
+        <div>
+          <h2 className="text-lg font-semibold text-foreground">
+            Integrations Cartographie
+          </h2>
+          <p className="text-sm text-muted-foreground">
+            Configurez les services de localisation pour vos biens immobiliers.
+          </p>
+        </div>
+
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-red-500/10">
+                  <MapPin className="h-5 w-5 text-red-500" />
+                </div>
+                <div>
+                  <CardTitle className="text-base font-semibold">
+                    Google Maps
+                  </CardTitle>
+                  <CardDescription>
+                    Affichez vos biens sur une carte et proposez l&apos;itineraire
+                    aux clients.
+                  </CardDescription>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <Label htmlFor="gmaps-toggle" className="text-xs text-muted-foreground">
+                  {googleMapsEnabled ? "Actif" : "Inactif"}
+                </Label>
+                <Switch
+                  id="gmaps-toggle"
+                  checked={googleMapsEnabled}
+                  onCheckedChange={(val: boolean) => setGoogleMapsEnabled(val)}
+                />
+              </div>
+            </div>
+          </CardHeader>
+
+          {googleMapsEnabled && (
+            <>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="gmaps-key" className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                    Cle API Google Maps
+                  </Label>
+                  <Input
+                    id="gmaps-key"
+                    type="password"
+                    placeholder="AIzaSy..."
+                    value={googleMapsApiKey}
+                    onChange={(e) => setGoogleMapsApiKey(e.target.value)}
+                  />
+                </div>
+              </CardContent>
+              <CardFooter className="justify-end">
+                <Button
+                  size="sm"
+                  onClick={handleSaveGoogleMaps}
+                  disabled={savingMaps}
+                >
+                  {savingMaps ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    <Save className="mr-2 h-4 w-4" />
+                  )}
+                  Sauvegarder
+                </Button>
+              </CardFooter>
+            </>
+          )}
+        </Card>
+      </section>
+
+      {/* ------------------------------------------------------------------ */}
+      {/*  Section: Informations Workspace + Equipe                          */}
+      {/* ------------------------------------------------------------------ */}
+      <section className="space-y-4">
+        <div>
+          <h2 className="text-lg font-semibold text-foreground">
+            Workspace
+          </h2>
+          <p className="text-sm text-muted-foreground">
+            Informations generales sur votre espace de travail.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Informations Workspace --------------------------------------- */}
+          <Card>
+            <CardHeader>
+              <div className="flex items-center gap-3">
+                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10">
+                  <Building2 className="h-5 w-5 text-primary" />
+                </div>
+                <CardTitle className="text-base font-semibold">
+                  Informations Workspace
+                </CardTitle>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-1">
+                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                  Nom de l&apos;entreprise
+                </p>
+                <p className="text-sm font-medium text-foreground">
+                  {tenant?.name ?? "-"}
+                </p>
+              </div>
+
+              <div className="flex flex-wrap gap-2">
+                <div className="space-y-1">
+                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                    Type
+                  </p>
+                  <Badge variant="outline">
+                    {typeLabel(tenant?.type ?? "")}
+                  </Badge>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                    Plan
+                  </p>
+                  <Badge variant={planVariant(tenant?.plan ?? "")}>
+                    {planLabel(tenant?.plan ?? "")}
+                  </Badge>
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                  Date de creation
+                </p>
+                <div className="flex items-center gap-1.5 text-sm text-foreground">
+                  <CalendarDays className="h-3.5 w-3.5 text-muted-foreground" />
+                  {tenant?.createdAt ? formatDate(tenant.createdAt) : "-"}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Equipe ------------------------------------------------------- */}
+          <Card>
+            <CardHeader>
+              <div className="flex items-center gap-3">
+                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-violet-500/10">
+                  <Users2 className="h-5 w-5 text-violet-600" />
+                </div>
+                <CardTitle className="text-base font-semibold">
+                  Equipe
+                </CardTitle>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-baseline gap-2">
+                <span className="text-3xl font-bold text-foreground">
+                  {activeUsersCount}
+                </span>
+                <span className="text-sm text-muted-foreground">
+                  membre{activeUsersCount !== 1 ? "s" : ""} actif{activeUsersCount !== 1 ? "s" : ""}
+                </span>
+              </div>
+
+              {users.length > activeUsersCount && (
+                <p className="text-xs text-muted-foreground">
+                  {users.length - activeUsersCount} membre{users.length - activeUsersCount !== 1 ? "s" : ""} inactif{users.length - activeUsersCount !== 1 ? "s" : ""}
+                </p>
+              )}
+
+              <Button variant="outline" size="sm" className="w-full" asChild>
+                <a href="/team">
+                  Gerer l&apos;equipe
+                  <ExternalLink className="ml-2 h-3.5 w-3.5" />
+                </a>
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      </section>
+
+      {/* ------------------------------------------------------------------ */}
+      {/*  Help banner                                                       */}
+      {/* ------------------------------------------------------------------ */}
+      <Card className="border-dashed">
+        <CardContent className="flex flex-col sm:flex-row items-center gap-4 py-2">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-muted">
+            <HelpCircle className="h-5 w-5 text-muted-foreground" />
+          </div>
+          <div className="flex-1 text-center sm:text-left">
+            <p className="text-sm font-medium text-foreground">
+              Besoin d&apos;aide pour configurer vos integrations ?
+            </p>
+            <p className="text-xs text-muted-foreground">
+              Notre equipe est disponible pour vous accompagner dans la mise en
+              place de vos outils.
+            </p>
+          </div>
+          <Button variant="outline" size="sm" asChild>
+            <a href="mailto:support@crm-immo-pro.com">
+              <Mail className="mr-2 h-4 w-4" />
+              Contactez-nous
+            </a>
+          </Button>
+        </CardContent>
+      </Card>
     </div>
   );
 }
