@@ -31,7 +31,7 @@ export default function LandingPage() {
           <div className="hidden md:flex items-center gap-8">
             <a href="#features" className="text-sm font-bold text-muted-foreground hover:text-primary transition-colors uppercase tracking-widest">Solutions</a>
             <a href="#pricing" className="text-sm font-bold text-muted-foreground hover:text-primary transition-colors uppercase tracking-widest">Tarifs</a>
-            <Link href="/sign-up" className="text-sm font-bold text-primary hover:opacity-80 transition-opacity uppercase tracking-widest underline underline-offset-4 decoration-2">Essai Gratuit</Link>
+            <Link href="/sign-up" className="text-sm font-bold text-primary hover:opacity-80 transition-opacity uppercase tracking-widest underline underline-offset-4 decoration-2">Commencer</Link>
           </div>
           <div className="flex items-center gap-4">
             {!isSignedIn ? (

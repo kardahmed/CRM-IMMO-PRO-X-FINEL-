@@ -32,9 +32,8 @@ export default function SuperAdminLayout({
   const { role, isLoaded, user, email } = useSupabaseAuth();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-  // Guard: seul SUPER_ADMIN ou ADMIN (ou bypass email) peut accéder
-  const isSuperAdminEmail = email === "contact@sensium-x.com";
-  const isAllowed = role === "SUPER_ADMIN" || role === "ADMIN" || isSuperAdminEmail;
+  // Guard: seul SUPER_ADMIN ou ADMIN peut accéder
+  const isAllowed = role === "SUPER_ADMIN" || role === "ADMIN";
 
   useEffect(() => {
     if (isLoaded && !isAllowed) {
@@ -52,7 +51,7 @@ export default function SuperAdminLayout({
       <div className="flex h-screen items-center justify-center bg-background text-foreground">
         <div className="flex flex-col items-center gap-4">
           <Logo width={48} height={48} showText={false} className="animate-pulse" />
-          <p className="text-xs font-bold uppercase tracking-[0.3em] text-muted-foreground/40">Vérification PRO-X HQ...</p>
+          <p className="text-xs font-bold uppercase tracking-[0.3em] text-muted-foreground/40">Vérification IMMO PRO-X Management...</p>
         </div>
       </div>
     );
@@ -62,7 +61,6 @@ export default function SuperAdminLayout({
     { href: "/super-admin", icon: BarChart, label: "Vue d'ensemble" },
     { href: "/super-admin/entreprises", icon: Building2, label: "Workspaces" },
     { href: "/super-admin/ai", icon: Sparkles, label: "Moteur IA" },
-    { href: "/super-admin/demo", icon: Users, label: "Leads Démo" },
     { href: "/super-admin/settings", icon: Settings, label: "Config Système" },
   ];
 
@@ -93,15 +91,13 @@ export default function SuperAdminLayout({
           <div className="p-4 rounded-[24px] bg-foreground text-background shadow-stripe relative overflow-hidden group">
              <div className="absolute top-0 right-0 w-24 h-24 bg-primary/20 blur-[40px] group-hover:bg-primary/30 transition-all" />
              <div className="flex items-center gap-4 relative z-10">
-                <Avatar className="h-12 w-12 border-2 border-background/10">
-                  <AvatarImage src={user?.user_metadata?.avatar_url} />
-                  <AvatarFallback className="bg-primary text-primary-foreground font-black text-xs">HQ</AvatarFallback>
+                <Avatar className="h-8 w-8 border-none ring-2 ring-emerald-500/20">
+                  <AvatarImage src="" />
+                  <AvatarFallback className="bg-emerald-500 text-white font-black text-xs italic">PX</AvatarFallback>
                 </Avatar>
-                <div>
-                  <p className="text-sm font-black italic uppercase tracking-tighter leading-tight">Master Admin</p>
-                  <p className="text-xs text-primary font-bold uppercase tracking-[0.2em] mt-1 flex items-center gap-1.5">
-                    <ShieldAlert className="h-3 w-3" /> Accès Système
-                  </p>
+                <div className="flex flex-col text-left">
+                  <span className="text-sm font-bold text-background truncate max-w-[120px]">{user?.email?.split('@')[0]}</span>
+                  <span className="text-[10px] font-black text-emerald-400 uppercase tracking-tighter">Systeme</span>
                 </div>
              </div>
           </div>
@@ -138,8 +134,8 @@ export default function SuperAdminLayout({
         <div className="p-6 mt-auto border-t border-border/50">
           <Link href="/">
             <button className="flex w-full items-center justify-center gap-3 px-4 py-4 rounded-2xl bg-accent text-xs font-bold text-muted-foreground hover:text-destructive hover:bg-destructive/5 transition-all uppercase tracking-[0.15em] border border-transparent hover:border-destructive/10">
-              <LogOut className="h-3.5 w-3.5" />
-              Sortir de l&apos;Accès HQ
+              <LogOut className="mr-2 h-4 w-4" />
+              Sortir du Management
             </button>
           </Link>
         </div>
@@ -155,7 +151,7 @@ export default function SuperAdminLayout({
              <div className="flex items-center gap-3">
                 <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
                 <h2 className="text-xs font-bold text-muted-foreground uppercase tracking-[0.4em] hidden sm:block">Système en ligne • v1.4.0</h2>
-                <h2 className="text-xs font-bold text-muted-foreground uppercase tracking-[0.4em] sm:hidden text-[10px]">HQ LIVE</h2>
+                <h2 className="text-xs font-bold text-emerald-600 uppercase tracking-[0.4em] sm:hidden text-[10px] italic">LIVE TRACKING</h2>
              </div>
           </div>
           <div className="flex items-center gap-6">

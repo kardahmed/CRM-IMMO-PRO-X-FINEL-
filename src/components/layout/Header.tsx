@@ -54,7 +54,7 @@ export function Header() {
 
         <div className="hidden md:flex flex-col items-end mr-2">
           <span className="text-xs text-muted-foreground font-medium uppercase tracking-wider">
-            Workspace
+            {tenantName === "IMMO PRO-X Management" ? "Systeme" : "Workspace"}
           </span>
           <span className="text-sm font-semibold text-primary">{workspaceName}</span>
         </div>

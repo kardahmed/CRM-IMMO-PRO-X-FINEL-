@@ -178,7 +178,6 @@ export default function WorkspaceDetailPanel() {
 
   const statusColor: Record<string, string> = {
     ACTIVE: "bg-emerald-500/10 text-emerald-400",
-    DEMO: "bg-amber-500/10 text-amber-400",
     SUSPENDED: "bg-rose-500/10 text-rose-400",
   };
 
@@ -204,9 +203,6 @@ export default function WorkspaceDetailPanel() {
           <h1 className="text-3xl font-black text-white tracking-tight">{tenant.name}</h1>
           <p className="text-sm text-neutral-400 mt-1">
             Cree le {format(new Date(tenant.createdAt), "dd MMMM yyyy", { locale: fr })}
-            {!!tenant.settings?.demoExpiresAt && (
-              <> — Demo expire le {format(new Date(tenant.settings.demoExpiresAt as string), "dd MMMM yyyy", { locale: fr })}</>
-            )}
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -252,17 +248,10 @@ export default function WorkspaceDetailPanel() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="DEMO">Demo (essai gratuit)</SelectItem>
                       <SelectItem value="ACTIVE">Actif (abonnement payant)</SelectItem>
                       <SelectItem value="SUSPENDED">Suspendu</SelectItem>
                     </SelectContent>
                   </Select>
-                  {newStatus === "ACTIVE" && tenant.status === "DEMO" && (
-                    <p className="text-xs text-emerald-400 flex items-center gap-1">
-                      <CheckCircle2 className="h-3 w-3" />
-                      Cela activera l&apos;abonnement et supprimera les limites demo
-                    </p>
-                  )}
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-bold text-neutral-300">Plan</label>
@@ -363,16 +352,6 @@ export default function WorkspaceDetailPanel() {
                 <span className="text-lg font-black text-white">{tenant.users.length}</span>
               </div>
 
-              {!!tenant.settings?.demoLimits && (
-                <div className="mt-4 p-3 rounded-lg bg-amber-500/5 border border-amber-500/20">
-                  <p className="text-xs font-bold text-amber-400 uppercase mb-2">Limites Demo</p>
-                  <div className="space-y-1 text-xs text-neutral-400">
-                    <p>Max clients: {(tenant.settings.demoLimits as Record<string, number>)?.maxClients ?? "—"}</p>
-                    <p>Max biens: {(tenant.settings.demoLimits as Record<string, number>)?.maxProperties ?? "—"}</p>
-                    <p>Max users: {(tenant.settings.demoLimits as Record<string, number>)?.maxUsers ?? "—"}</p>
-                  </div>
-                </div>
-              )}
             </CardContent>
           </Card>
         </div>

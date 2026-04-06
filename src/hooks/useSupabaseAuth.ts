@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { useSimulation } from "@/context/simulation-context";
 import { createSupabaseBrowserClient } from "@/lib/supabase-browser";
 import type { User, Session, AuthChangeEvent } from "@supabase/supabase-js";
 
@@ -64,7 +63,6 @@ export function useSupabaseAuth() {
     await supabase.auth.signOut();
   }, [supabase.auth]);
 
-  const { isSimulating, tenantId: simTenantId, role: simRole, workspaceType: simWorkspaceType, plan: simPlan } = useSimulation();
 
   const metadata = (state.user?.user_metadata ?? {}) as IUserMetadata;
   const isSuperAdmin = state.user?.email === "contact@sensium-x.com";
@@ -75,17 +73,15 @@ export function useSupabaseAuth() {
     isLoaded: state.isLoaded,
     signOut,
     // Convenience accessors matching what Clerk publicMetadata provided
-    // Override with simulation if Super Admin and simulation is active
-    tenantId: (isSuperAdmin && isSimulating) ? simTenantId : (metadata.tenantId ?? null),
-    role: (isSuperAdmin && isSimulating) ? simRole : (metadata.role ?? null),
-    workspaceType: (isSuperAdmin && isSimulating) ? simWorkspaceType : (metadata.workspaceType ?? null),
-    plan: (isSuperAdmin && isSimulating) ? simPlan : (metadata.plan ?? null),
-    tenantName: metadata.tenantName ?? null,
+    tenantId: isSuperAdmin ? null : (metadata.tenantId ?? null),
+    role: metadata.role ?? null,
+    workspaceType: metadata.workspaceType ?? null,
+    plan: metadata.plan ?? null,
+    tenantName: isSuperAdmin ? "IMMO PRO-X Management" : (metadata.tenantName ?? null),
     dbUserId: metadata.dbUserId ?? null,
     firstName: metadata.firstName ?? state.user?.user_metadata?.firstName ?? null,
     lastName: metadata.lastName ?? state.user?.user_metadata?.lastName ?? null,
     email: state.user?.email ?? null,
     isSuperAdmin,
-    isSimulating,
   };
 }

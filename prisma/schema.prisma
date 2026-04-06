@@ -34,7 +34,6 @@ enum PlanType {
 
 enum TenantStatus {
   ACTIVE
-  DEMO
   SUSPENDED
 
   @@map("tenant_status")
@@ -252,8 +251,6 @@ model Tenant {
   plan           PlanType      @default(STARTER) @map("plan")
   status         TenantStatus  @default(ACTIVE) @map("status")
   settings       Json          @default("{}") @map("settings")
-  // Demo info (demoExpiresAt, demoLimits) is stored inside settings JSON
-  // to avoid requiring a DB migration. Access via settings.demoExpiresAt
   createdAt      DateTime      @default(now()) @map("created_at")
   updatedAt      DateTime      @updatedAt @map("updated_at")
 
@@ -714,23 +711,4 @@ model AIGeneration {
   @@map("ai_generations")
 }
 
-/// Lead de demande de démo depuis le portail public
-model DemoLead {
-  id            String   @id @default(uuid())
-  companyName   String   @map("company_name")
-  companyType   String   @map("company_type") // PROMOTION | AGENCY
-  firstName     String   @map("first_name")
-  lastName      String   @map("last_name")
-  email         String   @map("email")
-  phone         String   @map("phone")
-  wilaya        String?  @map("wilaya")
-  agentCount    String?  @map("agent_count") // "1-5", "6-20", "21-50", "50+"
-  message       String?  @map("message")
-  status        String   @default("NEW") @map("status") // NEW, CONTACTED, QUALIFIED, CLOSED
-  tenantId      String?  @map("tenant_id") // Auto-created demo tenant
-  createdAt     DateTime @default(now()) @map("created_at")
-  updatedAt     DateTime @updatedAt @map("updated_at")
 
-  @@index([status])
-  @@map("demo_leads")
-}

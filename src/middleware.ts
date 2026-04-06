@@ -6,13 +6,11 @@ const PUBLIC_ROUTES = new Set([
   "/sign-in",
   "/sign-up",
   "/suspended",
-  "/demo-expired",
 ]);
 
 const PUBLIC_PREFIXES = [
   "/api/webhooks",
   "/api/v1/webhooks",
-  "/api/v1/demo-request",
   "/api/v1/automations/check-overdue",
   "/api/v1/automations/check-pending",
   "/portal/",
@@ -110,8 +108,15 @@ export async function middleware(req: NextRequest) {
 
   // Dashboard & Super Admin — require tenant (except super admin)
   if (isDashboardRoute(pathname) || isSuperAdminRoute(pathname)) {
+    const isSuperAdmin = user.user_metadata?.role === "SUPER_ADMIN" || user.email === "contact@sensium-x.com";
     const tenantId = user.user_metadata?.tenantId as string | undefined;
-    if (!tenantId && !isSuperAdminRoute(pathname)) {
+
+    // Force Super Admin to HQ if they try to access a dashboard route OR onboarding
+    if (isSuperAdmin && (isDashboardRoute(pathname) || isOnboardingRoute(pathname))) {
+      return NextResponse.redirect(new URL("/super-admin", req.url));
+    }
+
+    if (!tenantId && !isSuperAdminRoute(pathname) && !isSuperAdmin) {
       return NextResponse.redirect(new URL("/onboarding", req.url));
     }
     return supabaseResponse;

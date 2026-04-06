@@ -7,7 +7,7 @@ import { z } from "zod";
 import * as Sentry from "@sentry/nextjs";
 
 const updateTenantSchema = z.object({
-  status: z.enum(["ACTIVE", "DEMO", "SUSPENDED"]).optional(),
+  status: z.enum(["ACTIVE", "SUSPENDED"]).optional(),
   plan: z.enum(["STARTER", "PRO", "BUSINESS", "ENTERPRISE"]).optional(),
   name: z.string().min(1).max(200).optional(),
   settings: z.record(z.string(), z.unknown()).optional(),
@@ -130,20 +130,7 @@ export async function PUT(
       };
       updateData.settings = merged;
     }
-    // When activating (DEMO → ACTIVE), clear demo fields from settings
-    if (data.status === "ACTIVE" && existing.status === "DEMO") {
-      const currentSettings = await prisma.tenant.findUnique({
-        where: { id },
-        select: { settings: true },
-      });
-      const settingsObj =
-        typeof currentSettings?.settings === "object" && currentSettings.settings !== null
-          ? { ...(currentSettings.settings as Record<string, unknown>) }
-          : {};
-      delete settingsObj.demoExpiresAt;
-      delete settingsObj.demoLimits;
-      updateData.settings = settingsObj;
-    }
+    // Logic for DEMO -> ACTIVE conversion removed as part of deep clean
 
     const updated = await prisma.tenant.update({
       where: { id },

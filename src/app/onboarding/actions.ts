@@ -5,13 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 import * as Sentry from "@sentry/nextjs";
 
-const DEMO_DURATION_DAYS = 14;
-
-const DEMO_LIMITS = {
-  maxClients: 5,
-  maxProperties: 3,
-  maxUsers: 1,
-};
+// Démo supprimée - passage en mode actif par défaut
 
 const createWorkspaceSchema = z.object({
   name: z
@@ -29,11 +23,7 @@ const createWorkspaceSchema = z.object({
 /**
  * createWorkspace — called from onboarding page after sign-up.
  *
- * Every new user gets a DEMO workspace (14 days, limited features).
- * After the trial, the super admin converts them to a paid plan.
- *
- * Demo info (expiresAt, limits) is stored in the `settings` JSON field
- * to avoid dependency on DB columns that may not have been migrated yet.
+ * Every new user gets an ACTIVE workspace by default.
  */
 export async function createWorkspace(formData: FormData) {
   const supabase = await createSupabaseServerClient();
@@ -68,9 +58,6 @@ export async function createWorkspace(formData: FormData) {
   const lastName = authUser.user_metadata?.lastName || "";
 
   try {
-    const expiresAt = new Date();
-    expiresAt.setDate(expiresAt.getDate() + DEMO_DURATION_DAYS);
-
     // 1. Create tenant + user in a transaction
     const result = await prisma.$transaction(async (tx) => {
       const tenant = await tx.tenant.create({
@@ -78,10 +65,8 @@ export async function createWorkspace(formData: FormData) {
           name,
           type,
           plan: "STARTER",
-          status: "DEMO",
+          status: "ACTIVE",
           settings: {
-            demoExpiresAt: expiresAt.toISOString(),
-            demoLimits: DEMO_LIMITS,
             ...(wilaya ? { wilaya } : {}),
             ...(workspacePhone ? { phone: workspacePhone } : {}),
           },
@@ -104,23 +89,7 @@ export async function createWorkspace(formData: FormData) {
       return { tenant, userId: user.id };
     });
 
-    // 2. Create DemoLead for super admin tracking (non-critical)
-    try {
-      await prisma.demoLead.create({
-        data: {
-          companyName: name,
-          companyType: type,
-          firstName,
-          lastName,
-          email,
-          phone: phone || "",
-          tenantId: result.tenant.id,
-          status: "NEW",
-        },
-      });
-    } catch {
-      Sentry.captureMessage("[createWorkspace] DemoLead creation skipped (table may not exist)", "warning");
-    }
+    // DemoLead creation removed (Hardway cleanup)
 
     // 2b. Seed default automation configs (non-critical)
     try {

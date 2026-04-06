@@ -60,7 +60,7 @@ export default function SignInPage() {
           <h2 className="text-3xl font-black text-slate-900 italic uppercase tracking-tighter">
             Bon de <span className="text-emerald-500">Retour</span>
           </h2>
-          <p className="text-xs text-slate-500 font-bold uppercase tracking-widest opacity-70">Expertise Immobilière HQ</p>
+          <p className="text-xs text-emerald-500 font-bold uppercase tracking-widest opacity-70 italic shadow-sm">IMMO PRO-X</p>
         </div>
 
         {/* Error */}

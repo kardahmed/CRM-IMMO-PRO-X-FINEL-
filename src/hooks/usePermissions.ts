@@ -2,10 +2,8 @@
 
 import { useMemo } from "react";
 import { useSupabaseAuth } from "@/hooks/useSupabaseAuth";
-import { useSimulation } from "@/context/simulation-context";
 import type { UserRole, WorkspaceType, PlanType } from "@prisma/client";
 import type { ModuleId } from "@/lib/modules";
-import { ALL_MODULES } from "@/lib/modules";
 import type { PermissionAction } from "@/lib/permissions-matrix";
 import { hasPermission } from "@/lib/permissions-matrix";
 import { getAvailableModules } from "@/lib/modules";
@@ -26,7 +24,6 @@ interface IPermissionsContext {
  */
 export function usePermissions(): IPermissionsContext {
   const { isLoaded, tenantId: rawTenantId, role: rawRole, workspaceType: rawWorkspaceType, plan: rawPlan } = useSupabaseAuth();
-  const { demoBypass, isSimulating } = useSimulation();
 
   const role = (rawRole as UserRole) ?? null;
   const tenantId = rawTenantId ?? null;
@@ -34,18 +31,16 @@ export function usePermissions(): IPermissionsContext {
   const plan = (rawPlan as PlanType) ?? null;
 
   const modules = useMemo(() => {
-    if (isSimulating && demoBypass) return ALL_MODULES;
     if (!workspaceType || !plan) return [];
     return getAvailableModules(workspaceType, plan);
-  }, [workspaceType, plan, isSimulating, demoBypass]);
+  }, [workspaceType, plan]);
 
   const canDo = useMemo(() => {
     return (moduleId: ModuleId, action: PermissionAction): boolean => {
-      if (isSimulating && demoBypass) return true;
       if (!role) return false;
       return hasPermission(role, moduleId, action);
     };
-  }, [role, isSimulating, demoBypass]);
+  }, [role]);
 
   return {
     role,

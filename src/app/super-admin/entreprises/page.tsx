@@ -68,7 +68,6 @@ export default function SuperAdminWorkspaces() {
     switch (status) {
       case "ACTIVE": return <div className="flex items-center gap-1.5 text-xs text-emerald-400"><span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />Actif</div>;
       case "SUSPENDED": return <div className="flex items-center gap-1.5 text-xs text-rose-400"><span className="h-2 w-2 rounded-full bg-rose-500" />Suspendu</div>;
-      case "DEMO": return <div className="flex items-center gap-1.5 text-xs text-amber-400"><span className="h-2 w-2 rounded-full bg-amber-500" />Demo</div>;
       default: return <div className="text-xs text-neutral-400">{status}</div>;
     }
   };

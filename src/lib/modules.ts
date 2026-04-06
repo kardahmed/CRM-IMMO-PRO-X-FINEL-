@@ -281,23 +281,6 @@ const PLAN_MODULES: Record<PlanType, ModuleId[]> = {
   ],
 };
 
-// ============================================================================
-// ALL MODULES (for demo bypass)
-// ============================================================================
-
-export const ALL_MODULES: ModuleId[] = [
-  ...COMMON_MODULES,
-  ...PROMOTION_MODULES,
-  ...AGENCY_MODULES,
-  "AUTOMATIONS",
-  "AI_AGENT",
-  "GEOMAP",
-  "CADASTRE",
-  "PORTAL",
-  "PERFORMANCE",
-  "DOCUMENTS",
-  "OBJECTIVES",
-];
 
 // ============================================================================
 // API publique

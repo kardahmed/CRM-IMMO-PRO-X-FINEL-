@@ -25,27 +25,12 @@ export async function getCurrentUser(): Promise<ICurrentUser> {
     throw new Error("Non authentifié");
   }
 
-  // Bypass spécial pour le compte Super Administrateur
-  const isSuperAdminEmail = authUser.email === "contact@sensium-x.com";
-
   const dbUser = await prisma.user.findFirst({
     where: {
       clerkId: authUser.id, // clerkId field repurposed for supabaseId
       isActive: true,
     },
   });
-
-  if (isSuperAdminEmail) {
-    return {
-      userId: dbUser?.id || "super-admin-id",
-      tenantId: dbUser?.tenantId || "master-tenant",
-      role: "ADMIN" as UserRole,
-      supabaseId: authUser.id,
-      firstName: dbUser?.firstName || authUser.user_metadata?.first_name || "Super",
-      lastName: dbUser?.lastName || authUser.user_metadata?.last_name || "Admin",
-      email: authUser.email || "contact@sensium-x.com",
-    };
-  }
 
   if (!dbUser) {
     throw new Error("Utilisateur introuvable en base de données");
