@@ -8,6 +8,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
+  DropdownMenuGroup,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
@@ -125,6 +126,7 @@ export function NotificationBell() {
 
       <DropdownMenuContent align="end" className="w-96 max-h-[500px]">
         <div className="flex items-center justify-between px-3 py-2">
+          <DropdownMenuGroup>
           <DropdownMenuLabel className="p-0">
             Notifications
             {unreadCount > 0 && (
@@ -133,6 +135,7 @@ export function NotificationBell() {
               </span>
             )}
           </DropdownMenuLabel>
+          </DropdownMenuGroup>
           {unreadCount > 0 && (
             <Button
               variant="ghost"

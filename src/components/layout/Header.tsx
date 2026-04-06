@@ -16,6 +16,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
   DropdownMenuLabel,
+  DropdownMenuGroup,
 } from "@/components/ui/dropdown-menu";
 
 export function Header() {
@@ -98,6 +99,7 @@ export function Header() {
               <DropdownMenuSeparator />
 
               {/* Mode switching */}
+              <DropdownMenuGroup>
               <DropdownMenuLabel className="text-xs text-muted-foreground uppercase tracking-wider font-bold">
                 Mode
               </DropdownMenuLabel>
@@ -146,6 +148,7 @@ export function Header() {
                 {(isSuperAdminRoute || workspaceType !== "PROMOTION") && <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />}
               </DropdownMenuItem>
 
+              </DropdownMenuGroup>
               <DropdownMenuSeparator />
 
               {/* Profile & Logout */}
