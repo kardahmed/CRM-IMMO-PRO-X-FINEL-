@@ -14,6 +14,7 @@ import {
   ShieldAlert,
   LogOut,
   ChevronRight,
+  CreditCard,
   Database,
   Menu,
   X
@@ -60,8 +61,10 @@ export default function SuperAdminLayout({
   const navItems = [
     { href: "/super-admin", icon: BarChart, label: "Vue d'ensemble" },
     { href: "/super-admin/entreprises", icon: Building2, label: "Workspaces" },
+    { href: "/super-admin/users", icon: Users, label: "Utilisateurs" },
     { href: "/super-admin/ai", icon: Sparkles, label: "Moteur IA" },
     { href: "/super-admin/demo", icon: Users, label: "Leads Démo" },
+    { href: "/super-admin/plans", icon: CreditCard, label: "Plans" },
     { href: "/super-admin/settings", icon: Settings, label: "Config Système" },
   ];
 

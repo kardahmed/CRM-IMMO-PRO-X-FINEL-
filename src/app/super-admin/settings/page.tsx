@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -230,7 +230,27 @@ function ToggleField({
 export default function SuperAdminSettings() {
   const [config, setConfig] = useState<IPlatformConfig>(DEFAULT_CONFIG);
   const [saving, setSaving] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<"general" | "email" | "api" | "security" | "system">("general");
+
+  const loadConfig = useCallback(async () => {
+    try {
+      setLoading(true);
+      const res = await fetch("/api/v1/admin/config");
+      const json = await res.json();
+      if (json.success && json.data) {
+        setConfig((prev) => ({ ...prev, ...json.data }));
+      }
+    } catch {
+      toast.error("Impossible de charger la configuration");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadConfig();
+  }, [loadConfig]);
 
   const update = <K extends keyof IPlatformConfig>(key: K, value: IPlatformConfig[K]) => {
     setConfig((prev) => ({ ...prev, [key]: value }));
@@ -238,12 +258,29 @@ export default function SuperAdminSettings() {
 
   const handleSave = async () => {
     setSaving(true);
-    // Simulate API call
-    await new Promise((r) => setTimeout(r, 1200));
-    setSaving(false);
-    toast.success("Configuration sauvegardée", {
-      description: "Les changements seront appliqués immédiatement.",
-    });
+    try {
+      const res = await fetch("/api/v1/admin/config", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(config),
+      });
+      const json = await res.json();
+      if (json.success) {
+        toast.success("Configuration sauvegardée", {
+          description: "Les changements seront appliqués immédiatement.",
+        });
+      } else {
+        toast.error("Erreur lors de la sauvegarde", {
+          description: json.error || "Veuillez réessayer.",
+        });
+      }
+    } catch {
+      toast.error("Erreur réseau", {
+        description: "Impossible de contacter le serveur.",
+      });
+    } finally {
+      setSaving(false);
+    }
   };
 
   const tabs = [
@@ -303,6 +340,14 @@ export default function SuperAdminSettings() {
       </div>
 
       {/* Content */}
+      {loading ? (
+        <div className="flex items-center justify-center py-20">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <span className="ml-3 text-sm font-bold text-muted-foreground uppercase tracking-wider">
+            Chargement de la configuration...
+          </span>
+        </div>
+      ) : (
       <div className="space-y-8">
         {/* === GENERAL === */}
         {activeTab === "general" && (
@@ -667,6 +712,7 @@ export default function SuperAdminSettings() {
           </div>
         )}
       </div>
+      )}
     </div>
   );
 }

@@ -4,8 +4,13 @@ import { useEffect, useState, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Save, CheckCircle2, Users, Activity, Loader2, AlertCircle, ArrowLeft, Briefcase, Trash2, UserMinus } from "lucide-react";
+import {
+  Save, CheckCircle2, Users, Activity, Loader2, AlertCircle, ArrowLeft,
+  Briefcase, Trash2, UserMinus, Pencil, UserPlus, Clock, Zap,
+} from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -54,6 +59,31 @@ export default function WorkspaceDetailPanel() {
   const [deleting, setDeleting] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [togglingUser, setTogglingUser] = useState<string | null>(null);
+
+  // Edit name state
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [editedName, setEditedName] = useState("");
+  const [savingName, setSavingName] = useState(false);
+
+  // Add user dialog state
+  const [isAddUserOpen, setIsAddUserOpen] = useState(false);
+  const [addingUser, setAddingUser] = useState(false);
+  const [newUserForm, setNewUserForm] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    password: "",
+    role: "AGENT",
+  });
+
+  // Extend demo dialog state
+  const [isExtendDemoOpen, setIsExtendDemoOpen] = useState(false);
+  const [extendDays, setExtendDays] = useState("14");
+  const [extendingDemo, setExtendingDemo] = useState(false);
+
+  // Convert demo state
+  const [converting, setConverting] = useState(false);
 
   const fetchTenant = useCallback(async () => {
     setLoading(true);
@@ -154,6 +184,129 @@ export default function WorkspaceDetailPanel() {
     }
   }
 
+  // --- Feature 1: Edit workspace name ---
+  function startEditingName() {
+    if (!tenant) return;
+    setEditedName(tenant.name);
+    setIsEditingName(true);
+  }
+
+  async function handleSaveName() {
+    if (!tenant || !editedName.trim() || editedName.trim() === tenant.name) {
+      setIsEditingName(false);
+      return;
+    }
+    setSavingName(true);
+    try {
+      const res = await fetch(`/api/v1/admin/tenants/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: editedName.trim() }),
+      });
+      if (!res.ok) throw new Error("Erreur");
+      const json = await res.json();
+      if (json.success) {
+        toast.success("Nom du workspace mis a jour");
+        setIsEditingName(false);
+        fetchTenant();
+      } else {
+        toast.error(json.error || "Erreur");
+      }
+    } catch {
+      toast.error("Erreur lors de la mise a jour du nom");
+    } finally {
+      setSavingName(false);
+    }
+  }
+
+  // --- Feature 2: Add user to workspace ---
+  async function handleAddUser() {
+    if (!tenant) return;
+    setAddingUser(true);
+    try {
+      const res = await fetch(`/api/v1/admin/tenants/${id}/users`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newUserForm),
+      });
+      const json = await res.json();
+      if (json.success) {
+        toast.success("Utilisateur cree avec succes");
+        setIsAddUserOpen(false);
+        setNewUserForm({ firstName: "", lastName: "", email: "", phone: "", password: "", role: "AGENT" });
+        fetchTenant();
+      } else {
+        toast.error(json.error || "Erreur lors de la creation");
+      }
+    } catch {
+      toast.error("Erreur lors de la creation de l'utilisateur");
+    } finally {
+      setAddingUser(false);
+    }
+  }
+
+  // --- Feature 3: Extend demo period ---
+  async function handleExtendDemo() {
+    if (!tenant) return;
+    const days = parseInt(extendDays, 10);
+    if (isNaN(days) || days < 1) {
+      toast.error("Nombre de jours invalide");
+      return;
+    }
+    setExtendingDemo(true);
+    try {
+      const currentExpiry = tenant.settings?.demoExpiresAt
+        ? new Date(tenant.settings.demoExpiresAt as string)
+        : new Date();
+      const newExpiry = new Date(currentExpiry);
+      newExpiry.setDate(newExpiry.getDate() + days);
+
+      const res = await fetch(`/api/v1/admin/tenants/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ settings: { demoExpiresAt: newExpiry.toISOString() } }),
+      });
+      if (!res.ok) throw new Error("Erreur");
+      const json = await res.json();
+      if (json.success) {
+        toast.success(`Demo prolongee de ${days} jours`);
+        setIsExtendDemoOpen(false);
+        fetchTenant();
+      } else {
+        toast.error(json.error || "Erreur");
+      }
+    } catch {
+      toast.error("Erreur lors de la prolongation");
+    } finally {
+      setExtendingDemo(false);
+    }
+  }
+
+  // --- Feature 4: Convert demo to active ---
+  async function handleConvertToActive() {
+    if (!tenant) return;
+    setConverting(true);
+    try {
+      const res = await fetch(`/api/v1/admin/tenants/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: "ACTIVE" }),
+      });
+      if (!res.ok) throw new Error("Erreur");
+      const json = await res.json();
+      if (json.success) {
+        toast.success("Workspace converti en abonnement actif — limites demo supprimees");
+        fetchTenant();
+      } else {
+        toast.error(json.error || "Erreur");
+      }
+    } catch {
+      toast.error("Erreur lors de la conversion");
+    } finally {
+      setConverting(false);
+    }
+  }
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -201,7 +354,52 @@ export default function WorkspaceDetailPanel() {
               {tenant.type}
             </Badge>
           </div>
-          <h1 className="text-3xl font-black text-foreground tracking-tight">{tenant.name}</h1>
+          {/* Editable name */}
+          <div className="flex items-center gap-2">
+            {isEditingName ? (
+              <div className="flex items-center gap-2">
+                <Input
+                  value={editedName}
+                  onChange={(e) => setEditedName(e.target.value)}
+                  className="text-2xl font-black bg-background border-border text-foreground h-10 w-80"
+                  autoFocus
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") handleSaveName();
+                    if (e.key === "Escape") setIsEditingName(false);
+                  }}
+                />
+                <Button
+                  size="sm"
+                  onClick={handleSaveName}
+                  disabled={savingName}
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold gap-1 h-8"
+                >
+                  {savingName ? <Loader2 className="h-3 w-3 animate-spin" /> : <CheckCircle2 className="h-3 w-3" />}
+                  OK
+                </Button>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => setIsEditingName(false)}
+                  className="text-muted-foreground h-8"
+                >
+                  Annuler
+                </Button>
+              </div>
+            ) : (
+              <>
+                <h1 className="text-3xl font-black text-foreground tracking-tight">{tenant.name}</h1>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={startEditingName}
+                  className="text-muted-foreground hover:text-foreground h-8 w-8 p-0"
+                >
+                  <Pencil className="h-4 w-4" />
+                </Button>
+              </>
+            )}
+          </div>
           <p className="text-sm text-muted-foreground mt-1">
             Cree le {format(new Date(tenant.createdAt), "dd MMMM yyyy", { locale: fr })}
             {!!tenant.settings?.demoExpiresAt && (
@@ -210,6 +408,27 @@ export default function WorkspaceDetailPanel() {
           </p>
         </div>
         <div className="flex items-center gap-3">
+          {/* Demo-specific actions */}
+          {tenant.status === "DEMO" && (
+            <>
+              <Button
+                variant="outline"
+                onClick={() => setIsExtendDemoOpen(true)}
+                className="border-amber-800 text-amber-400 hover:bg-amber-500/10 font-bold gap-2"
+              >
+                <Clock className="h-4 w-4" />
+                Prolonger la demo
+              </Button>
+              <Button
+                onClick={handleConvertToActive}
+                disabled={converting}
+                className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold gap-2"
+              >
+                {converting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Zap className="h-4 w-4" />}
+                Convertir en abonnement
+              </Button>
+            </>
+          )}
           <Button
             variant="outline"
             onClick={() => setIsDeleteOpen(true)}
@@ -285,10 +504,20 @@ export default function WorkspaceDetailPanel() {
           {/* Users */}
           <Card className="bg-card/50 border-border backdrop-blur-sm">
             <CardHeader>
-              <CardTitle className="text-foreground flex items-center gap-2 text-lg">
-                <Users className="h-5 w-5 text-cyan-400" />
-                Utilisateurs ({tenant.users.length})
-              </CardTitle>
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-foreground flex items-center gap-2 text-lg">
+                  <Users className="h-5 w-5 text-cyan-400" />
+                  Utilisateurs ({tenant.users.length})
+                </CardTitle>
+                <Button
+                  size="sm"
+                  onClick={() => setIsAddUserOpen(true)}
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold gap-2"
+                >
+                  <UserPlus className="h-4 w-4" />
+                  Ajouter un utilisateur
+                </Button>
+              </div>
             </CardHeader>
             <CardContent>
               <div className="space-y-2">
@@ -404,6 +633,151 @@ export default function WorkspaceDetailPanel() {
             >
               {deleting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
               Confirmer la suppression
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add User Dialog */}
+      <Dialog open={isAddUserOpen} onOpenChange={setIsAddUserOpen}>
+        <DialogContent className="sm:max-w-lg bg-card border-border">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-black text-foreground flex items-center gap-2">
+              <UserPlus className="h-5 w-5 text-indigo-400" /> Ajouter un utilisateur
+            </DialogTitle>
+            <DialogDescription className="text-muted-foreground">
+              Creez un nouvel utilisateur dans le workspace <strong className="text-foreground">{tenant.name}</strong>.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 mt-2">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label className="text-sm font-bold text-muted-foreground">Prenom</Label>
+                <Input
+                  value={newUserForm.firstName}
+                  onChange={(e) => setNewUserForm((f) => ({ ...f, firstName: e.target.value }))}
+                  placeholder="Jean"
+                  className="bg-background border-border text-foreground"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-sm font-bold text-muted-foreground">Nom</Label>
+                <Input
+                  value={newUserForm.lastName}
+                  onChange={(e) => setNewUserForm((f) => ({ ...f, lastName: e.target.value }))}
+                  placeholder="Dupont"
+                  className="bg-background border-border text-foreground"
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label className="text-sm font-bold text-muted-foreground">Email</Label>
+              <Input
+                type="email"
+                value={newUserForm.email}
+                onChange={(e) => setNewUserForm((f) => ({ ...f, email: e.target.value }))}
+                placeholder="jean.dupont@exemple.com"
+                className="bg-background border-border text-foreground"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label className="text-sm font-bold text-muted-foreground">Telephone (optionnel)</Label>
+              <Input
+                type="tel"
+                value={newUserForm.phone}
+                onChange={(e) => setNewUserForm((f) => ({ ...f, phone: e.target.value }))}
+                placeholder="+33 6 12 34 56 78"
+                className="bg-background border-border text-foreground"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label className="text-sm font-bold text-muted-foreground">Mot de passe</Label>
+              <Input
+                type="password"
+                value={newUserForm.password}
+                onChange={(e) => setNewUserForm((f) => ({ ...f, password: e.target.value }))}
+                placeholder="Min. 6 caracteres"
+                className="bg-background border-border text-foreground"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label className="text-sm font-bold text-muted-foreground">Role</Label>
+              <Select value={newUserForm.role} onValueChange={(v) => setNewUserForm((f) => ({ ...f, role: v }))}>
+                <SelectTrigger className="bg-background border-border text-foreground">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="CEO">CEO</SelectItem>
+                  <SelectItem value="SUPERVISOR">Superviseur</SelectItem>
+                  <SelectItem value="AGENT">Agent</SelectItem>
+                  <SelectItem value="ASSISTANT">Assistant</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <div className="flex gap-3 mt-4">
+            <Button
+              variant="outline"
+              className="flex-1 border-border text-foreground"
+              onClick={() => setIsAddUserOpen(false)}
+            >
+              Annuler
+            </Button>
+            <Button
+              className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold gap-2"
+              onClick={handleAddUser}
+              disabled={addingUser || !newUserForm.firstName || !newUserForm.lastName || !newUserForm.email || !newUserForm.password}
+            >
+              {addingUser ? <Loader2 className="h-4 w-4 animate-spin" /> : <UserPlus className="h-4 w-4" />}
+              Creer l&apos;utilisateur
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Extend Demo Dialog */}
+      <Dialog open={isExtendDemoOpen} onOpenChange={setIsExtendDemoOpen}>
+        <DialogContent className="sm:max-w-md bg-card border-border">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-black text-foreground flex items-center gap-2">
+              <Clock className="h-5 w-5 text-amber-400" /> Prolonger la demo
+            </DialogTitle>
+            <DialogDescription className="text-muted-foreground">
+              Ajoutez des jours supplementaires a la periode de demo de <strong className="text-foreground">{tenant.name}</strong>.
+              {!!tenant.settings?.demoExpiresAt && (
+                <> Expiration actuelle : {format(new Date(tenant.settings.demoExpiresAt as string), "dd MMMM yyyy", { locale: fr })}.</>
+              )}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 mt-2">
+            <div className="space-y-2">
+              <Label className="text-sm font-bold text-muted-foreground">Nombre de jours a ajouter</Label>
+              <Input
+                type="number"
+                min="1"
+                max="365"
+                value={extendDays}
+                onChange={(e) => setExtendDays(e.target.value)}
+                placeholder="14"
+                className="bg-background border-border text-foreground"
+              />
+            </div>
+          </div>
+          <div className="flex gap-3 mt-4">
+            <Button
+              variant="outline"
+              className="flex-1 border-border text-foreground"
+              onClick={() => setIsExtendDemoOpen(false)}
+            >
+              Annuler
+            </Button>
+            <Button
+              className="flex-1 bg-amber-600 hover:bg-amber-700 text-white font-bold gap-2"
+              onClick={handleExtendDemo}
+              disabled={extendingDemo || !extendDays}
+            >
+              {extendingDemo ? <Loader2 className="h-4 w-4 animate-spin" /> : <Clock className="h-4 w-4" />}
+              Prolonger
             </Button>
           </div>
         </DialogContent>
