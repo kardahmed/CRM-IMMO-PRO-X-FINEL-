@@ -53,8 +53,8 @@ export default function SuperAdminDashboard() {
       isPositive: true, // true because decrease in churn is good
       icon: Activity,
       color: "text-foreground",
-      bg: "bg-neutral-500/5",
-      border: "border-neutral-500/10"
+      bg: "bg-muted",
+      border: "border-border"
     }
   ];
 
@@ -143,7 +143,7 @@ export default function SuperAdminDashboard() {
             {[
               { label: "ENTERPRISE", value: 12, color: "bg-emerald-400" },
               { label: "BUSINESS", value: 38, color: "bg-primary" },
-              { label: "ESSENTIAL", value: 50, color: "bg-white" },
+              { label: "ESSENTIAL", value: 50, color: "bg-foreground" },
             ].map((plan, i) => (
               <div key={i} className="space-y-3">
                 <div className="flex items-center justify-between">
