@@ -4,13 +4,15 @@ import { Check, Dot, ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const PIPELINE_STAGES = [
-  { id: "ACCUEIL", label: "Accueil" },
-  { id: "VISITE_A_GERER", label: "Visite à planifier" },
-  { id: "VISITE_CONFIRMEE", label: "Visite confirmée" },
-  { id: "VISITE_TERMINEE", label: "Visite terminée" },
-  { id: "NEGOCIATION", label: "Négociation" },
-  { id: "RESERVATION", label: "Réservation" },
-  { id: "VENTE", label: "Vente" },
+  { id: "NEW", label: "Nouveau" },
+  { id: "CONTACTED", label: "Contacté" },
+  { id: "QUALIFIED", label: "Qualifié" },
+  { id: "VISIT_SCHEDULED", label: "Visite planifiée" },
+  { id: "VISITED", label: "Visité" },
+  { id: "NEGOTIATION", label: "Négociation" },
+  { id: "RESERVED", label: "Réservé" },
+  { id: "SIGNED", label: "Signé" },
+  { id: "CLOSED", label: "Finalisé" },
 ];
 
 interface PipelineStepperProps {
@@ -18,18 +20,11 @@ interface PipelineStepperProps {
 }
 
 export function PipelineStepper({ currentStage }: PipelineStepperProps) {
-  // Exception handling for off-flow states
-  if (currentStage === "PERDUE") {
-    return (
-      <div className="w-full bg-red-50 border border-red-100 rounded-xl p-4 flex items-center justify-center text-red-600 font-bold">
-        Ce dossier client est marqué comme perdu (PERDUE).
-      </div>
-    );
-  }
-  if (currentStage === "RELANCEMENT") {
+  // Exception handling for unknown stages
+  if (!PIPELINE_STAGES.find(s => s.id === currentStage)) {
     return (
       <div className="w-full bg-orange-50 border border-orange-100 rounded-xl p-4 flex items-center justify-center text-orange-600 font-bold">
-        Le client est actuellement en relancement post-échec (RELANCEMENT).
+        Étape : {currentStage}
       </div>
     );
   }

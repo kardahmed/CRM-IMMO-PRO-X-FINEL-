@@ -420,14 +420,14 @@ export default function ClientDetailPage() {
           </TabsContent>
 
           <TabsContent value="historique">
-            <TabHistorique history={(client.interactions || []).map((i: Record<string, unknown>) => ({
-              id: i.id as string,
-              type: i.type as string,
-              description: (i.content || i.description || "") as string,
-              createdAt: i.createdAt as string,
+            <TabHistorique history={(client.interactions || []).map((i) => ({
+              id: i.id,
+              type: i.type,
+              description: i.content || i.description || "",
+              createdAt: i.createdAt,
               userName: i.user
-                ? `${(i.user as Record<string, string>).firstName || ""} ${(i.user as Record<string, string>).lastName || ""}`.trim()
-                : (i.userName as string) || "",
+                ? `${i.user.firstName || ""} ${i.user.lastName || ""}`.trim()
+                : i.userName || "",
             }))} />
           </TabsContent>
 

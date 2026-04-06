@@ -14,27 +14,27 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { TabInformations } from "@/components/clients/TabInformations";
 
 const STAGE_COLORS: Record<string, string> = {
-  ACCUEIL: "bg-blue-100 text-blue-700 border-blue-200",
-  VISITE_A_GERER: "bg-purple-100 text-purple-700 border-purple-200",
-  VISITE_CONFIRMEE: "bg-indigo-100 text-indigo-700 border-indigo-200",
-  VISITE_TERMINEE: "bg-cyan-100 text-cyan-700 border-cyan-200",
-  NEGOCIATION: "bg-orange-100 text-orange-700 border-orange-200",
-  RESERVATION: "bg-amber-100 text-amber-700 border-amber-200",
-  VENTE: "bg-green-100 text-green-700 border-green-200",
-  RELANCEMENT: "bg-gray-100 text-gray-700 border-gray-200",
-  PERDUE: "bg-red-100 text-red-700 border-red-200",
+  NEW: "bg-blue-100 text-blue-700 border-blue-200",
+  CONTACTED: "bg-purple-100 text-purple-700 border-purple-200",
+  QUALIFIED: "bg-indigo-100 text-indigo-700 border-indigo-200",
+  VISIT_SCHEDULED: "bg-cyan-100 text-cyan-700 border-cyan-200",
+  VISITED: "bg-teal-100 text-teal-700 border-teal-200",
+  NEGOTIATION: "bg-orange-100 text-orange-700 border-orange-200",
+  RESERVED: "bg-amber-100 text-amber-700 border-amber-200",
+  SIGNED: "bg-green-100 text-green-700 border-green-200",
+  CLOSED: "bg-emerald-100 text-emerald-700 border-emerald-200",
 };
 
 const STAGE_LABELS: Record<string, string> = {
-  ACCUEIL: "Accueil",
-  VISITE_A_GERER: "Visite à gérer",
-  VISITE_CONFIRMEE: "Visite confirmée",
-  VISITE_TERMINEE: "Visite terminée",
-  NEGOCIATION: "Négociation",
-  RESERVATION: "Réservation",
-  VENTE: "Vente",
-  RELANCEMENT: "Relancement",
-  PERDUE: "Perdue",
+  NEW: "Nouveau",
+  CONTACTED: "Contacté",
+  QUALIFIED: "Qualifié",
+  VISIT_SCHEDULED: "Visite planifiée",
+  VISITED: "Visité",
+  NEGOTIATION: "Négociation",
+  RESERVED: "Réservé",
+  SIGNED: "Signé",
+  CLOSED: "Finalisé",
 };
 
 interface IClientHeaderData {
