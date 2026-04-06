@@ -48,7 +48,7 @@ export const GET = apiHandler(
         take: limit,
         orderBy: { dueAt: "asc" },
         include: {
-          client: { select: { id: true, firstName: true, lastName: true } },
+          client: { select: { id: true, firstName: true, lastName: true, phone: true, pipelineStage: true } },
           assignedTo: { select: { id: true, firstName: true, lastName: true } },
           property: { select: { id: true, name: true } },
         },

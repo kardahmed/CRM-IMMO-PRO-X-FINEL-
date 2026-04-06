@@ -64,8 +64,8 @@ export const MODULE_REGISTRY: Record<ModuleId, IModuleDefinition> = {
   },
   PLANNING: {
     id: "PLANNING",
-    label: "Planning",
-    description: "Calendrier visites et tâches",
+    label: "Tâches & Planning",
+    description: "Gestion des tâches et visites",
     icon: "calendar",
     category: "COMMON",
   },

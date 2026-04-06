@@ -22,6 +22,11 @@ export interface PlanningTask {
   assignedToId: string;
   clientName: string | null;
   clientId: string | null;
+  clientPhone: string | null;
+  clientStage: string | null;
+  isAutomated: boolean;
+  notes: string | null;
+  pipelineStage: string | null;
 }
 
 /** Raw visit shape returned by GET /api/v1/visits */
@@ -43,8 +48,11 @@ export interface ApiTask {
   type: string;
   status: string;
   dueAt: string | null;
+  isAutomated?: boolean;
+  notes?: string | null;
+  pipelineStage?: string | null;
   assignedTo: { id: string; firstName: string; lastName: string };
-  client?: { id: string; firstName: string; lastName: string } | null;
+  client?: { id: string; firstName: string; lastName: string; phone?: string; pipelineStage?: string } | null;
   property?: { id: string; name: string } | null;
 }
 
