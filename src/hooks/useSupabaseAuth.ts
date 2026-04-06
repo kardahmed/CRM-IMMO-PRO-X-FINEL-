@@ -24,7 +24,7 @@ interface IUserMetadata {
 
 /**
  * Hook pour accéder à l'utilisateur Supabase côté client.
- * Remplace useUser() de Clerk.
+ * Hook d'authentification Supabase.
  */
 export function useSupabaseAuth() {
   const [state, setState] = useState<IAuthState>({

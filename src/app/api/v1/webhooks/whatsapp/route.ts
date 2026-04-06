@@ -32,7 +32,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
  * POST /api/v1/webhooks/whatsapp
  *
  * Reçoit les messages WhatsApp entrants via Cloud API.
- * Route publique (pas d'auth Clerk) — vérification par structure du payload.
+ * Route publique (pas d'auth) — vérification par structure du payload.
  *
  * Flow :
  * 1. Parse le payload WhatsApp

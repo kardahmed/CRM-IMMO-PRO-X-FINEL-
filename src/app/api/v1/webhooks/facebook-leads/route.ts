@@ -35,7 +35,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
  * POST /api/v1/webhooks/facebook-leads
  *
  * Reçoit les notifications de Lead Ads Facebook.
- * Route publique (pas d'auth Clerk).
+ * Route publique (pas d'auth).
  *
  * Flow :
  * 1. Reçoit la notification (contient leadgen_id, page_id, form_id)

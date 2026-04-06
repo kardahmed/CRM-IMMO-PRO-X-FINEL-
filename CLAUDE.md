@@ -12,7 +12,7 @@ SaaS CRM immobilier multi-tenant. Gestion complète du cycle de vente immobilier
 | UI | React, Tailwind CSS, shadcn/ui |
 | ORM | Prisma |
 | Base de données | Supabase PostgreSQL |
-| Auth | Clerk |
+| Auth | Supabase Auth |
 | Temps réel | Supabase Realtime |
 | Cartographie | Google Maps API |
 | Scraping | Puppeteer |
@@ -23,7 +23,7 @@ SaaS CRM immobilier multi-tenant. Gestion complète du cycle de vente immobilier
 
 - Chaque table métier porte une colonne `tenant_id` (UUID, NOT NULL).
 - Row-Level Security (RLS) activé sur PostgreSQL : les policies filtrent par `tenant_id`.
-- Le middleware Next.js extrait le `tenant_id` depuis la session Clerk et l'injecte dans le contexte de chaque requête.
+- Le middleware Next.js extrait le `tenant_id` depuis la session Supabase Auth et l'injecte dans le contexte de chaque requête.
 - **Aucune requête ne doit s'exécuter sans filtre `tenant_id`.** C'est la règle n-1 de sécurité.
 
 ## Types de workspace
@@ -73,7 +73,7 @@ src/
   app/              # App Router Next.js (pages, layouts, routes API)
   components/       # Composants React réutilisables
     ui/             # Composants shadcn/ui
-  lib/              # Utilitaires, clients (prisma, supabase, clerk)
+  lib/              # Utilitaires, clients (prisma, supabase)
   hooks/            # Custom React hooks
   types/            # Types TypeScript partagés
   services/         # Logique métier
