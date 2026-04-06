@@ -12,6 +12,7 @@ export type NotificationType =
   | "REASSIGNMENT"
   | "ESCALATION"
   | "STAGE_CHANGED"
+  | "TASK_CREATED"
   | "TASK_OVERDUE"
   | "PAYMENT_OVERDUE"
   | "OBJECTIVE_REACHED"

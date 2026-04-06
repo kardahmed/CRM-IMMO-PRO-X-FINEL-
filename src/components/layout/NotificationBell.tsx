@@ -28,6 +28,7 @@ const TYPE_CONFIG: Record<string, { color: string; label: string }> = {
   REASSIGNMENT: { color: "bg-orange-500", label: "Réassignation" },
   ESCALATION: { color: "bg-red-500", label: "Escalade" },
   STAGE_CHANGED: { color: "bg-purple-500", label: "Pipeline" },
+  TASK_CREATED: { color: "bg-teal-500", label: "Tâche auto" },
   TASK_OVERDUE: { color: "bg-red-500", label: "Retard" },
   PAYMENT_OVERDUE: { color: "bg-red-600", label: "Paiement" },
   OBJECTIVE_REACHED: { color: "bg-emerald-500", label: "Objectif" },

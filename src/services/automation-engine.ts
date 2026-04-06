@@ -87,9 +87,22 @@ export async function triggerAutomations(
 
     if (newTasks.length > 0) {
       await db.task.createMany({ data: newTasks });
+
+      // 5. Notifier l'agent assigné qu'il a de nouvelles tâches
+      if (client.assignedAgentId) {
+        const clientName = `${client.firstName} ${client.lastName}`;
+        await createNotification({
+          tenantId,
+          userId: client.assignedAgentId,
+          title: `${newTasks.length} tâche${newTasks.length > 1 ? "s" : ""} auto créée${newTasks.length > 1 ? "s" : ""}`,
+          message: `${clientName} → étape ${newStage} : ${newTasks.map(t => t.title).join(", ")}`,
+          type: "TASK_CREATED",
+          link: `/clients/${clientId}`,
+        });
+      }
     }
 
-    // 5. Log
+    // 6. Log
     await db.activityLog.create({
       data: {
         tenantId,
