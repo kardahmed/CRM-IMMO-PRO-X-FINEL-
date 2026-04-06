@@ -63,6 +63,14 @@ const settingsSchema = z.object({
         })
         .optional(),
       facebookPageId: z.string().max(100).optional(),
+      whatsappEnabled: z.boolean().optional(),
+      whatsappApiToken: z.string().max(500).optional(),
+      whatsappPhoneNumberId: z.string().max(100).optional(),
+      facebookEnabled: z.boolean().optional(),
+      facebookAppSecret: z.string().max(500).optional(),
+      facebookWebhookToken: z.string().max(500).optional(),
+      googleMapsEnabled: z.boolean().optional(),
+      googleMapsApiKey: z.string().max(500).optional(),
     })
     .optional(),
 });
