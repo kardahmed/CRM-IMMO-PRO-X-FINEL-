@@ -13,18 +13,18 @@ import {
   Save,
   Loader2,
   Zap,
-  Crown,
+  Star,
   Building2,
-  Rocket,
+  Sparkles,
   Users,
   Home,
-  Brain,
+  Settings,
   HardDrive,
   MessageCircle,
-  Facebook,
+  Share2,
   MapPin,
-  Code2,
-  Headphones,
+  Key,
+  Shield,
   Download,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -137,7 +137,7 @@ const PLAN_META: Record<PlanKey, { icon: React.ElementType; accent: string; badg
     badgeColor: "text-blue-600 border-blue-600/30 bg-blue-500/5",
   },
   PRO: {
-    icon: Rocket,
+    icon: Sparkles,
     accent: "text-violet-500",
     badge: "Populaire",
     badgeColor: "text-violet-600 border-violet-600/30 bg-violet-500/5",
@@ -149,7 +149,7 @@ const PLAN_META: Record<PlanKey, { icon: React.ElementType; accent: string; badg
     badgeColor: "text-amber-600 border-amber-600/30 bg-amber-500/5",
   },
   ENTERPRISE: {
-    icon: Crown,
+    icon: Star,
     accent: "text-emerald-500",
     badge: "Premium",
     badgeColor: "text-emerald-600 border-emerald-600/30 bg-emerald-500/5",
@@ -158,10 +158,10 @@ const PLAN_META: Record<PlanKey, { icon: React.ElementType; accent: string; badg
 
 const FEATURE_META: { key: keyof IPlanFeatures; label: string; icon: React.ElementType }[] = [
   { key: "whatsapp", label: "WhatsApp Integration", icon: MessageCircle },
-  { key: "facebookLeads", label: "Facebook Leads", icon: Facebook },
+  { key: "facebookLeads", label: "Facebook Leads", icon: Share2 },
   { key: "googleMaps", label: "Google Maps", icon: MapPin },
-  { key: "apiAccess", label: "API Access", icon: Code2 },
-  { key: "supportPrioritaire", label: "Support Prioritaire", icon: Headphones },
+  { key: "apiAccess", label: "API Access", icon: Key },
+  { key: "supportPrioritaire", label: "Support Prioritaire", icon: Shield },
   { key: "exportDonnees", label: "Export Données", icon: Download },
 ];
 
@@ -318,7 +318,7 @@ function PlanCard({
               onChange={(v) => updateLimit("maxProperties", v)}
             />
             <LimitField
-              icon={Brain}
+              icon={Settings}
               label="IA / Mois"
               value={plan.aiGenerationsPerMonth}
               onChange={(v) => updateLimit("aiGenerationsPerMonth", v)}
