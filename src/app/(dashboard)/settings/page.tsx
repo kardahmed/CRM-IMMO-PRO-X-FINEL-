@@ -609,12 +609,12 @@ export default function SettingsPage() {
                 </p>
               )}
 
-              <Button variant="outline" size="sm" className="w-full" asChild>
-                <a href="/team">
+              <a href="/team">
+                <Button variant="outline" size="sm" className="w-full">
                   Gerer l&apos;equipe
                   <ExternalLink className="ml-2 h-3.5 w-3.5" />
-                </a>
-              </Button>
+                </Button>
+              </a>
             </CardContent>
           </Card>
         </div>
@@ -637,12 +637,12 @@ export default function SettingsPage() {
               place de vos outils.
             </p>
           </div>
-          <Button variant="outline" size="sm" asChild>
-            <a href="mailto:support@crm-immo-pro.com">
+          <a href="mailto:support@crm-immo-pro.com">
+            <Button variant="outline" size="sm">
               <Mail className="mr-2 h-4 w-4" />
               Contactez-nous
-            </a>
-          </Button>
+            </Button>
+          </a>
         </CardContent>
       </Card>
     </div>

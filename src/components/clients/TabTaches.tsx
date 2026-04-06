@@ -457,16 +457,16 @@ export function TabTaches({ tasks, clientId }: { tasks: Task[]; clientId: string
               <div className="flex items-center gap-2 text-xs text-muted-foreground">
                 <Send className="h-3.5 w-3.5" />
                 <span className="font-medium">Action rapide :</span>
-                <Button size="sm" variant="outline" className="h-7 text-xs rounded-full gap-1" asChild>
-                  <a href={`tel:${""}`}>
+                <a href={`tel:${""}`}>
+                  <Button size="sm" variant="outline" className="h-7 text-xs rounded-full gap-1">
                     <Phone className="h-3 w-3" /> Appeler
-                  </a>
-                </Button>
-                <Button size="sm" variant="outline" className="h-7 text-xs rounded-full gap-1" asChild>
-                  <a href={`https://wa.me/`} target="_blank" rel="noopener noreferrer">
+                  </Button>
+                </a>
+                <a href={`https://wa.me/`} target="_blank" rel="noopener noreferrer">
+                  <Button size="sm" variant="outline" className="h-7 text-xs rounded-full gap-1">
                     <MessageCircle className="h-3 w-3" /> WhatsApp
-                  </a>
-                </Button>
+                  </Button>
+                </a>
               </div>
             )}
 

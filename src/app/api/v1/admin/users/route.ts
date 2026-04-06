@@ -10,7 +10,7 @@ import { createSupabaseAdminClient } from "@/lib/supabase-server";
 /*  Helpers                                                                   */
 /* -------------------------------------------------------------------------- */
 
-async function requireAdmin(req: NextRequest) {
+async function requireAdmin(req: NextRequest): Promise<{ error: NextResponse } | { admin: NonNullable<Awaited<ReturnType<typeof getAdminUser>>> }> {
   const ip = getClientIp(req);
   const rl = await rateLimit(`admin:users:${ip}`, RATE_LIMITS.authenticated);
   if (!rl.allowed) {

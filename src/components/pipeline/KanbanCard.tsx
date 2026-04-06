@@ -133,9 +133,9 @@ export function KanbanCard({
 
           {/* Quick Actions — visible on hover */}
           <div className="absolute -top-2 -right-2 flex items-center gap-1 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
-            <TooltipProvider delayDuration={200}>
+            <TooltipProvider delay={200}>
               <Tooltip>
-                <TooltipTrigger asChild>
+                <TooltipTrigger>
                   <button
                     onClick={handleCall}
                     className="h-7 w-7 rounded-full bg-emerald-500 text-white flex items-center justify-center shadow-lg hover:scale-110 transition-transform"
@@ -146,7 +146,7 @@ export function KanbanCard({
                 <TooltipContent side="top"><p className="text-xs">Appeler</p></TooltipContent>
               </Tooltip>
               <Tooltip>
-                <TooltipTrigger asChild>
+                <TooltipTrigger>
                   <button
                     onClick={handleWhatsApp}
                     className="h-7 w-7 rounded-full bg-green-500 text-white flex items-center justify-center shadow-lg hover:scale-110 transition-transform"
@@ -157,7 +157,7 @@ export function KanbanCard({
                 <TooltipContent side="top"><p className="text-xs">WhatsApp</p></TooltipContent>
               </Tooltip>
               <Tooltip>
-                <TooltipTrigger asChild>
+                <TooltipTrigger>
                   <button
                     onClick={handleScheduleVisit}
                     className="h-7 w-7 rounded-full bg-blue-500 text-white flex items-center justify-center shadow-lg hover:scale-110 transition-transform"

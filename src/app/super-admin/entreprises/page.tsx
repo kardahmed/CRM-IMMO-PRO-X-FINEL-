@@ -180,7 +180,7 @@ export default function SuperAdminWorkspaces() {
         </div>
 
         <Dialog open={dialogOpen} onOpenChange={(open) => { setDialogOpen(open); if (!open) { setForm(EMPTY_FORM); setShowPassword(false); } }}>
-          <DialogTrigger asChild>
+          <DialogTrigger>
             <Button className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold gap-2 rounded-xl">
               <Plus className="h-4 w-4" />
               Nouveau workspace

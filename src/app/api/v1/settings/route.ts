@@ -96,8 +96,8 @@ export const PUT = apiHandler(
         ? (existing.settings as Record<string, string | Record<string, string>>)
         : {};
 
-    const mergedSettings: Record<string, string | Record<string, string>> = body.settings
-      ? { ...currentSettings, ...body.settings }
+    const mergedSettings = body.settings
+      ? { ...currentSettings, ...body.settings } as Record<string, unknown>
       : currentSettings;
 
     const updated = await ctx.db.tenant.update({

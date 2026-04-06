@@ -8,7 +8,7 @@ import * as Sentry from "@sentry/nextjs";
 /*  Helpers                                                                   */
 /* -------------------------------------------------------------------------- */
 
-async function requireAdmin(req: NextRequest) {
+async function requireAdmin(req: NextRequest): Promise<{ error: NextResponse } | { admin: NonNullable<Awaited<ReturnType<typeof getAdminUser>>> }> {
   const ip = getClientIp(req);
   const rl = await rateLimit(`admin:tenants:${ip}`, RATE_LIMITS.authenticated);
   if (!rl.allowed) {

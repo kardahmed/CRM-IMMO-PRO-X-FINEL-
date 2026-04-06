@@ -702,7 +702,7 @@ export default function WorkspaceDetailPanel() {
             </div>
             <div className="space-y-2">
               <Label className="text-sm font-bold text-muted-foreground">Role</Label>
-              <Select value={newUserForm.role} onValueChange={(v) => setNewUserForm((f) => ({ ...f, role: v }))}>
+              <Select value={newUserForm.role} onValueChange={(v) => setNewUserForm((f) => ({ ...f, role: v ?? "" }))}>
                 <SelectTrigger className="bg-background border-border text-foreground">
                   <SelectValue />
                 </SelectTrigger>
