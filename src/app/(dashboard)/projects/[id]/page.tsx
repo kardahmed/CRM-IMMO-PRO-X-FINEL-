@@ -419,7 +419,7 @@ export default function ProjectDetailPage() {
 
       {/* Unit Detail Simulator Modal */}
       <Dialog open={isUnitOpen} onOpenChange={setIsUnitOpen}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="sm:max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader className="mb-4">
             <DialogTitle className="text-2xl font-black uppercase flex items-center gap-2">
               Unite {selectedUnit?.name}{" "}

@@ -38,12 +38,14 @@ import { VerticalFlowConnector } from "@/components/automations/FlowConnector";
 // Types
 // ---------------------------------------------------------------------------
 interface AutomationTask {
-  name: string;
+  name?: string;
+  title?: string;
   type: string;
   delayMinutes?: number;
   isActive?: boolean;
   targetAgentId?: string | null;
   messageTemplate?: string;
+  description?: string;
 }
 
 interface AutomationConfig {
@@ -410,7 +412,7 @@ export default function AutomationsPage() {
                                         </button>
                                       )}
                                     </div>
-                                    <h4 className="text-lg font-bold tracking-tight text-foreground">{task.name}</h4>
+                                    <h4 className="text-lg font-bold tracking-tight text-foreground">{task.title || task.name}</h4>
                                   </div>
                                 </div>
 

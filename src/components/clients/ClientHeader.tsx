@@ -123,7 +123,7 @@ export function ClientHeader({ client }: ClientHeaderProps) {
             <User className="h-3.5 w-3.5" />
             Modifier la fiche
           </DialogTrigger>
-          <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto w-full p-6">
+          <DialogContent className="sm:max-w-5xl max-h-[90vh] overflow-y-auto w-full p-6">
             <DialogHeader>
               <DialogTitle>Édition du client</DialogTitle>
             </DialogHeader>
