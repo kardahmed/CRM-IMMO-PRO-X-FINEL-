@@ -17,7 +17,8 @@ import {
   CreditCard,
   Database,
   Menu,
-  X
+  X,
+  Megaphone
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Logo } from "@/components/ui/Logo";
@@ -65,6 +66,7 @@ export default function SuperAdminLayout({
     { href: "/super-admin/ai", icon: Sparkles, label: "Moteur IA" },
     { href: "/super-admin/demo", icon: Users, label: "Leads Démo" },
     { href: "/super-admin/plans", icon: CreditCard, label: "Plans" },
+    { href: "/super-admin/marketing", icon: Megaphone, label: "Marketing" },
     { href: "/super-admin/settings", icon: Settings, label: "Config Système" },
   ];
 
