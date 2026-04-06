@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import Link from "next/link";
 import {
   Zap,
   XCircle,
@@ -12,14 +11,13 @@ import {
   FileText,
   Calendar,
   Clock,
-  Users,
-  Settings2,
-  BarChart3,
+  ArrowDown,
+  Loader2,
+  Save,
   Pencil,
-  PlusCircle,
+  Users,
 } from "lucide-react";
 import { toast } from "sonner";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -32,7 +30,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
-import { VerticalFlowConnector } from "@/components/automations/FlowConnector";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -64,44 +61,47 @@ interface TeamMember {
 }
 
 // ---------------------------------------------------------------------------
-// Pipeline stage labels & colors
+// Stage metadata
 // ---------------------------------------------------------------------------
-const STAGE_META: Record<string, { label: string; color: string; order: number }> = {
-  NEW: { label: "Nouveau", color: "bg-blue-500/10 text-blue-600 border-blue-500/20", order: 1 },
-  CONTACTED: { label: "Contacté", color: "bg-cyan-500/10 text-cyan-600 border-cyan-500/20", order: 2 },
-  QUALIFIED: { label: "Qualified", color: "bg-violet-500/10 text-violet-600 border-violet-500/20", order: 3 },
-  VISIT_SCHEDULED: { label: "Visite planifiée", color: "bg-indigo-500/10 text-indigo-600 border-indigo-500/20", order: 4 },
-  VISITED: { label: "Visite effectuée", color: "bg-sky-500/10 text-sky-600 border-sky-500/20", order: 5 },
-  NEGOTIATION: { label: "Négociation", color: "bg-amber-500/10 text-amber-600 border-amber-500/20", order: 6 },
-  RESERVED: { label: "Réservé", color: "bg-orange-500/10 text-orange-600 border-orange-500/20", order: 7 },
-  SIGNED: { label: "Signé", color: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20", order: 8 },
-  CLOSED: { label: "Clôturé", color: "bg-green-500/10 text-green-600 border-green-500/20", order: 9 },
+const STAGE_META: Record<string, { label: string; color: string; bg: string; order: number }> = {
+  NEW:              { label: "Nouveau",          color: "text-blue-600",    bg: "bg-blue-50 border-blue-200",     order: 1 },
+  CONTACTED:        { label: "Contacté",         color: "text-cyan-600",    bg: "bg-cyan-50 border-cyan-200",     order: 2 },
+  QUALIFIED:        { label: "Qualifié",         color: "text-violet-600",  bg: "bg-violet-50 border-violet-200", order: 3 },
+  VISIT_SCHEDULED:  { label: "Visite planifiée", color: "text-indigo-600",  bg: "bg-indigo-50 border-indigo-200", order: 4 },
+  VISITED:          { label: "Visite effectuée", color: "text-sky-600",     bg: "bg-sky-50 border-sky-200",       order: 5 },
+  NEGOTIATION:      { label: "Négociation",      color: "text-amber-600",   bg: "bg-amber-50 border-amber-200",   order: 6 },
+  RESERVED:         { label: "Réservé",          color: "text-orange-600",  bg: "bg-orange-50 border-orange-200", order: 7 },
+  SIGNED:           { label: "Signé",            color: "text-emerald-600", bg: "bg-emerald-50 border-emerald-200", order: 8 },
+  CLOSED:           { label: "Clôturé",          color: "text-green-600",   bg: "bg-green-50 border-green-200",   order: 9 },
 };
 
 // ---------------------------------------------------------------------------
-// Task type metadata
+// Task type config
 // ---------------------------------------------------------------------------
-const TYPE_META: Record<string, { label: string; icon: string; color: string }> = {
-  CALL: { label: "Appel", icon: "Phone", color: "bg-emerald-50 text-emerald-600 border-emerald-100" },
-  OTHER: { label: "WhatsApp/SMS", icon: "MessageCircle", color: "bg-emerald-50 text-emerald-600 border-emerald-100" },
-  DOCUMENT: { label: "Document", icon: "FileText", color: "bg-blue-50 text-blue-600 border-blue-100" },
-  MEETING: { label: "Rendez-vous", icon: "Calendar", color: "bg-purple-50 text-purple-600 border-purple-100" },
+const TYPE_CONFIG: Record<string, { label: string; icon: typeof Phone; color: string; iconColor: string }> = {
+  CALL:     { label: "Appel",        icon: Phone,          color: "bg-emerald-50 border-emerald-200", iconColor: "text-emerald-600" },
+  OTHER:    { label: "WhatsApp/SMS", icon: MessageCircle,  color: "bg-green-50 border-green-200",     iconColor: "text-green-600" },
+  DOCUMENT: { label: "Document",     icon: FileText,       color: "bg-blue-50 border-blue-200",       iconColor: "text-blue-600" },
+  MEETING:  { label: "Rendez-vous",  icon: Calendar,       color: "bg-purple-50 border-purple-200",   iconColor: "text-purple-600" },
 };
 
-const TYPE_ICONS: Record<string, React.ReactNode> = {
-  Phone: <Phone className="h-4 w-4" />,
-  MessageCircle: <MessageCircle className="h-4 w-4" />,
-  FileText: <FileText className="h-4 w-4" />,
-  Calendar: <Calendar className="h-4 w-4" />,
-};
-
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
 function formatDelay(minutes: number): string {
   if (minutes < 60) return `${minutes} min`;
   if (minutes < 1440) return `${Math.round(minutes / 60)}h`;
-  return `${Math.round(minutes / 1440)} jour${Math.round(minutes / 1440) > 1 ? "s" : ""}`;
+  const days = Math.round(minutes / 1440);
+  return `${days} jour${days > 1 ? "s" : ""}`;
+}
+
+// ---------------------------------------------------------------------------
+// Flow Arrow connector
+// ---------------------------------------------------------------------------
+function FlowArrow({ muted = false }: { muted?: boolean }) {
+  return (
+    <div className="flex flex-col items-center py-1">
+      <div className={cn("w-0.5 h-6", muted ? "bg-neutral-200" : "bg-primary/30")} />
+      <ArrowDown className={cn("h-3.5 w-3.5 -mt-0.5", muted ? "text-neutral-300" : "text-primary/40")} />
+    </div>
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -116,9 +116,6 @@ export default function AutomationsPage() {
   const [savingStages, setSavingStages] = useState<Set<string>>(new Set());
   const [editingTemplate, setEditingTemplate] = useState<string | null>(null);
 
-  // -------------------------------------------------------------------------
-  // Fetch configs
-  // -------------------------------------------------------------------------
   const fetchConfigs = useCallback(async () => {
     try {
       setLoading(true);
@@ -128,7 +125,7 @@ export default function AutomationsPage() {
       if (json.success) {
         setConfigs(json.data);
       } else {
-        setError(json.error ?? "Erreur lors du chargement des automatisations");
+        setError(json.error ?? "Erreur lors du chargement");
       }
     } catch {
       setError("Impossible de contacter le serveur");
@@ -137,19 +134,12 @@ export default function AutomationsPage() {
     }
   }, []);
 
-  // -------------------------------------------------------------------------
-  // Fetch agents
-  // -------------------------------------------------------------------------
   const fetchAgents = useCallback(async () => {
     try {
       const res = await fetch("/api/v1/settings/team");
       const json = await res.json();
-      if (json.data?.members) {
-        setAgents(json.data.members);
-      }
-    } catch {
-      // Silently fail
-    }
+      if (json.data?.members) setAgents(json.data.members);
+    } catch { /* silent */ }
   }, []);
 
   useEffect(() => {
@@ -178,12 +168,12 @@ export default function AutomationsPage() {
       });
       const json = await res.json();
       if (!json.success) throw new Error(json.error);
-      toast.success(`Flux "${STAGE_META[pipelineStage]?.label ?? pipelineStage}" ${isActive ? "mis en route" : "suspendu"}`);
+      toast.success(`${STAGE_META[pipelineStage]?.label ?? pipelineStage} ${isActive ? "activé" : "désactivé"}`);
     } catch {
       setConfigs((prev) =>
         prev.map((c) => (c.pipelineStage === pipelineStage ? { ...c, isActive: !isActive } : c))
       );
-      toast.error("Erreur technique de synchronisation");
+      toast.error("Erreur de synchronisation");
     }
   };
 
@@ -191,9 +181,7 @@ export default function AutomationsPage() {
     setConfigs((prev) =>
       prev.map((c) => {
         if (c.pipelineStage !== pipelineStage) return c;
-        const updatedTasks = c.tasks.map((t, i) =>
-          i === taskIndex ? { ...t, isActive } : t
-        );
+        const updatedTasks = c.tasks.map((t, i) => i === taskIndex ? { ...t, isActive } : t);
         return { ...c, tasks: updatedTasks };
       })
     );
@@ -203,32 +191,22 @@ export default function AutomationsPage() {
     setConfigs((prev) =>
       prev.map((c) => {
         if (c.pipelineStage !== pipelineStage) return c;
-        const updatedTasks = c.tasks.map((t, i) =>
-          i === taskIndex ? { ...t, targetAgentId: agentId } : t
-        );
+        const updatedTasks = c.tasks.map((t, i) => i === taskIndex ? { ...t, targetAgentId: agentId } : t);
         return { ...c, tasks: updatedTasks };
       })
     );
   };
 
-  // -------------------------------------------------------------------------
-  // Task message template
-  // -------------------------------------------------------------------------
   const handleTaskTemplateChange = useCallback((pipelineStage: string, taskIndex: number, template: string) => {
     setConfigs((prev) =>
       prev.map((c) => {
         if (c.pipelineStage !== pipelineStage) return c;
-        const updatedTasks = c.tasks.map((t, i) =>
-          i === taskIndex ? { ...t, messageTemplate: template || undefined } : t
-        );
+        const updatedTasks = c.tasks.map((t, i) => i === taskIndex ? { ...t, messageTemplate: template || undefined } : t);
         return { ...c, tasks: updatedTasks };
       })
     );
   }, []);
 
-  // -------------------------------------------------------------------------
-  // Save tasks for a stage
-  // -------------------------------------------------------------------------
   const handleSaveTasks = useCallback(async (config: AutomationConfig) => {
     setSavingStages((prev) => new Set(prev).add(config.pipelineStage));
     try {
@@ -239,7 +217,7 @@ export default function AutomationsPage() {
       });
       const json = await res.json();
       if (!json.success) throw new Error(json.error);
-      toast.success(`Flux "${STAGE_META[config.pipelineStage]?.label ?? config.pipelineStage}" optimisé`);
+      toast.success("Flux sauvegardé");
     } catch {
       toast.error("Erreur d'enregistrement");
     } finally {
@@ -249,234 +227,237 @@ export default function AutomationsPage() {
         return next;
       });
     }
-  }, [setSavingStages]);
+  }, []);
 
-  const sortedConfigs = [...configs].sort((a, b) => {
-    return (STAGE_META[a.pipelineStage]?.order ?? 99) - (STAGE_META[b.pipelineStage]?.order ?? 99);
-  });
+  const sortedConfigs = [...configs].sort((a, b) =>
+    (STAGE_META[a.pipelineStage]?.order ?? 99) - (STAGE_META[b.pipelineStage]?.order ?? 99)
+  );
 
   return (
-    <div className="space-y-12 pb-20 max-w-5xl mx-auto px-4 italic-none">
-      {/* Executive Header */}
-      <div className="flex flex-col md:flex-row items-center justify-between gap-6 bg-card p-8 rounded-[32px] shadow-stripe border border-border animate-page-enter">
-        <div className="flex items-center gap-6">
-          <div className="h-16 w-16 rounded-2xl bg-emerald-500/10 flex items-center justify-center text-emerald-600 shadow-sm border border-emerald-500/20">
-            <Zap className="h-8 w-8 fill-emerald-500/20" />
+    <div className="pb-20 max-w-3xl mx-auto">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center gap-3">
+          <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center">
+            <Zap className="h-5 w-5 text-primary" />
           </div>
           <div>
-            <h1 className="text-4xl font-black tracking-tighter text-foreground flex items-center gap-2">
-              Automations
-              <span className="text-primary italic text-xl font-medium tracking-normal opacity-40 lowercase">engine</span>
-            </h1>
-            <p className="text-xs font-bold text-muted-foreground uppercase tracking-[0.3em] opacity-60 mt-1">
-              Architecture des Flux & Propulseurs d'Activite
+            <h1 className="text-xl font-bold tracking-tight">Automatisations</h1>
+            <p className="text-xs text-muted-foreground">
+              {sortedConfigs.length} étapes · {sortedConfigs.reduce((s, c) => s + (c.tasks?.length || 0), 0)} actions
             </p>
           </div>
         </div>
-        <Link href="/dashboard/automations/dashboard">
-          <Button variant="outline" className="h-14 px-8 rounded-full font-bold uppercase text-xs tracking-[0.2em] shadow-stripe border-border hover:bg-accent gap-3 group transition-all">
-            <BarChart3 className="h-4 w-4 text-primary group-hover:rotate-12 transition-transform" />
-            Performance Hub
-          </Button>
-        </Link>
       </div>
 
-      {loading ? (
-        <div className="space-y-10">
-          {[...Array(4)].map((_, i) => <Skeleton key={i} className="h-32 rounded-[32px] w-full" />)}
+      {/* Loading */}
+      {loading && (
+        <div className="flex flex-col items-center gap-3 py-20">
+          <Loader2 className="h-6 w-6 animate-spin text-primary" />
+          <p className="text-sm text-muted-foreground">Chargement des flux...</p>
         </div>
-      ) : error ? (
-        <Card className="rounded-[32px] border-none shadow-stripe bg-rose-50/50 p-12 text-center">
-          <XCircle className="h-16 w-16 text-rose-500 mx-auto mb-4 opacity-50" />
-          <p className="text-lg font-bold text-rose-900 tracking-tight">{error}</p>
-          <Button onClick={fetchConfigs} variant="outline" className="mt-6 rounded-full h-12 px-8">Réessayer</Button>
-        </Card>
-      ) : (
-        <div className="space-y-16 relative">
-          {/* Vertical Visual Guide Line */}
-          <div className="absolute left-[39px] top-10 bottom-0 w-[2px] bg-muted/50 hidden lg:block" />
+      )}
 
-          {sortedConfigs.map((config) => {
-            const meta = STAGE_META[config.pipelineStage] ?? { label: config.pipelineStage, color: "bg-muted text-muted-foreground", order: 99 };
+      {/* Error */}
+      {error && !loading && (
+        <div className="flex flex-col items-center gap-4 py-20">
+          <XCircle className="h-10 w-10 text-red-400" />
+          <p className="text-sm font-medium text-red-600">{error}</p>
+          <Button onClick={fetchConfigs} variant="outline" size="sm">Réessayer</Button>
+        </div>
+      )}
+
+      {/* Flow */}
+      {!loading && !error && (
+        <div className="flex flex-col items-center">
+          {sortedConfigs.map((config, stageIdx) => {
+            const meta = STAGE_META[config.pipelineStage] ?? { label: config.pipelineStage, color: "text-neutral-600", bg: "bg-neutral-50 border-neutral-200", order: 99 };
             const isExpanded = expandedStages.has(config.pipelineStage);
             const isSaving = savingStages.has(config.pipelineStage);
             const tasks = config.tasks || [];
-            const activeTaskCount = tasks.filter(t => t.isActive !== false).length;
+            const activeCount = tasks.filter(t => t.isActive !== false).length;
 
             return (
-              <div key={config.id} className="relative animate-page-enter">
-                {/* TRIGGER NODE */}
-                <div className="relative z-10 flex items-start gap-4 lg:gap-8 group">
-                   <div className={cn(
-                     "flex-shrink-0 h-[80px] w-[80px] rounded-full flex items-center justify-center transition-all duration-700 shadow-stripe-lg border-4 border-white",
-                     config.isActive ? "bg-emerald-500 text-white scale-110" : "bg-neutral-100 text-neutral-400 grayscale"
-                   )}>
-                     <Zap className={cn("h-8 w-8", config.isActive && "animate-pulse")} />
-                   </div>
-                   
-                   <div className={cn(
-                     "flex-1 bg-card p-8 rounded-[32px] border transition-all duration-500 shadow-stripe hover:shadow-stripe-lg",
-                     config.isActive ? "border-emerald-500/10" : "border-border opacity-60"
-                   )}>
-                      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-                        <div className="space-y-1">
-                           <div className="flex items-center gap-3">
-                             <span className="text-xs font-bold uppercase tracking-[0.25em] text-primary">Déclencheur Système</span>
-                             <Badge className={cn("rounded-full px-4 py-1 text-xs font-bold uppercase border", meta.color)}>
-                               {meta.label}
-                             </Badge>
-                           </div>
-                           <h3 className="text-2xl font-black tracking-tight text-foreground transition-colors group-hover:text-primary">
-                             Prospect entre dans l'étape
-                           </h3>
-                           <p className="text-sm text-muted-foreground font-medium italic">
-                             Actionne automatiquement {tasks.length} propulseur{tasks.length > 1 ? "s" : ""} logistique{tasks.length > 1 ? "s" : ""}.
-                           </p>
-                        </div>
+              <div key={config.id} className="flex flex-col items-center w-full">
+                {/* Arrow between stages */}
+                {stageIdx > 0 && <FlowArrow muted={!config.isActive} />}
 
-                        <div className="flex items-center gap-6 self-start lg:self-center bg-accent px-6 py-4 rounded-2xl border border-border">
-                          <div className="text-right">
-                             <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground/60">{config.isActive ? "Actif" : "Suspendu"}</p>
-                             <p className="text-xs font-bold uppercase text-foreground">{activeTaskCount} actif{activeTaskCount > 1 ? "s" : ""}</p>
-                          </div>
-                          <Switch
-                            checked={config.isActive}
-                            onCheckedChange={(checked) => handleMasterToggle(config.pipelineStage, checked)}
-                            className="data-[state=checked]:bg-emerald-500"
-                          />
-                        </div>
+                {/* ═══════ TRIGGER NODE ═══════ */}
+                <div
+                  className={cn(
+                    "w-full max-w-xl bg-white dark:bg-card border rounded-2xl shadow-sm transition-all hover:shadow-md cursor-pointer",
+                    config.isActive ? "border-primary/20" : "border-border opacity-60"
+                  )}
+                  onClick={() => toggleExpand(config.pipelineStage)}
+                >
+                  <div className="flex items-center gap-3 p-4">
+                    {/* Stage icon */}
+                    <div className={cn("h-9 w-9 rounded-lg flex items-center justify-center border shrink-0", meta.bg)}>
+                      <Zap className={cn("h-4 w-4", meta.color)} />
+                    </div>
+
+                    {/* Stage info */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <Badge variant="outline" className={cn("text-[10px] font-bold uppercase border px-2 py-0", meta.bg, meta.color)}>
+                          {meta.label}
+                        </Badge>
+                        <span className="text-xs text-muted-foreground">
+                          {activeCount}/{tasks.length} actions
+                        </span>
                       </div>
+                      <p className="text-sm font-semibold mt-0.5 truncate">
+                        Quand un prospect entre dans cette étape
+                      </p>
+                    </div>
 
-                      {/* Expand / Visual Flow Control */}
-                      <Button 
-                        variant="ghost" 
-                        onClick={() => toggleExpand(config.pipelineStage)}
-                        className="mt-6 w-full h-12 bg-accent/50 hover:bg-accent border border-border text-xs font-bold uppercase tracking-[0.2em] text-muted-foreground transition-all rounded-xl gap-2"
-                      >
-                        {isExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
-                        {isExpanded ? "Masquer le pipeline visuel" : "Déployer le flux Zapier"}
-                      </Button>
-                   </div>
+                    {/* Toggle + expand */}
+                    <div className="flex items-center gap-3 shrink-0">
+                      <Switch
+                        checked={config.isActive}
+                        onCheckedChange={(checked) => {
+                          handleMasterToggle(config.pipelineStage, checked);
+                        }}
+                        onClick={(e) => e.stopPropagation()}
+                        className="data-[state=checked]:bg-primary"
+                      />
+                      {isExpanded ? (
+                        <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                      ) : (
+                        <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                      )}
+                    </div>
+                  </div>
                 </div>
 
-                {/* VISUAL FLOW - ACTION NODES */}
+                {/* ═══════ TASK NODES ═══════ */}
                 {isExpanded && (
-                  <div className="mt-4 ml-[39px] flex flex-col items-center lg:items-start lg:ml-[39px] animate-in fade-in slide-in-from-top-4 duration-500 w-full lg:w-auto">
+                  <div className="flex flex-col items-center w-full">
                     {tasks.map((task, idx) => {
-                      const typeMeta = TYPE_META[task.type] ?? { label: task.type, icon: "FileText", color: "bg-gray-100 text-gray-700" };
-                      const IconNode = TYPE_ICONS[typeMeta.icon] ?? <FileText className="h-4 w-4" />;
+                      const typeConf = TYPE_CONFIG[task.type] ?? TYPE_CONFIG.CALL;
+                      const Icon = typeConf.icon;
+                      const taskActive = task.isActive !== false;
+                      const templateKey = `${config.pipelineStage}-${idx}`;
+                      const isEditingTpl = editingTemplate === templateKey;
 
                       return (
-                        <div key={idx} className="flex flex-col items-center lg:items-start w-full">
-                          <VerticalFlowConnector active={config.isActive && task.isActive !== false} className="lg:w-20 lg:ml-[-10px]" />
-                          
-                          <div className="flex items-start gap-6 lg:gap-8 w-full group/task">
-                            {/* Action Pulse Point */}
-                            <div className={cn(
-                              "flex-shrink-0 h-4 w-4 rounded-full mt-10 transition-all duration-700 relative",
-                              task.isActive !== false ? "bg-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.5)] scale-125" : "bg-neutral-200"
-                            )}>
-                              {task.isActive !== false && <div className="absolute inset-0 rounded-full bg-emerald-500 animate-ping opacity-25" />}
-                            </div>
+                        <div key={idx} className="flex flex-col items-center w-full">
+                          {/* Arrow */}
+                          <FlowArrow muted={!taskActive} />
 
-                            {/* Action Card */}
-                            <div className={cn(
-                              "flex-1 bg-card border p-6 rounded-[24px] shadow-stripe hover:shadow-stripe-lg transition-all duration-500",
-                              task.isActive !== false ? "border-emerald-500/5" : "opacity-50 border-border"
-                            )}>
-                              <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-                                <div className="flex items-center gap-4">
-                                  <div className={cn("h-12 w-12 rounded-[14px] flex items-center justify-center border shadow-sm transition-transform group-hover/task:rotate-3", typeMeta.color)}>
-                                    {IconNode}
-                                  </div>
-                                  <div>
-                                    <div className="flex items-center gap-2 mb-0.5">
-                                      <span className="text-xs font-bold uppercase tracking-[0.2em] text-muted-foreground/60 italic">Propulseur #{idx + 1}</span>
-                                      {task.delayMinutes && task.delayMinutes > 0 && (
-                                        <Badge variant="outline" className="text-xs font-bold uppercase py-0 px-2 flex items-center gap-1 border-border">
-                                          <Clock className="h-2.5 w-2.5" />
-                                          Délai : {formatDelay(task.delayMinutes)}
-                                        </Badge>
-                                      )}
-                                      {task.type === "OTHER" && (
-                                        <button
-                                          type="button"
-                                          className="inline-flex items-center justify-center h-6 w-6 rounded hover:bg-accent transition-colors"
-                                          title="Modifier le template WhatsApp"
-                                          onClick={() => {
-                                            const templateKey = `${config.pipelineStage}-${idx}`;
-                                            setEditingTemplate(editingTemplate === templateKey ? null : templateKey);
-                                          }}
-                                        >
-                                          <Pencil className="h-3 w-3 text-muted-foreground" />
-                                        </button>
-                                      )}
-                                    </div>
-                                    <h4 className="text-lg font-bold tracking-tight text-foreground">{task.title || task.name}</h4>
-                                  </div>
+                          {/* Task card */}
+                          <div
+                            className={cn(
+                              "w-full max-w-lg bg-white dark:bg-card border rounded-xl shadow-sm transition-all",
+                              taskActive ? "border-border hover:shadow-md" : "border-border/50 opacity-40"
+                            )}
+                          >
+                            <div className="flex items-start gap-3 p-3.5">
+                              {/* Type icon */}
+                              <div className={cn("h-8 w-8 rounded-lg flex items-center justify-center border shrink-0 mt-0.5", typeConf.color)}>
+                                <Icon className={cn("h-3.5 w-3.5", typeConf.iconColor)} />
+                              </div>
+
+                              {/* Content */}
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2 mb-0.5">
+                                  <Badge variant="outline" className={cn("text-[10px] font-semibold px-1.5 py-0 border", typeConf.color, typeConf.iconColor)}>
+                                    {typeConf.label}
+                                  </Badge>
+                                  {task.delayMinutes && task.delayMinutes > 0 && (
+                                    <span className="text-[10px] text-muted-foreground flex items-center gap-0.5">
+                                      <Clock className="h-2.5 w-2.5" />
+                                      {formatDelay(task.delayMinutes)}
+                                    </span>
+                                  )}
                                 </div>
+                                <p className="text-sm font-medium leading-snug">
+                                  {idx + 1}. {task.title || task.name}
+                                </p>
+                                {task.description && (
+                                  <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">
+                                    {task.description}
+                                  </p>
+                                )}
 
-                                <div className="flex items-center gap-4 w-full md:w-auto">
-                                  <div className="flex-1 min-w-[160px]">
+                                {/* Agent selector (inline) */}
+                                {taskActive && agents.length > 0 && (
+                                  <div className="mt-2">
                                     <Select
                                       value={task.targetAgentId ?? "all"}
                                       onValueChange={(v) => handleTaskAgentChange(config.pipelineStage, idx, v === "all" ? null : v)}
                                     >
-                                      <SelectTrigger className="h-10 text-xs font-bold uppercase tracking-widest border-border rounded-xl bg-accent/50">
-                                        <Users className="h-3 w-3 mr-2 text-primary" />
-                                        <SelectValue placeholder="Assigne à..." />
+                                      <SelectTrigger className="h-7 text-[10px] font-medium w-auto min-w-[140px] max-w-[200px] border-dashed">
+                                        <Users className="h-2.5 w-2.5 mr-1 text-muted-foreground" />
+                                        <SelectValue placeholder="Tout le monde" />
                                       </SelectTrigger>
-                                      <SelectContent className="rounded-xl border-border shadow-stripe-lg">
-                                        <SelectItem value="all" className="text-xs font-bold uppercase">Flux Collectif</SelectItem>
+                                      <SelectContent>
+                                        <SelectItem value="all" className="text-xs">Tout le monde</SelectItem>
                                         {agents.map((a) => (
-                                          <SelectItem key={a.id} value={a.id} className="text-xs font-bold uppercase">{a.firstName} {a.lastName}</SelectItem>
+                                          <SelectItem key={a.id} value={a.id} className="text-xs">
+                                            {a.firstName} {a.lastName}
+                                          </SelectItem>
                                         ))}
                                       </SelectContent>
                                     </Select>
                                   </div>
-                                  <Switch
-                                    checked={task.isActive !== false}
-                                    onCheckedChange={(c) => handleTaskToggle(config.pipelineStage, idx, c)}
-                                    className="data-[state=checked]:bg-emerald-500 scale-90"
-                                  />
-                                </div>
+                                )}
+
+                                {/* WhatsApp template editor */}
+                                {isEditingTpl && task.type === "OTHER" && (
+                                  <div className="mt-3 pt-3 border-t border-dashed border-border">
+                                    <textarea
+                                      className="w-full rounded-lg border border-border bg-muted/30 px-3 py-2 text-xs focus:ring-1 focus:ring-primary/20 focus:border-primary outline-none resize-none"
+                                      rows={3}
+                                      maxLength={2000}
+                                      placeholder="Template WhatsApp personnalisé..."
+                                      value={task.messageTemplate ?? ""}
+                                      onChange={(e) => handleTaskTemplateChange(config.pipelineStage, idx, e.target.value)}
+                                    />
+                                    <div className="mt-1.5 flex flex-wrap gap-1">
+                                      {["{clientName}", "{agentName}", "{budget}", "{date}"].map(v => (
+                                        <span key={v} className="px-1.5 py-0.5 rounded text-[10px] font-medium text-muted-foreground bg-muted/50 border border-border/50">{v}</span>
+                                      ))}
+                                    </div>
+                                  </div>
+                                )}
                               </div>
 
-                              {/* WhatsApp template editor */}
-                              {editingTemplate === `${config.pipelineStage}-${idx}` && task.type === "OTHER" && (
-                                <div className="mt-4 border-t border-border pt-4 animate-in fade-in slide-in-from-top-2 duration-300">
-                                  <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground block mb-2">
-                                    Template de message WhatsApp
-                                  </label>
-                                  <textarea
-                                    className="w-full rounded-xl border border-border bg-accent/50 px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all resize-none min-h-[100px] font-medium text-foreground"
-                                    rows={3}
-                                    maxLength={2000}
-                                    placeholder="Pas de template personnalisé"
-                                    value={task.messageTemplate ?? ""}
-                                    onChange={(e) => handleTaskTemplateChange(config.pipelineStage, idx, e.target.value)}
-                                  />
-                                  <div className="mt-2 flex flex-wrap gap-1.5">
-                                    {["{clientName}", "{agentName}", "{propertyName}", "{budget}", "{date}"].map(v => (
-                                      <span key={v} className="px-2 py-0.5 rounded-md bg-muted/50 text-xs font-bold text-muted-foreground border border-border/50">{v}</span>
-                                    ))}
-                                  </div>
-                                </div>
-                              )}
+                              {/* Right actions */}
+                              <div className="flex items-center gap-1.5 shrink-0">
+                                {task.type === "OTHER" && (
+                                  <button
+                                    type="button"
+                                    className="h-6 w-6 rounded hover:bg-accent flex items-center justify-center transition-colors"
+                                    title="Template WhatsApp"
+                                    onClick={() => setEditingTemplate(isEditingTpl ? null : templateKey)}
+                                  >
+                                    <Pencil className="h-3 w-3 text-muted-foreground" />
+                                  </button>
+                                )}
+                                <Switch
+                                  checked={taskActive}
+                                  onCheckedChange={(c) => handleTaskToggle(config.pipelineStage, idx, c)}
+                                  className="data-[state=checked]:bg-primary scale-75"
+                                />
+                              </div>
                             </div>
                           </div>
                         </div>
                       );
                     })}
 
-                    <div className="mt-8 self-end pr-0 lg:pr-8 animate-in fade-in duration-1000">
+                    {/* Save button */}
+                    <div className="mt-3 mb-1">
                       <Button
-                        size="lg"
+                        size="sm"
+                        variant="outline"
                         onClick={() => handleSaveTasks(config)}
                         disabled={isSaving}
-                        className="h-14 px-10 rounded-full font-black uppercase text-xs tracking-[0.25em] bg-card text-foreground shadow-stripe-lg hover:bg-neutral-800 transition-all active:scale-95 italic"
+                        className="h-8 text-xs font-medium gap-1.5 rounded-lg"
                       >
-                        {isSaving ? "Synchronisation..." : "Optimiser ce flux"}
+                        {isSaving ? <Loader2 className="h-3 w-3 animate-spin" /> : <Save className="h-3 w-3" />}
+                        Sauvegarder
                       </Button>
                     </div>
                   </div>
