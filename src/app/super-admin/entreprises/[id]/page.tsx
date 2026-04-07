@@ -118,7 +118,6 @@ export default function WorkspaceDetailPanel() {
       const json = await res.json();
       if (json.success) {
         toast.success(`Workspace supprime (${json.data.usersCleared} utilisateurs nettoyes)`);
-        // Redirect back to list
         window.location.href = "/super-admin/entreprises";
       } else {
         toast.error(json.error || "Erreur");
@@ -157,7 +156,7 @@ export default function WorkspaceDetailPanel() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <Loader2 className="h-8 w-8 animate-spin text-neutral-500" />
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
       </div>
     );
   }
@@ -166,9 +165,9 @@ export default function WorkspaceDetailPanel() {
     return (
       <div className="flex flex-col items-center justify-center h-64 gap-4">
         <AlertCircle className="h-12 w-12 text-rose-500" />
-        <p className="text-lg font-bold text-white">Workspace introuvable</p>
+        <p className="text-lg font-bold text-foreground">Workspace introuvable</p>
         <Link href="/super-admin/entreprises">
-          <Button variant="outline" className="border-neutral-800 text-white gap-2">
+          <Button variant="outline" className="gap-2">
             <ArrowLeft className="h-4 w-4" /> Retour
           </Button>
         </Link>
@@ -177,31 +176,31 @@ export default function WorkspaceDetailPanel() {
   }
 
   const statusColor: Record<string, string> = {
-    ACTIVE: "bg-emerald-500/10 text-emerald-400",
-    SUSPENDED: "bg-rose-500/10 text-rose-400",
+    ACTIVE: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
+    SUSPENDED: "bg-rose-500/10 text-rose-600 dark:text-rose-400",
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8 animate-in fade-in duration-700 slide-in-from-bottom-4">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-neutral-800 pb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-6">
         <div>
-          <div className="flex items-center gap-3 mb-1">
-            <Link href="/super-admin/entreprises" className="text-neutral-500 hover:text-white transition-colors text-sm font-bold">
+          <div className="flex items-center gap-3 mb-2">
+            <Link href="/super-admin/entreprises" className="text-muted-foreground hover:text-foreground transition-colors text-sm font-bold">
               ← Retour
             </Link>
             <Badge className={`${statusColor[tenant.status] || ""} border-none font-black uppercase text-[10px]`}>
               {tenant.status}
             </Badge>
-            <Badge className="bg-indigo-500/10 text-indigo-400 border-none font-black uppercase text-[10px]">
+            <Badge className="bg-primary/10 text-primary border-none font-black uppercase text-[10px]">
               {tenant.plan}
             </Badge>
-            <Badge variant="outline" className="border-neutral-700 text-neutral-400 font-bold uppercase text-[10px]">
+            <Badge variant="outline" className="border-border text-muted-foreground font-bold uppercase text-[10px]">
               {tenant.type}
             </Badge>
           </div>
-          <h1 className="text-3xl font-black text-white tracking-tight">{tenant.name}</h1>
-          <p className="text-sm text-neutral-400 mt-1">
+          <h1 className="text-3xl font-black text-foreground tracking-tight">{tenant.name}</h1>
+          <p className="text-sm text-muted-foreground mt-1">
             Cree le {format(new Date(tenant.createdAt), "dd MMMM yyyy", { locale: fr })}
           </p>
         </div>
@@ -209,7 +208,7 @@ export default function WorkspaceDetailPanel() {
           <Button
             variant="outline"
             onClick={() => setIsDeleteOpen(true)}
-            className="border-rose-800 text-rose-400 hover:bg-rose-500/10 font-bold gap-2"
+            className="border-rose-300 dark:border-rose-800 text-rose-600 dark:text-rose-400 hover:bg-rose-500/10 font-bold gap-2"
           >
             <Trash2 className="h-4 w-4" />
             Supprimer
@@ -217,7 +216,7 @@ export default function WorkspaceDetailPanel() {
           <Button
             onClick={handleSave}
             disabled={saving}
-            className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold gap-2"
+            className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold gap-2"
           >
             {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
             Sauvegarder
@@ -229,22 +228,22 @@ export default function WorkspaceDetailPanel() {
         {/* Left: Controls */}
         <div className="lg:col-span-2 space-y-6">
           {/* Status & Plan */}
-          <Card className="bg-neutral-900/50 border-neutral-800 backdrop-blur-sm">
+          <Card className="bg-card border-border shadow-stripe rounded-[32px]">
             <CardHeader>
-              <CardTitle className="text-white flex items-center gap-2 text-lg">
-                <Briefcase className="h-5 w-5 text-indigo-400" />
+              <CardTitle className="text-foreground flex items-center gap-2 text-lg">
+                <Briefcase className="h-5 w-5 text-primary" />
                 Statut et Plan
               </CardTitle>
-              <CardDescription className="text-neutral-400">
+              <CardDescription>
                 Changez le statut pour activer l&apos;abonnement ou suspendre le workspace.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-neutral-300">Statut</label>
+                  <label className="text-sm font-bold text-muted-foreground">Statut</label>
                   <Select value={newStatus} onValueChange={(v: string | null) => setNewStatus(v || "")}>
-                    <SelectTrigger className="bg-neutral-950 border-neutral-800 text-white">
+                    <SelectTrigger className="bg-background border-border">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -254,9 +253,9 @@ export default function WorkspaceDetailPanel() {
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-neutral-300">Plan</label>
+                  <label className="text-sm font-bold text-muted-foreground">Plan</label>
                   <Select value={newPlan} onValueChange={(v: string | null) => setNewPlan(v || "")}>
-                    <SelectTrigger className="bg-neutral-950 border-neutral-800 text-white">
+                    <SelectTrigger className="bg-background border-border">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -272,30 +271,30 @@ export default function WorkspaceDetailPanel() {
           </Card>
 
           {/* Users */}
-          <Card className="bg-neutral-900/50 border-neutral-800 backdrop-blur-sm">
+          <Card className="bg-card border-border shadow-stripe rounded-[32px]">
             <CardHeader>
-              <CardTitle className="text-white flex items-center gap-2 text-lg">
-                <Users className="h-5 w-5 text-cyan-400" />
+              <CardTitle className="text-foreground flex items-center gap-2 text-lg">
+                <Users className="h-5 w-5 text-primary" />
                 Utilisateurs ({tenant.users.length})
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-2">
                 {tenant.users.map((u) => (
-                  <div key={u.id} className="flex items-center justify-between p-3 rounded-lg bg-neutral-950 border border-neutral-800">
+                  <div key={u.id} className="flex items-center justify-between p-3 rounded-2xl bg-accent/50 border border-border">
                     <div>
-                      <p className="font-bold text-white text-sm">{u.firstName} {u.lastName}</p>
-                      <p className="text-xs text-neutral-500">{u.email}</p>
+                      <p className="font-bold text-foreground text-sm">{u.firstName} {u.lastName}</p>
+                      <p className="text-xs text-muted-foreground">{u.email}</p>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Badge className={`text-[10px] uppercase font-bold ${u.isActive ? "bg-emerald-500/10 text-emerald-400" : "bg-neutral-800 text-neutral-500"} border-none`}>
+                      <Badge className={`text-[10px] uppercase font-bold ${u.isActive ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400" : "bg-muted text-muted-foreground"} border-none`}>
                         {u.role}
                       </Badge>
                       {u.isActive ? (
                         <Button
                           size="sm"
                           variant="ghost"
-                          className="h-7 text-[10px] text-rose-400 hover:bg-rose-500/10 font-bold gap-1"
+                          className="h-7 text-[10px] text-rose-600 dark:text-rose-400 hover:bg-rose-500/10 font-bold gap-1"
                           disabled={togglingUser === u.id}
                           onClick={() => handleToggleUser(u.id, false)}
                         >
@@ -306,7 +305,7 @@ export default function WorkspaceDetailPanel() {
                         <Button
                           size="sm"
                           variant="ghost"
-                          className="h-7 text-[10px] text-emerald-400 hover:bg-emerald-500/10 font-bold gap-1"
+                          className="h-7 text-[10px] text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 font-bold gap-1"
                           disabled={togglingUser === u.id}
                           onClick={() => handleToggleUser(u.id, true)}
                         >
@@ -318,7 +317,7 @@ export default function WorkspaceDetailPanel() {
                   </div>
                 ))}
                 {tenant.users.length === 0 && (
-                  <p className="text-neutral-500 text-sm text-center py-4">Aucun utilisateur</p>
+                  <p className="text-muted-foreground text-sm text-center py-4">Aucun utilisateur</p>
                 )}
               </div>
             </CardContent>
@@ -327,31 +326,25 @@ export default function WorkspaceDetailPanel() {
 
         {/* Right: Stats */}
         <div className="space-y-6">
-          <Card className="bg-neutral-900/50 border-neutral-800 backdrop-blur-sm">
+          <Card className="bg-card border-border shadow-stripe rounded-[32px]">
             <CardHeader>
-              <CardTitle className="text-white flex items-center gap-2 text-lg">
-                <Activity className="h-5 w-5 text-emerald-400" />
+              <CardTitle className="text-foreground flex items-center gap-2 text-lg">
+                <Activity className="h-5 w-5 text-emerald-500" />
                 Utilisation
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex justify-between items-center p-3 rounded-lg bg-neutral-950 border border-neutral-800">
-                <span className="text-sm text-neutral-400">Clients</span>
-                <span className="text-lg font-black text-white">{tenant._count.clients}</span>
-              </div>
-              <div className="flex justify-between items-center p-3 rounded-lg bg-neutral-950 border border-neutral-800">
-                <span className="text-sm text-neutral-400">Biens</span>
-                <span className="text-lg font-black text-white">{tenant._count.properties}</span>
-              </div>
-              <div className="flex justify-between items-center p-3 rounded-lg bg-neutral-950 border border-neutral-800">
-                <span className="text-sm text-neutral-400">Projets</span>
-                <span className="text-lg font-black text-white">{tenant._count.projects}</span>
-              </div>
-              <div className="flex justify-between items-center p-3 rounded-lg bg-neutral-950 border border-neutral-800">
-                <span className="text-sm text-neutral-400">Utilisateurs</span>
-                <span className="text-lg font-black text-white">{tenant.users.length}</span>
-              </div>
-
+            <CardContent className="space-y-3">
+              {[
+                { label: "Clients", value: tenant._count.clients },
+                { label: "Biens", value: tenant._count.properties },
+                { label: "Projets", value: tenant._count.projects },
+                { label: "Utilisateurs", value: tenant.users.length },
+              ].map((stat) => (
+                <div key={stat.label} className="flex justify-between items-center p-3 rounded-2xl bg-accent/50 border border-border">
+                  <span className="text-sm text-muted-foreground">{stat.label}</span>
+                  <span className="text-lg font-black text-foreground">{stat.value}</span>
+                </div>
+              ))}
             </CardContent>
           </Card>
         </div>
@@ -359,19 +352,19 @@ export default function WorkspaceDetailPanel() {
 
       {/* Delete Confirmation Dialog */}
       <Dialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
-        <DialogContent className="sm:max-w-md bg-neutral-900 border-neutral-800">
+        <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-xl font-black text-white flex items-center gap-2">
+            <DialogTitle className="text-xl font-black text-foreground flex items-center gap-2">
               <Trash2 className="h-5 w-5 text-rose-500" /> Supprimer le workspace
             </DialogTitle>
-            <DialogDescription className="text-neutral-400">
-              Cette action est irreversible. Le workspace <strong className="text-white">{tenant.name}</strong> sera supprime avec toutes ses donnees (clients, biens, projets). Les comptes des {tenant.users.length} utilisateur(s) seront nettoyes.
+            <DialogDescription>
+              Cette action est irreversible. Le workspace <strong className="text-foreground">{tenant.name}</strong> sera supprime avec toutes ses donnees (clients, biens, projets). Les comptes des {tenant.users.length} utilisateur(s) seront nettoyes.
             </DialogDescription>
           </DialogHeader>
           <div className="flex gap-3 mt-4">
             <Button
               variant="outline"
-              className="flex-1 border-neutral-700 text-white"
+              className="flex-1"
               onClick={() => setIsDeleteOpen(false)}
             >
               Annuler
