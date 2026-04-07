@@ -6,7 +6,6 @@ import { cn } from "@/lib/utils";
 import {
   Phone,
   Home,
-  AlertTriangle,
   MessageSquare,
   MoreVertical,
   PhoneCall,
@@ -14,7 +13,10 @@ import {
   Zap,
   Globe,
   UserPlus,
-  Share2
+  Share2,
+  Flame,
+  Thermometer,
+  Snowflake,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Draggable } from "@hello-pangea/dnd";
@@ -53,6 +55,21 @@ function formatBudgetDA(budget: number): string {
   return `${budget.toLocaleString("fr-DZ")} DA`;
 }
 
+/** Temperature indicator based on stage progression */
+function getTemperature(stage: string): { icon: React.ComponentType<{ className?: string }>; label: string; color: string; bg: string } {
+  const hotStages = ["NEGOTIATION", "RESERVED", "SIGNED"];
+  const warmStages = ["VISIT_SCHEDULED", "VISITED"];
+  const coldStages = ["NEW", "CONTACTED", "QUALIFIED"];
+
+  if (hotStages.includes(stage)) {
+    return { icon: Flame, label: "Chaud", color: "text-rose-500", bg: "bg-rose-500/10 border-rose-500/20" };
+  }
+  if (warmStages.includes(stage)) {
+    return { icon: Thermometer, label: "Tiede", color: "text-amber-500", bg: "bg-amber-500/10 border-amber-500/20" };
+  }
+  return { icon: Snowflake, label: "Froid", color: "text-blue-400", bg: "bg-blue-500/10 border-blue-500/20" };
+}
+
 export function KanbanCard({
   client,
   index,
@@ -61,6 +78,8 @@ export function KanbanCard({
   index: number;
 }) {
   const router = useRouter();
+  const temp = getTemperature(client.stage);
+  const TempIcon = temp.icon;
 
   const handleCall = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -91,25 +110,33 @@ export function KanbanCard({
           {...provided.dragHandleProps}
           onClick={() => router.push(`/clients/${client.id}`)}
           className={cn(
-            "p-4 rounded-2xl border-2 bg-white dark:bg-neutral-900 cursor-pointer shadow-sm relative",
+            "p-4 rounded-2xl border-2 bg-card cursor-pointer shadow-sm relative",
             "transition-all duration-300 group ring-offset-background",
-            "hover:shadow-xl hover:border-primary/40 hover:-translate-y-1.5 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
-            snapshot.isDragging ? 
-              "shadow-2xl rotate-[3deg] border-primary ring-4 ring-primary/10 z-50 brightness-105" : 
+            "hover:shadow-stripe-lg hover:border-primary/40 hover:-translate-y-1.5 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
+            snapshot.isDragging ?
+              "shadow-2xl rotate-[3deg] border-primary ring-4 ring-primary/10 z-50 brightness-105" :
               "border-transparent"
           )}
         >
           {/* Top Indicators */}
           <div className="absolute -top-2 -left-2 flex items-center gap-1.5 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
             {client.overdueTasks > 0 && (
-              <div className="bg-red-500 text-white text-[9px] font-black h-5 w-5 flex items-center justify-center rounded-full animate-bounce shadow-lg">
+              <div className="bg-rose-500 text-white text-[9px] font-black h-5 w-5 flex items-center justify-center rounded-full animate-bounce shadow-lg">
                 !
               </div>
             )}
           </div>
 
+          {/* Temperature Badge */}
+          <div className="absolute -top-2 -right-2 z-10">
+            <div className={cn("flex items-center gap-1 px-2 py-0.5 rounded-full border text-[9px] font-black uppercase", temp.bg, temp.color)}>
+              <TempIcon className="h-3 w-3" />
+              {temp.label}
+            </div>
+          </div>
+
           {/* Header: Name + Actions */}
-          <div className="flex items-start justify-between gap-2 mb-3">
+          <div className="flex items-start justify-between gap-2 mb-3 mt-1">
             <div className="flex flex-col min-w-0">
               <h4 className="font-bold text-sm text-foreground truncate group-hover:text-primary transition-colors pr-2">
                 {client.name}
@@ -124,8 +151,8 @@ export function KanbanCard({
 
             <DropdownMenu>
               <DropdownMenuTrigger onClick={(e) => e.stopPropagation()}>
-                <div className="p-1 px-2 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-md opacity-0 group-hover:opacity-100 transition-opacity">
-                  <MoreVertical className="h-4 w-4" />
+                <div className="p-1 px-2 hover:bg-accent rounded-md opacity-0 group-hover:opacity-100 transition-opacity">
+                  <MoreVertical className="h-4 w-4 text-muted-foreground" />
                 </div>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
@@ -143,8 +170,8 @@ export function KanbanCard({
           </div>
 
           {/* Budget Display - Prominent */}
-          <div className="bg-primary/5 dark:bg-primary/10 rounded-lg p-2.5 mb-4 border border-primary/10">
-            <div className="text-[10px] font-black text-primary uppercase tracking-wider mb-0.5 opacity-70">Budget estimé</div>
+          <div className="bg-primary/5 dark:bg-primary/10 rounded-xl p-2.5 mb-4 border border-primary/10">
+            <div className="text-[10px] font-black text-primary uppercase tracking-[0.15em] mb-0.5 opacity-70">Budget estime</div>
             <div className="text-sm font-black text-primary tabular-nums">
               {formatBudgetDA(client.budget)}
             </div>
@@ -163,18 +190,18 @@ export function KanbanCard({
           </div>
 
           {/* Footer: Agent + Activity Status */}
-          <div className="flex items-center justify-between pt-3 border-t border-neutral-100 dark:border-neutral-800">
+          <div className="flex items-center justify-between pt-3 border-t border-border">
             <div className="flex items-center gap-2">
               <div className="relative">
-                <Avatar className="h-7 w-7 border-2 border-white dark:border-neutral-900 shadow-sm">
+                <Avatar className="h-7 w-7 border-2 border-card shadow-sm">
                   <AvatarImage src={client.agentAvatar} />
-                  <AvatarFallback className="text-[10px] font-black bg-neutral-100 dark:bg-neutral-800 text-neutral-600">
+                  <AvatarFallback className="text-[10px] font-black bg-accent text-muted-foreground">
                     {client.agentName.split(" ").map(n => n[0]).join("")}
                   </AvatarFallback>
                 </Avatar>
                 <div className={cn(
-                  "absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-white dark:border-neutral-900",
-                  client.daysInStage > 7 ? "bg-orange-500" : "bg-emerald-500"
+                  "absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-card",
+                  client.daysInStage > 7 ? "bg-amber-500" : "bg-emerald-500"
                 )} />
               </div>
               <div className="flex flex-col">
@@ -197,8 +224,8 @@ export function KanbanCard({
                 className={cn(
                   "text-[9px] font-black h-5 px-1.5 tabular-nums uppercase tracking-tighter",
                   client.daysInStage > 7
-                    ? "border-orange-200 text-orange-600 bg-orange-50/50"
-                    : "border-neutral-100 text-muted-foreground"
+                    ? "border-amber-200 dark:border-amber-800 text-amber-600 bg-amber-50 dark:bg-amber-900/20"
+                    : "border-border text-muted-foreground"
                 )}
               >
                 {client.daysInStage} JOURS

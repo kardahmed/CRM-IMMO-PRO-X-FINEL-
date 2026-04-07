@@ -67,9 +67,9 @@ const NAV_ITEMS: Record<ModuleId, INavItem> = {
   // PROMOTION
   PROJECTS: {
     id: "projects",
-    label: "Programmes",
+    label: "Properties",
     icon: "building-2",
-    href: "/projects",
+    href: "/properties",
     moduleId: "PROJECTS",
   },
   CONSTRUCTION_PROGRESS: {
@@ -81,9 +81,9 @@ const NAV_ITEMS: Record<ModuleId, INavItem> = {
   },
   AVAILABILITY_GRID: {
     id: "availability",
-    label: "Disponibilite",
+    label: "Catalogue",
     icon: "grid-3x3",
-    href: "/availability",
+    href: "/properties",
     moduleId: "AVAILABILITY_GRID",
   },
   PAYMENT_SCHEDULE: {
@@ -220,7 +220,6 @@ const SECTION_ORDER: { title: string; modules: ModuleId[] }[] = [
     modules: [
       "PROJECTS",
       "CONSTRUCTION_PROGRESS",
-      "AVAILABILITY_GRID",
       "PAYMENT_SCHEDULE",
     ],
   },

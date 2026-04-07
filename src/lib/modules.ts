@@ -101,8 +101,8 @@ export const MODULE_REGISTRY: Record<ModuleId, IModuleDefinition> = {
   // --- PROMOTION ---
   PROJECTS: {
     id: "PROJECTS",
-    label: "Programmes",
-    description: "Gestion des programmes immobiliers",
+    label: "Properties",
+    description: "Inventaire unifie — catalogue, programmes et analyse",
     icon: "building-2",
     category: "PROMOTION",
   },
