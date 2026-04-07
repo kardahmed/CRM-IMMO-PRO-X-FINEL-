@@ -281,6 +281,32 @@ export async function changeClientStage(
     },
   });
 
+  // ── Stock Sync: auto-update property status based on pipeline stage ──
+  if (updated.selectedPropertyId) {
+    const stockSyncMap: Partial<Record<PipelineStage, "RESERVED" | "SOLD" | "AVAILABLE">> = {
+      RESERVED: "RESERVED",
+      SIGNED: "SOLD",
+      CLOSED: "SOLD",
+    };
+
+    const newPropertyStatus = stockSyncMap[newStage];
+    if (newPropertyStatus) {
+      await db.property.update({
+        where: { id: updated.selectedPropertyId },
+        data: { status: newPropertyStatus },
+      });
+    }
+
+    // If lead goes backwards (lost/reset), free the property
+    const lostStages: PipelineStage[] = ["NEW", "CONTACTED", "QUALIFIED"];
+    if (lostStages.includes(newStage) && ["RESERVED", "SIGNED"].includes(previousStage)) {
+      await db.property.update({
+        where: { id: updated.selectedPropertyId },
+        data: { status: "AVAILABLE" },
+      });
+    }
+  }
+
   // Log
   await db.activityLog.create({
     data: {

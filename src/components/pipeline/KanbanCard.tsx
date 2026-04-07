@@ -43,6 +43,10 @@ export interface PipelineClient {
   overdueTasks: number;
   stage: string;
   source?: string;
+  // Smart Matching
+  matchScore?: number; // 0-100
+  matchedPropertyName?: string;
+  selectedPropertyId?: string;
 }
 
 function formatBudgetDA(budget: number): string {
@@ -176,6 +180,32 @@ export function KanbanCard({
               {formatBudgetDA(client.budget)}
             </div>
           </div>
+
+          {/* Smart Match Badge */}
+          {client.matchScore != null && client.matchScore > 0 && (
+            <div className={cn(
+              "flex items-center gap-2 p-2 rounded-xl border text-xs font-bold mb-4",
+              client.matchScore >= 80
+                ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-600"
+                : client.matchScore >= 50
+                ? "bg-amber-500/10 border-amber-500/20 text-amber-600"
+                : "bg-blue-500/10 border-blue-500/20 text-blue-600"
+            )}>
+              <Zap className="h-3.5 w-3.5" />
+              <span>Match {client.matchScore}%</span>
+              {client.matchedPropertyName && (
+                <span className="text-[10px] text-muted-foreground truncate ml-auto">{client.matchedPropertyName}</span>
+              )}
+            </div>
+          )}
+
+          {/* Linked Property Badge */}
+          {client.selectedPropertyId && (
+            <div className="flex items-center gap-2 p-2 rounded-xl border border-primary/20 bg-primary/5 text-xs font-bold text-primary mb-4">
+              <Home className="h-3.5 w-3.5" />
+              <span>Bien lie</span>
+            </div>
+          )}
 
           {/* Property Info */}
           <div className="space-y-2 mb-4">

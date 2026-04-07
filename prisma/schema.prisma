@@ -321,8 +321,17 @@ model Project {
   deliveryDate       DateTime?     @map("delivery_date")
   progressPercentage Float         @default(0) @map("progress_percentage")
   status             ProjectStatus @default(PLANNING) @map("status")
-  createdAt          DateTime      @default(now()) @map("created_at")
-  updatedAt          DateTime      @updatedAt @map("updated_at")
+
+  // Budget marketing
+  marketingBudgetAds    Decimal? @map("marketing_budget_ads") @db.Decimal(15, 2)
+  marketingBudgetEvents Decimal? @map("marketing_budget_events") @db.Decimal(15, 2)
+  marketingBudgetPrint  Decimal? @map("marketing_budget_print") @db.Decimal(15, 2)
+  description           String?  @map("description")
+  totalLots             Int?     @map("total_lots")
+  images                Json     @default("[]") @map("images")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
   // Relations
   tenant     Tenant     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
@@ -365,13 +374,14 @@ model Property {
   updatedAt DateTime @updatedAt @map("updated_at")
 
   // Relations
-  tenant        Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  project       Project?        @relation(fields: [projectId], references: [id], onDelete: SetNull)
-  tasks         Task[]
-  visits        Visit[]
-  payments      Payment[]
-  mandates      Mandate[]
-  cadastralData CadastralData[]
+  tenant         Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  project        Project?        @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  linkedClients  Client[]        @relation("ClientProperty")
+  tasks          Task[]
+  visits         Visit[]
+  payments       Payment[]
+  mandates       Mandate[]
+  cadastralData  CadastralData[]
 
   @@index([tenantId])
   @@index([tenantId, status])
@@ -401,8 +411,9 @@ model Client {
   desiredSurface Float?        @map("desired_surface")
 
   // Pipeline
-  pipelineStage PipelineStage @default(NEW) @map("pipeline_stage")
-  lostReason    String?       @map("lost_reason")
+  pipelineStage      PipelineStage @default(NEW) @map("pipeline_stage")
+  lostReason         String?       @map("lost_reason")
+  selectedPropertyId String?       @map("selected_property_id")
 
   // Portail client (token unique généré à RESERVED/SIGNED)
   portalToken          String?   @unique @map("portal_token")
@@ -412,19 +423,21 @@ model Client {
   updatedAt DateTime @updatedAt @map("updated_at")
 
   // Relations
-  tenant        Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  assignedAgent User?          @relation("AgentClients", fields: [assignedAgentId], references: [id], onDelete: SetNull)
-  tasks         Task[]
-  visits        Visit[]
-  interactions  Interaction[]
-  payments      Payment[]
-  aiGenerations AIGeneration[]
+  tenant           Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  assignedAgent    User?          @relation("AgentClients", fields: [assignedAgentId], references: [id], onDelete: SetNull)
+  selectedProperty Property?      @relation("ClientProperty", fields: [selectedPropertyId], references: [id], onDelete: SetNull)
+  tasks            Task[]
+  visits           Visit[]
+  interactions     Interaction[]
+  payments         Payment[]
+  aiGenerations    AIGeneration[]
 
   @@unique([tenantId, phone])
   @@index([tenantId])
   @@index([tenantId, pipelineStage])
   @@index([tenantId, assignedAgentId])
   @@index([tenantId, email])
+  @@index([tenantId, selectedPropertyId])
   @@map("clients")
 }
 

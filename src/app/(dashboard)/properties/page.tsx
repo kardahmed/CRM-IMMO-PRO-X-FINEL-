@@ -18,6 +18,10 @@ import {
   TrendingUp,
   Grid3X3,
   MapPin,
+  Megaphone,
+  Target,
+  Eye,
+  Users,
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -68,6 +72,10 @@ interface Project {
   deliveryDate: string | null;
   createdAt: string;
   properties?: Array<{ id: string; status?: string }>;
+  marketingBudgetAds?: number | null;
+  marketingBudgetEvents?: number | null;
+  marketingBudgetPrint?: number | null;
+  _count?: { leads?: number; visits?: number };
 }
 
 interface Property {
@@ -339,6 +347,12 @@ export default function PropertiesPage() {
             className="rounded-full px-6 py-2.5 border border-border data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary data-[state=active]:shadow-stripe font-bold transition-all text-xs"
           >
             <BarChart3 className="h-3.5 w-3.5 mr-2" /> Analyse
+          </TabsTrigger>
+          <TabsTrigger
+            value="marketing"
+            className="rounded-full px-6 py-2.5 border border-border data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary data-[state=active]:shadow-stripe font-bold transition-all text-xs"
+          >
+            <Megaphone className="h-3.5 w-3.5 mr-2" /> Marketing
           </TabsTrigger>
         </TabsList>
 
@@ -696,6 +710,131 @@ export default function PropertiesPage() {
                 )}
               </TableBody>
             </Table>
+          </Card>
+        </TabsContent>
+
+        {/* ================================================================ */}
+        {/* TAB 4: MARKETING PERFORMANCE */}
+        {/* ================================================================ */}
+        <TabsContent value="marketing" className="space-y-6 mt-6 outline-none">
+          {/* Global Marketing KPIs */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            {(() => {
+              const totalBudget = projects.reduce((acc, p) => {
+                return acc + Number(p.marketingBudgetAds || 0) + Number(p.marketingBudgetEvents || 0) + Number(p.marketingBudgetPrint || 0);
+              }, 0);
+              const totalLeads = projects.reduce((acc, p) => acc + (p._count?.leads || 0), 0);
+              const totalVisits = projects.reduce((acc, p) => acc + (p._count?.visits || 0), 0);
+              const cpl = totalLeads > 0 ? Math.round(totalBudget / totalLeads) : 0;
+              return (
+                <>
+                  <KPICard icon={Megaphone} label="Budget Total" value={formatLargeValue(totalBudget)} color="indigo" />
+                  <KPICard icon={Users} label="Leads Generes" value={totalLeads} color="emerald" />
+                  <KPICard icon={Eye} label="Visites" value={totalVisits} color="blue" />
+                  <KPICard icon={Target} label="CPL Moyen" value={cpl > 0 ? `${cpl.toLocaleString()} DA` : "N/A"} color="amber" />
+                </>
+              );
+            })()}
+          </div>
+
+          {/* Per-project marketing breakdown */}
+          <Card className="rounded-[24px] border-border shadow-stripe overflow-hidden">
+            <div className="px-5 py-4 border-b border-border">
+              <h3 className="font-black text-foreground text-sm flex items-center gap-2">
+                <Megaphone className="h-4 w-4 text-primary" /> Rentabilite par programme
+              </h3>
+              <p className="text-[10px] text-muted-foreground mt-1">
+                Analysez le cout par lead (CPL), cout par visite (CPV) et le ROI commercial de chaque programme
+              </p>
+            </div>
+            <Table>
+              <TableHeader>
+                <TableRow className="bg-accent/50 border-border hover:bg-accent/50">
+                  <TableHead className="uppercase text-[10px] font-black text-muted-foreground tracking-wider">Programme</TableHead>
+                  <TableHead className="uppercase text-[10px] font-black text-muted-foreground tracking-wider text-right">Budget Ads</TableHead>
+                  <TableHead className="uppercase text-[10px] font-black text-muted-foreground tracking-wider text-right">Budget Events</TableHead>
+                  <TableHead className="uppercase text-[10px] font-black text-muted-foreground tracking-wider text-right">Budget Print</TableHead>
+                  <TableHead className="uppercase text-[10px] font-black text-muted-foreground tracking-wider text-right">Total</TableHead>
+                  <TableHead className="uppercase text-[10px] font-black text-muted-foreground tracking-wider text-center">Leads</TableHead>
+                  <TableHead className="uppercase text-[10px] font-black text-muted-foreground tracking-wider text-center">Visites</TableHead>
+                  <TableHead className="uppercase text-[10px] font-black text-muted-foreground tracking-wider text-right">CPL</TableHead>
+                  <TableHead className="uppercase text-[10px] font-black text-muted-foreground tracking-wider text-right">CPV</TableHead>
+                  <TableHead className="uppercase text-[10px] font-black text-muted-foreground tracking-wider text-center">ROI</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {projects.map(project => {
+                  const ads = Number(project.marketingBudgetAds || 0);
+                  const events = Number(project.marketingBudgetEvents || 0);
+                  const print = Number(project.marketingBudgetPrint || 0);
+                  const total = ads + events + print;
+                  const leads = project._count?.leads || 0;
+                  const visits = project._count?.visits || 0;
+                  const cpl = leads > 0 ? Math.round(total / leads) : 0;
+                  const cpv = visits > 0 ? Math.round(total / visits) : 0;
+
+                  // ROI = revenue generated / marketing spend
+                  const projProps = properties.filter(p => p.projectId === project.id || p.project?.id === project.id);
+                  const revenue = projProps.filter(p => p.status === "SOLD").reduce((acc, p) => acc + (p.price || 0), 0);
+                  const roi = total > 0 ? ((revenue / total) * 100).toFixed(0) : "N/A";
+
+                  return (
+                    <TableRow key={project.id} className="hover:bg-accent/30 transition-colors border-border">
+                      <TableCell className="font-bold text-sm text-foreground">{project.name}</TableCell>
+                      <TableCell className="text-xs text-right tabular-nums text-foreground">{ads > 0 ? formatLargeValue(ads) : "-"}</TableCell>
+                      <TableCell className="text-xs text-right tabular-nums text-foreground">{events > 0 ? formatLargeValue(events) : "-"}</TableCell>
+                      <TableCell className="text-xs text-right tabular-nums text-foreground">{print > 0 ? formatLargeValue(print) : "-"}</TableCell>
+                      <TableCell className="text-xs text-right font-bold tabular-nums text-foreground">{total > 0 ? formatLargeValue(total) : "-"}</TableCell>
+                      <TableCell className="text-center">
+                        <Badge className="bg-emerald-500/10 text-emerald-600 border-none text-[10px] font-black tabular-nums">{leads}</Badge>
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <Badge className="bg-blue-500/10 text-blue-600 border-none text-[10px] font-black tabular-nums">{visits}</Badge>
+                      </TableCell>
+                      <TableCell className="text-xs text-right tabular-nums text-foreground font-bold">
+                        {cpl > 0 ? `${cpl.toLocaleString()} DA` : "-"}
+                      </TableCell>
+                      <TableCell className="text-xs text-right tabular-nums text-foreground font-bold">
+                        {cpv > 0 ? `${cpv.toLocaleString()} DA` : "-"}
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <Badge className={cn(
+                          "border-none text-[10px] font-black tabular-nums",
+                          roi === "N/A" ? "bg-muted text-muted-foreground" :
+                          Number(roi) >= 500 ? "bg-emerald-500/10 text-emerald-600" :
+                          Number(roi) >= 100 ? "bg-amber-500/10 text-amber-600" :
+                          "bg-rose-500/10 text-rose-600"
+                        )}>
+                          {roi === "N/A" ? "N/A" : `${roi}%`}
+                        </Badge>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+                {projects.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={10} className="text-center py-8 text-muted-foreground">
+                      Aucun programme avec budget marketing
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </Card>
+
+          {/* Budget allocation info */}
+          <Card className="p-6 rounded-[24px] border-border shadow-sm">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="p-2 rounded-xl bg-amber-50 dark:bg-amber-900/20 text-amber-600">
+                <Target className="h-5 w-5" />
+              </div>
+              <div>
+                <h3 className="font-black text-sm text-foreground">Configurer le budget marketing</h3>
+                <p className="text-[10px] text-muted-foreground">
+                  Ajoutez un budget marketing sur la fiche de chaque programme pour voir les metriques CPL, CPV et ROI ici
+                </p>
+              </div>
+            </div>
           </Card>
         </TabsContent>
       </Tabs>
