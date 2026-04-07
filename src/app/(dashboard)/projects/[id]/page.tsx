@@ -13,6 +13,7 @@ import {
   AlertCircle,
   Upload,
   Plus,
+  Building2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -30,6 +31,7 @@ import {
 import { toast } from "sonner";
 import { UnitGrid, type ProjectUnit } from "@/components/projects/UnitGrid";
 import { CreditSimulator } from "@/components/shared/CreditSimulator";
+import { cn } from "@/lib/utils";
 
 interface IProperty {
   id: string;
@@ -57,10 +59,10 @@ interface IProject {
 }
 
 const STATUS_CONFIG: Record<string, { label: string; className: string }> = {
-  PLANNING: { label: "Planifie", className: "bg-blue-100 text-blue-700" },
-  IN_PROGRESS: { label: "En cours", className: "bg-amber-100 text-amber-700" },
-  DELIVERED: { label: "Livre", className: "bg-green-100 text-green-700" },
-  CANCELLED: { label: "Annule", className: "bg-red-100 text-red-700" },
+  PLANNING: { label: "Planifie", className: "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-none" },
+  IN_PROGRESS: { label: "En cours", className: "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-none" },
+  DELIVERED: { label: "Livre", className: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-none" },
+  CANCELLED: { label: "Annule", className: "bg-rose-500/10 text-rose-600 dark:text-rose-400 border-none" },
 };
 
 export default function ProjectDetailPage() {
@@ -100,17 +102,22 @@ export default function ProjectDetailPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-[60vh]">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <div className="space-y-4 text-center">
+          <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto" />
+          <p className="text-sm text-muted-foreground font-medium">Chargement du projet...</p>
+        </div>
       </div>
     );
   }
 
   if (error || !project) {
     return (
-      <div className="flex flex-col items-center justify-center h-[60vh] gap-4">
-        <AlertCircle className="h-12 w-12 text-destructive" />
-        <p className="text-xl font-bold">Projet introuvable</p>
-        <Button onClick={() => router.back()} variant="outline">
+      <div className="flex flex-col items-center justify-center h-[60vh] gap-6">
+        <div className="p-8 rounded-[32px] bg-rose-50 dark:bg-rose-500/5 border border-rose-100 dark:border-rose-500/10 shadow-stripe text-center">
+          <AlertCircle className="h-12 w-12 text-rose-500 mx-auto mb-4" />
+          <p className="text-lg font-black text-foreground tracking-tight">Projet introuvable</p>
+        </div>
+        <Button onClick={() => router.back()} variant="outline" className="rounded-full font-bold px-8">
           <ArrowLeft className="h-4 w-4 mr-2" /> Retour
         </Button>
       </div>
@@ -142,116 +149,125 @@ export default function ProjectDetailPage() {
   };
 
   return (
-    <div className="space-y-6 pb-10">
+    <div className="space-y-6 pb-10 animate-in fade-in duration-700 slide-in-from-bottom-4">
       <Button
         variant="ghost"
         size="sm"
         onClick={() => router.back()}
-        className="gap-1.5 text-muted-foreground hover:text-foreground mb-2"
+        className="gap-1.5 text-muted-foreground hover:text-foreground mb-2 rounded-xl"
       >
         <ArrowLeft className="h-4 w-4" />
         Retour aux projets
       </Button>
 
       {/* Header Profile */}
-      <div className="flex flex-col md:flex-row gap-6 relative p-6 rounded-2xl border bg-card shadow-sm overflow-hidden">
-        {imageUrl && (
-          <div
-            className="absolute inset-0 opacity-10 bg-cover bg-center"
-            style={{ backgroundImage: `url(${imageUrl})` }}
-          />
-        )}
-
-        {imageUrl && (
-          <div className="relative z-10 w-full md:w-64 h-48 shrink-0 rounded-xl overflow-hidden shadow-md">
-            <Image
-              src={imageUrl}
-              alt={project.name}
-              className="w-full h-full object-cover"
-              fill
-              unoptimized
+      <Card className="relative overflow-hidden rounded-[32px] border-border shadow-stripe">
+        <div className="flex flex-col md:flex-row gap-6 p-6">
+          {imageUrl && (
+            <div
+              className="absolute inset-0 opacity-5 bg-cover bg-center"
+              style={{ backgroundImage: `url(${imageUrl})` }}
             />
-          </div>
-        )}
-
-        <div className="relative z-10 flex-1 space-y-4">
-          <div className="flex items-start justify-between">
-            <div>
-              <h1 className="text-3xl font-black uppercase tracking-tight">
-                {project.name}
-              </h1>
-              {location && (
-                <p className="text-muted-foreground font-medium mt-1">
-                  {location}
-                </p>
-              )}
-            </div>
-            <Badge className={`${statusCfg.className} font-black uppercase text-xs`}>
-              {statusCfg.label}
-            </Badge>
-          </div>
-
-          {project.description && (
-            <p className="text-sm border-l-2 border-primary/50 pl-3 max-w-2xl">
-              {project.description}
-            </p>
           )}
+
+          {imageUrl && (
+            <div className="relative z-10 w-full md:w-64 h-48 shrink-0 rounded-2xl overflow-hidden shadow-stripe">
+              <Image
+                src={imageUrl}
+                alt={project.name}
+                className="w-full h-full object-cover"
+                fill
+                unoptimized
+              />
+            </div>
+          )}
+
+          <div className="relative z-10 flex-1 space-y-4">
+            <div className="flex items-start justify-between">
+              <div className="space-y-2">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-[10px] font-black uppercase tracking-[0.2em]">
+                  <Building2 className="h-3 w-3" /> Projet
+                </div>
+                <h1 className="text-3xl font-black uppercase tracking-tighter text-foreground">
+                  {project.name}
+                </h1>
+                {location && (
+                  <p className="text-sm text-muted-foreground font-medium">
+                    {location}
+                  </p>
+                )}
+              </div>
+              <Badge className={cn("font-black uppercase text-xs", statusCfg.className)}>
+                {statusCfg.label}
+              </Badge>
+            </div>
+
+            {project.description && (
+              <p className="text-sm border-l-2 border-primary/50 pl-3 max-w-2xl text-muted-foreground">
+                {project.description}
+              </p>
+            )}
+          </div>
         </div>
-      </div>
+      </Card>
 
       {/* Progress Stats */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="p-5 rounded-xl border bg-card space-y-3">
-          <div className="flex justify-between items-center text-sm font-bold">
-            <span className="uppercase text-muted-foreground text-xs flex items-center gap-1.5">
-              <Building className="h-4 w-4 text-primary" /> Commercialisation
-            </span>
-            <span>{sellRatio}% vendu</span>
+        <Card className="rounded-[24px] border-border shadow-stripe">
+          <div className="p-5 space-y-3">
+            <div className="flex justify-between items-center text-sm font-bold">
+              <span className="uppercase text-muted-foreground text-xs flex items-center gap-1.5 tracking-wider">
+                <Building className="h-4 w-4 text-primary" /> Commercialisation
+              </span>
+              <span className="text-foreground">{sellRatio}% vendu</span>
+            </div>
+            <Progress value={sellRatio} className="h-2.5 bg-accent" />
+            <p className="text-xs font-medium text-right text-muted-foreground tabular-nums">
+              {soldUnits} sur {totalUnits} unites
+            </p>
           </div>
-          <Progress value={sellRatio} className="h-2 bg-neutral-200 dark:bg-neutral-800" />
-          <p className="text-xs font-medium text-right text-muted-foreground">
-            {soldUnits} sur {totalUnits} unites
-          </p>
-        </div>
+        </Card>
 
-        <div className="p-5 rounded-xl border bg-card space-y-3">
-          <div className="flex justify-between items-center text-sm font-bold">
-            <span className="uppercase text-muted-foreground text-xs flex items-center gap-1.5">
-              <HardHat className="h-4 w-4 text-amber-500" /> Avancement chantier
-            </span>
-            <span>{project.progressPercentage}%</span>
+        <Card className="rounded-[24px] border-border shadow-stripe">
+          <div className="p-5 space-y-3">
+            <div className="flex justify-between items-center text-sm font-bold">
+              <span className="uppercase text-muted-foreground text-xs flex items-center gap-1.5 tracking-wider">
+                <HardHat className="h-4 w-4 text-amber-500" /> Avancement chantier
+              </span>
+              <span className="text-foreground">{project.progressPercentage}%</span>
+            </div>
+            <Progress
+              value={project.progressPercentage}
+              className="h-2.5 bg-accent [&_[data-slot=progress-indicator]]:bg-amber-500"
+            />
           </div>
-          <Progress
-            value={project.progressPercentage}
-            className="h-2 bg-neutral-200 dark:bg-neutral-800 [&_[data-slot=progress-indicator]]:bg-amber-500"
-          />
-        </div>
+        </Card>
       </div>
 
       {/* Tabs */}
       <Tabs defaultValue="disponibilites" className="w-full">
-        <TabsList className="w-full justify-start border-b bg-transparent h-auto p-0 rounded-none gap-0">
+        <TabsList className="w-full justify-start border-b border-border bg-transparent h-auto p-0 rounded-none gap-0">
           <TabsTrigger
             value="disponibilites"
-            className="gap-1.5 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none font-bold px-6 py-3"
+            className="gap-1.5 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none font-bold px-6 py-3 text-muted-foreground data-[state=active]:text-foreground"
           >
             <Building className="h-4 w-4" /> Disponibilites ({totalUnits})
           </TabsTrigger>
           <TabsTrigger
             value="mises-a-jour"
-            className="gap-1.5 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none font-bold px-6 py-3"
+            className="gap-1.5 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none font-bold px-6 py-3 text-muted-foreground data-[state=active]:text-foreground"
           >
             <HardHat className="h-4 w-4" /> Mises a jour
           </TabsTrigger>
           <TabsTrigger
             value="galerie"
-            className="gap-1.5 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none font-bold px-6 py-3"
+            className="gap-1.5 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none font-bold px-6 py-3 text-muted-foreground data-[state=active]:text-foreground"
           >
             <ImageIcon className="h-4 w-4" /> Galerie & Plans
           </TabsTrigger>
           <TabsTrigger
             value="cadastre"
-            className="gap-1.5 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none font-bold px-6 py-3"
+            className="gap-1.5 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none font-bold px-6 py-3 text-muted-foreground data-[state=active]:text-foreground"
           >
             <FileText className="h-4 w-4" /> Cadastre & Docs
           </TabsTrigger>
@@ -262,21 +278,22 @@ export default function ProjectDetailPage() {
             {units.length > 0 ? (
               <UnitGrid units={units} onUnitClick={handleUnitClick} />
             ) : (
-              <div className="p-12 text-center text-muted-foreground italic border rounded-xl bg-card">
-                Aucune unite ajoutee a ce projet.
-              </div>
+              <Card className="p-12 text-center rounded-[24px] border-border shadow-sm">
+                <Building2 className="h-12 w-12 text-muted-foreground/30 mx-auto mb-4" />
+                <p className="text-muted-foreground font-medium">Aucune unite ajoutee a ce projet.</p>
+              </Card>
             )}
           </TabsContent>
 
           <TabsContent value="mises-a-jour">
             <div className="space-y-6">
               {/* Progress Update Form */}
-              <Card>
+              <Card className="rounded-[24px] border-border shadow-stripe">
                 <CardContent className="p-5 space-y-4">
-                  <h3 className="font-black text-sm uppercase text-muted-foreground">Mettre a jour l&apos;avancement</h3>
+                  <h3 className="font-black text-xs uppercase text-muted-foreground tracking-[0.2em]">Mettre a jour l&apos;avancement</h3>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
                     <div className="space-y-2">
-                      <label className="text-xs font-bold text-muted-foreground">Pourcentage (%)</label>
+                      <label className="text-xs font-black text-muted-foreground uppercase tracking-wider">Pourcentage (%)</label>
                       <Input
                         type="number"
                         min={0}
@@ -284,18 +301,20 @@ export default function ProjectDetailPage() {
                         placeholder={`Actuel: ${project.progressPercentage}%`}
                         value={progressForm.percentage}
                         onChange={(e) => setProgressForm((p) => ({ ...p, percentage: e.target.value }))}
+                        className="h-12 rounded-xl border-border"
                       />
                     </div>
                     <div className="space-y-2 md:col-span-1">
-                      <label className="text-xs font-bold text-muted-foreground">Note (optionnel)</label>
+                      <label className="text-xs font-black text-muted-foreground uppercase tracking-wider">Note (optionnel)</label>
                       <Input
                         placeholder="Ex: Gros oeuvre termine"
                         value={progressForm.note}
                         onChange={(e) => setProgressForm((p) => ({ ...p, note: e.target.value }))}
+                        className="h-12 rounded-xl border-border"
                       />
                     </div>
                     <Button
-                      className="font-bold"
+                      className="bg-primary hover:bg-primary/90 text-primary-foreground font-black rounded-xl h-12"
                       disabled={updatingProgress || !progressForm.percentage}
                       onClick={async () => {
                         setUpdatingProgress(true);
@@ -327,21 +346,23 @@ export default function ProjectDetailPage() {
               </Card>
 
               {/* Current Status */}
-              <Card>
+              <Card className="rounded-[24px] border-border shadow-stripe">
                 <CardContent className="p-5">
                   <div className="flex items-center gap-3 mb-4">
-                    <HardHat className="h-5 w-5 text-amber-500" />
-                    <h3 className="font-black text-sm">Etat actuel du chantier</h3>
+                    <div className="p-2 rounded-xl bg-amber-50 dark:bg-amber-900/20 text-amber-600">
+                      <HardHat className="h-5 w-5" />
+                    </div>
+                    <h3 className="font-black text-sm text-foreground">Etat actuel du chantier</h3>
                   </div>
                   <div className="space-y-3">
-                    <div className="flex justify-between text-sm font-bold">
+                    <div className="flex justify-between text-sm font-bold text-foreground">
                       <span>Avancement global</span>
-                      <span>{project.progressPercentage}%</span>
+                      <span className="tabular-nums">{project.progressPercentage}%</span>
                     </div>
-                    <Progress value={project.progressPercentage} className="h-3 bg-neutral-200 dark:bg-neutral-800 [&_[data-slot=progress-indicator]]:bg-amber-500" />
+                    <Progress value={project.progressPercentage} className="h-3 bg-accent [&_[data-slot=progress-indicator]]:bg-amber-500" />
                     <div className="flex justify-between text-xs text-muted-foreground">
-                      <span>Statut: <Badge className={`${statusCfg.className} font-bold text-[10px] ml-1`}>{statusCfg.label}</Badge></span>
-                      <span>Unites: {soldUnits}/{totalUnits} vendues</span>
+                      <span>Statut: <Badge className={cn("font-bold text-[10px] ml-1", statusCfg.className)}>{statusCfg.label}</Badge></span>
+                      <span className="tabular-nums">{soldUnits}/{totalUnits} vendues</span>
                     </div>
                   </div>
                 </CardContent>
@@ -355,7 +376,7 @@ export default function ProjectDetailPage() {
                 {project.images.map((img, i) => (
                   <div
                     key={i}
-                    className="aspect-video rounded-xl overflow-hidden border relative"
+                    className="aspect-video rounded-2xl overflow-hidden border border-border relative shadow-sm hover:shadow-stripe transition-all duration-300"
                   >
                     <Image
                       src={img}
@@ -368,22 +389,25 @@ export default function ProjectDetailPage() {
                 ))}
               </div>
             ) : (
-              <div className="p-12 text-center text-muted-foreground italic border rounded-xl bg-card">
-                Aucune image disponible.
-              </div>
+              <Card className="p-12 text-center rounded-[24px] border-border shadow-sm">
+                <ImageIcon className="h-12 w-12 text-muted-foreground/30 mx-auto mb-4" />
+                <p className="text-muted-foreground font-medium">Aucune image disponible.</p>
+              </Card>
             )}
           </TabsContent>
 
           <TabsContent value="cadastre">
-            <Card>
+            <Card className="rounded-[24px] border-border shadow-stripe">
               <CardContent className="p-5 space-y-6">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <FileText className="h-5 w-5 text-primary" />
-                    <h3 className="font-black text-sm">Documents du projet</h3>
+                    <div className="p-2 rounded-xl bg-primary/10 text-primary">
+                      <FileText className="h-5 w-5" />
+                    </div>
+                    <h3 className="font-black text-sm text-foreground">Documents du projet</h3>
                   </div>
-                  <Button variant="outline" size="sm" className="font-bold gap-1.5" onClick={() => toast.info("Upload de documents bientot disponible")}>
-                    <Upload className="h-3.5 w-3.5" /> Ajouter un document
+                  <Button variant="outline" size="sm" className="font-bold gap-1.5 rounded-xl border-border" onClick={() => toast.info("Upload de documents bientot disponible")}>
+                    <Upload className="h-3.5 w-3.5" /> Ajouter
                   </Button>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -395,14 +419,14 @@ export default function ProjectDetailPage() {
                     { name: "Assurance decennale", type: "PDF", status: "requis" },
                     { name: "Plans architecte", type: "DWG/PDF", status: "optionnel" },
                   ].map((doc) => (
-                    <div key={doc.name} className="flex items-center justify-between p-3 rounded-lg border bg-accent/5 hover:bg-accent/10 transition-colors">
+                    <div key={doc.name} className="flex items-center justify-between p-3 rounded-2xl border border-border bg-accent/30 hover:bg-accent/50 transition-colors">
                       <div className="flex items-center gap-3">
-                        <div className="p-2 rounded-lg bg-primary/10">
+                        <div className="p-2 rounded-xl bg-primary/10">
                           <FileText className="h-4 w-4 text-primary" />
                         </div>
                         <div>
-                          <p className="text-sm font-bold">{doc.name}</p>
-                          <p className="text-[10px] text-muted-foreground uppercase">{doc.type}</p>
+                          <p className="text-sm font-bold text-foreground">{doc.name}</p>
+                          <p className="text-[10px] text-muted-foreground uppercase font-bold">{doc.type}</p>
                         </div>
                       </div>
                       <Badge variant={doc.status === "requis" ? "default" : "secondary"} className="text-[10px] font-bold uppercase">
@@ -421,17 +445,20 @@ export default function ProjectDetailPage() {
       <Dialog open={isUnitOpen} onOpenChange={setIsUnitOpen}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader className="mb-4">
-            <DialogTitle className="text-2xl font-black uppercase flex items-center gap-2">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-[10px] font-black uppercase tracking-[0.2em] w-fit mb-2">
+              <Building className="h-3 w-3" /> Unite
+            </div>
+            <DialogTitle className="text-2xl font-black uppercase tracking-tight text-foreground flex items-center gap-2">
               Unite {selectedUnit?.name}{" "}
-              <Badge>{selectedUnit?.type}</Badge>
+              <Badge className="bg-primary/10 text-primary border-none font-bold">{selectedUnit?.type}</Badge>
             </DialogTitle>
-            <DialogDescription className="text-sm font-bold flex items-center gap-2 mt-1">
+            <DialogDescription className="text-sm font-bold flex items-center gap-2 mt-1 text-muted-foreground">
               <span>Bloc {selectedUnit?.block}</span> •{" "}
               <span>
                 Etage{" "}
                 {selectedUnit?.floor === 0 ? "RDC" : selectedUnit?.floor}
               </span>{" "}
-              • <span>{selectedUnit?.area} m²</span>
+              • <span>{selectedUnit?.area} m&sup2;</span>
             </DialogDescription>
           </DialogHeader>
 
