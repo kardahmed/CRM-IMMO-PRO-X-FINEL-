@@ -35,6 +35,15 @@ export const GET = apiHandler(
         skip,
         take: limit,
         orderBy: { createdAt: "desc" },
+        include: {
+          properties: {
+            select: {
+              id: true, name: true, type: true, floor: true, rooms: true,
+              surface: true, price: true, status: true, transactionType: true,
+              lotNumber: true,
+            },
+          },
+        },
       }),
       ctx.db.project.count({ where }),
     ]);

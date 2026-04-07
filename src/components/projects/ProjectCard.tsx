@@ -3,94 +3,196 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { MapPin, Building, Home, ArrowRight } from "lucide-react";
+import {
+  MapPin,
+  Building,
+  Home,
+  Eye,
+  LayoutGrid,
+  MoreVertical,
+  Calendar,
+  DollarSign,
+  Pencil,
+  Trash2,
+  Copy,
+} from "lucide-react";
 import Link from "next/link";
-import Image from "next/image";
 import { cn } from "@/lib/utils";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface ProjectCardProps {
   id: string;
+  code: string;
   name: string;
   location: string;
-  availableUnits: number;
-  totalUnits: number;
-  progress: number;
   status: string;
-  imageUrl: string;
+  deliveryDate: string | null;
+  totalUnits: number;
+  soldUnits: number;
+  reservedUnits: number;
+  availableUnits: number;
+  averagePrice: number;
+  progress: number;
+  onViewUnits?: (id: string) => void;
+  onEdit?: (id: string) => void;
+  onDelete?: (id: string) => void;
 }
 
-const STATUS_CONFIG: Record<string, { label: string; color: string }> = {
-  PLANNING: { label: "Planification", color: "bg-blue-100 text-blue-700 bg-opacity-90" },
-  IN_PROGRESS: { label: "En cours", color: "bg-amber-100 text-amber-700 bg-opacity-90" },
-  DELIVERED: { label: "Livré", color: "bg-green-100 text-green-700 bg-opacity-90" },
-  CANCELLED: { label: "Annulé", color: "bg-red-100 text-red-700 bg-opacity-90" },
+const STATUS_CONFIG: Record<string, { label: string; className: string }> = {
+  PLANNING: { label: "Planification", className: "bg-blue-100 text-blue-700 border-blue-200" },
+  IN_PROGRESS: { label: "Active", className: "bg-emerald-100 text-emerald-700 border-emerald-200" },
+  DELIVERED: { label: "Livre", className: "bg-gray-100 text-gray-700 border-gray-200" },
+  CANCELLED: { label: "Annule", className: "bg-red-100 text-red-700 border-red-200" },
 };
 
-export function ProjectCard({ id, name, location, availableUnits, totalUnits, progress, status, imageUrl }: ProjectCardProps) {
+function formatPrice(price: number): string {
+  if (price >= 1_000_000) return `${(price / 1_000_000).toFixed(1)} M DA`;
+  if (price >= 1_000) return `${(price / 1_000).toFixed(0)} K DA`;
+  return `${price} DA`;
+}
+
+function formatDate(dateStr: string | null): string {
+  if (!dateStr) return "Non definie";
+  const d = new Date(dateStr);
+  return d.toLocaleDateString("fr-FR", { month: "short", year: "numeric" });
+}
+
+export function ProjectCard({
+  id,
+  code,
+  name,
+  location,
+  status,
+  deliveryDate,
+  totalUnits,
+  soldUnits,
+  reservedUnits,
+  availableUnits,
+  averagePrice,
+  progress,
+  onViewUnits,
+  onEdit,
+  onDelete,
+}: ProjectCardProps) {
   const sc = STATUS_CONFIG[status] || STATUS_CONFIG.IN_PROGRESS;
-  const soldUnits = totalUnits - availableUnits;
-  const sellRatio = Math.round((soldUnits / totalUnits) * 100);
+  const sellRatio = totalUnits > 0 ? Math.round((soldUnits / totalUnits) * 100) : 0;
 
   return (
-    <Link href={`/projects/${id}`}>
-      <Card className="overflow-hidden cursor-pointer group hover:shadow-lg transition-all hover:-translate-y-1 border-neutral-100 dark:border-neutral-800">
-        {/* Cover */}
-        <div className="relative h-48 w-full">
-          <Image src={imageUrl} alt={name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" fill sizes="(max-width: 768px) 100vw, 400px" />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-          <div className="absolute top-3 right-3">
-            <Badge className={cn("text-[10px] font-black uppercase text-white shadow-sm border-none backdrop-blur-md", sc.color)}>
-              {sc.label}
-            </Badge>
-          </div>
-          <div className="absolute bottom-3 left-3 right-3 text-white">
-            <h3 className="text-lg font-black leading-tight shadow-black drop-shadow-md">{name}</h3>
-            <p className="text-white/80 text-xs font-medium flex items-center gap-1 mt-0.5 shadow-black drop-shadow-md">
-              <MapPin className="h-3 w-3" /> {location}
+    <Card className="overflow-hidden group hover:shadow-lg transition-all hover:-translate-y-0.5 border relative">
+      {/* 3-dot menu */}
+      <div className="absolute top-3 right-3 z-20">
+        <DropdownMenu>
+          <DropdownMenuTrigger className="h-8 w-8 rounded-lg bg-white/90 dark:bg-neutral-800/90 backdrop-blur-sm border shadow-sm flex items-center justify-center hover:bg-white transition-colors">
+            <MoreVertical className="h-4 w-4 text-muted-foreground" />
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" side="bottom" sideOffset={4}>
+            <DropdownMenuItem onClick={() => onEdit?.(id)} className="gap-2 text-sm font-medium">
+              <Pencil className="h-3.5 w-3.5" /> Modifier
+            </DropdownMenuItem>
+            <DropdownMenuItem className="gap-2 text-sm font-medium">
+              <Copy className="h-3.5 w-3.5" /> Dupliquer
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              onClick={() => onDelete?.(id)}
+              className="gap-2 text-sm font-medium text-red-600"
+              variant="destructive"
+            >
+              <Trash2 className="h-3.5 w-3.5" /> Supprimer
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+
+      <CardContent className="p-5 space-y-4">
+        {/* Header: Badge + Code */}
+        <div className="flex items-start justify-between pr-8">
+          <div className="space-y-1.5">
+            <div className="flex items-center gap-2">
+              <Badge className={cn("text-[10px] font-black uppercase border", sc.className)}>
+                {sc.label}
+              </Badge>
+              <span className="text-[10px] font-mono font-bold text-muted-foreground uppercase">
+                {code}
+              </span>
+            </div>
+            <h3 className="text-base font-black leading-tight">{name}</h3>
+            <p className="text-xs text-muted-foreground flex items-center gap-1">
+              <MapPin className="h-3 w-3 shrink-0" /> {location}
             </p>
           </div>
         </div>
 
-        {/* Info */}
-        <CardContent className="p-4 space-y-4 bg-card">
-          {/* Blocks / Units */}
-          <div className="grid grid-cols-2 gap-2 text-sm">
-            <div className="flex flex-col gap-1 p-2 rounded-lg bg-accent/30 border text-center">
-              <span className="text-xs text-muted-foreground font-bold uppercase"><Home className="h-3 w-3 inline mr-1" />Disponibles</span>
-              <span className="font-black text-primary text-xl">{availableUnits}</span>
-            </div>
-            <div className="flex flex-col gap-1 p-2 rounded-lg bg-accent/30 border text-center">
-              <span className="text-xs text-muted-foreground font-bold uppercase"><Building className="h-3 w-3 inline mr-1" />Total Biens</span>
-              <span className="font-black text-xl">{totalUnits}</span>
-            </div>
-          </div>
-
-          {/* Progress Section */}
-          <div className="space-y-3 pt-2 border-t">
-            {/* Commercialisation */}
+        {/* Info Row: Prix moyen + Livraison */}
+        <div className="grid grid-cols-2 gap-3">
+          <div className="flex items-center gap-2 p-2.5 rounded-lg bg-accent/30 border">
+            <DollarSign className="h-4 w-4 text-emerald-600 shrink-0" />
             <div>
-              <div className="flex justify-between text-xs font-bold mb-1.5">
-                <span className="text-muted-foreground uppercase text-[10px]">Commercialisation</span>
-                <span>{sellRatio}% vendu</span>
-              </div>
-              <Progress value={sellRatio} className="h-1.5 bg-neutral-200 dark:bg-neutral-800" />
+              <p className="text-[9px] font-bold uppercase text-muted-foreground">Prix moy./unite</p>
+              <p className="text-xs font-black text-emerald-700">
+                {averagePrice > 0 ? formatPrice(averagePrice) : "N/A"}
+              </p>
             </div>
-
-            {/* Chantier */}
+          </div>
+          <div className="flex items-center gap-2 p-2.5 rounded-lg bg-accent/30 border">
+            <Calendar className="h-4 w-4 text-blue-600 shrink-0" />
             <div>
-              <div className="flex justify-between text-xs font-bold mb-1.5">
-                <span className="text-muted-foreground uppercase text-[10px]">Chantier</span>
-                <span>{progress}%</span>
-              </div>
-              <Progress value={progress} className="h-1.5 bg-neutral-200 dark:bg-neutral-800 [&_[data-slot=progress-indicator]]:bg-amber-500" />
+              <p className="text-[9px] font-bold uppercase text-muted-foreground">Livraison</p>
+              <p className="text-xs font-black text-blue-700">{formatDate(deliveryDate)}</p>
             </div>
           </div>
+        </div>
 
-          <div className="pt-2 flex items-center text-xs font-bold text-primary group-hover:underline">
-            Voir les détails du projet <ArrowRight className="h-3 w-3 ml-1 group-hover:translate-x-1 transition-transform" />
+        {/* Stats: VENDUES / DISPO / TOTAL */}
+        <div className="grid grid-cols-3 gap-2">
+          <div className="text-center p-2 rounded-lg bg-red-50 dark:bg-red-950/30 border border-red-100 dark:border-red-900">
+            <p className="text-[9px] font-black uppercase text-red-600">Vendues</p>
+            <p className="text-lg font-black text-red-700">{soldUnits}</p>
           </div>
-        </CardContent>
-      </Card>
-    </Link>
+          <div className="text-center p-2 rounded-lg bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-100 dark:border-emerald-900">
+            <p className="text-[9px] font-black uppercase text-emerald-600">Dispo</p>
+            <p className="text-lg font-black text-emerald-700">{availableUnits}</p>
+          </div>
+          <div className="text-center p-2 rounded-lg bg-blue-50 dark:bg-blue-950/30 border border-blue-100 dark:border-blue-900">
+            <p className="text-[9px] font-black uppercase text-blue-600">Total</p>
+            <p className="text-lg font-black text-blue-700">{totalUnits}</p>
+          </div>
+        </div>
+
+        {/* Progress: % vendues */}
+        <div>
+          <div className="flex justify-between text-xs font-bold mb-1.5">
+            <span className="text-muted-foreground text-[10px] uppercase">Vendues</span>
+            <span className="text-emerald-700">{sellRatio}%</span>
+          </div>
+          <Progress
+            value={sellRatio}
+            className="h-2 bg-neutral-200 dark:bg-neutral-800 [&_[data-slot=progress-indicator]]:bg-emerald-500"
+          />
+        </div>
+
+        {/* 2 Buttons */}
+        <div className="grid grid-cols-2 gap-2 pt-1">
+          <Link
+            href={`/projects/${id}`}
+            className="flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-bold rounded-lg border hover:bg-accent/50 transition-colors"
+          >
+            <Eye className="h-3.5 w-3.5" /> Voir details
+          </Link>
+          <button
+            onClick={() => onViewUnits?.(id)}
+            className="flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-bold rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 transition-colors"
+          >
+            <LayoutGrid className="h-3.5 w-3.5" /> Voir unites
+          </button>
+        </div>
+      </CardContent>
+    </Card>
   );
 }
