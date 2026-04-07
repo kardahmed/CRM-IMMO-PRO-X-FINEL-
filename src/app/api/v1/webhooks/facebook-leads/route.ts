@@ -157,7 +157,7 @@ async function findTenantByPageId(
     const fb = settings?.facebook as Record<string, unknown> | undefined;
     if (fb?.pageId === pageId && typeof fb?.accessToken === "string") {
       const rawToken = fb.accessToken;
-      const accessToken = isEncrypted(rawToken) ? decrypt(rawToken) : rawToken;
+      const accessToken = isEncrypted(rawToken) ? await decrypt(rawToken) : rawToken;
       return {
         tenantId: t.id,
         facebookAccessToken: accessToken,

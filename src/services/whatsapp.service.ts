@@ -65,7 +65,7 @@ export async function getWhatsAppConfig(
   if (!wa?.whatsappApiKey || !wa?.whatsappPhoneId) return null;
 
   // Decrypt API key if stored encrypted
-  const apiKey = isEncrypted(wa.whatsappApiKey) ? decrypt(wa.whatsappApiKey) : wa.whatsappApiKey;
+  const apiKey = isEncrypted(wa.whatsappApiKey) ? await decrypt(wa.whatsappApiKey) : wa.whatsappApiKey;
 
   return { ...wa, whatsappApiKey: apiKey };
 }

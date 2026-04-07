@@ -52,7 +52,7 @@ export async function getSmtpConfig(
 
   // Decrypt password if encrypted
   const smtpPass = isEncrypted(smtp.smtpPass)
-    ? decrypt(smtp.smtpPass)
+    ? await decrypt(smtp.smtpPass)
     : smtp.smtpPass;
 
   return {

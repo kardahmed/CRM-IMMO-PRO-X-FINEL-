@@ -9,6 +9,9 @@ import * as Sentry from "@sentry/nextjs";
  * Endpoint CRON — traite les tâches automatisées en attente (PENDING) dont la date est dépassée,
  * et escalade celles restées IN_PROGRESS plus de 24 h.
  *
+ * NOTE: Utilise `prisma` global (sans scope tenant) car le CRON traite TOUS les tenants.
+ * L'isolation tenant est respectée via task.tenantId lors de la création des notifications.
+ *
  * Vercel Cron appelle cette route toutes les 15 minutes.
  * Header requis : Authorization: Bearer <CRON_SECRET>
  */

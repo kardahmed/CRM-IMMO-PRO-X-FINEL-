@@ -1,5 +1,6 @@
 import { apiHandler, getBody, jsonOk, jsonError } from "@/lib/api-handler";
 import { updateTaskSchema, postponeTaskSchema, type UpdateTaskInput } from "@/lib/validations/tasks";
+import { z } from "zod";
 
 /**
  * GET /api/v1/tasks/[id] — Détail d'une tâche
@@ -56,15 +57,20 @@ export const PATCH = apiHandler(
   },
 );
 
+const taskActionSchema = z.object({
+  action: z.enum(["complete", "postpone"]),
+  dueAt: z.string().datetime().optional(),
+});
+
 /**
  * PUT /api/v1/tasks/[id] — Complete or postpone a task
  * Body: { action: "complete" } or { action: "postpone", dueAt: "..." }
  */
 export const PUT = apiHandler(
-  { module: "PLANNING", action: "UPDATE" },
+  { module: "PLANNING", action: "UPDATE", schema: taskActionSchema },
   async (ctx) => {
     const { id } = ctx.params;
-    const body = await ctx.req.json().catch(() => ({})) as Record<string, unknown>;
+    const body = getBody<z.infer<typeof taskActionSchema>>(ctx.req);
 
     const existing = await ctx.db.task.findFirst({ where: { id } });
     if (!existing) return jsonError("Tâche introuvable", 404);
@@ -81,18 +87,14 @@ export const PUT = apiHandler(
       return jsonOk(updated);
     }
 
-    if (body.action === "postpone") {
-      const parsed = postponeTaskSchema.safeParse(body);
-      if (!parsed.success) {
-        return jsonError("dueAt requis pour reporter", 422);
-      }
-      const updated = await ctx.db.task.update({
-        where: { id },
-        data: { dueAt: new Date(parsed.data.dueAt) },
-      });
-      return jsonOk(updated);
+    // action === "postpone"
+    if (!body.dueAt) {
+      return jsonError("dueAt requis pour reporter", 422);
     }
-
-    return jsonError("Action invalide. Utiliser 'complete' ou 'postpone'", 400);
+    const updated = await ctx.db.task.update({
+      where: { id },
+      data: { dueAt: new Date(body.dueAt) },
+    });
+    return jsonOk(updated);
   },
 );

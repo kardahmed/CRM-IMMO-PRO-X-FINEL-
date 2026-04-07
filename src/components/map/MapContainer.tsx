@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import { GoogleMap, useJsApiLoader, Marker, InfoWindow, MarkerClusterer } from "@react-google-maps/api";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -20,7 +20,6 @@ const center = {
   lng: 3.0588,
 };
 
-// Types & Mocks
 export interface MapProperty {
   id: string;
   name: string;
@@ -43,14 +42,6 @@ const PIN_COLORS = {
   RENTED: "#3b82f6",    // blue-500
 };
 
-const MOCK_PROPERTIES: MapProperty[] = [
-  { id: "1", name: "Appartement F3 Riviera", type: "APPARTEMENT", lat: 36.75, lng: 3.05, status: "AVAILABLE", price: 12500000, area: 85, rooms: 3, project: "residence-riviera", block: "A", imageUrl: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=500&q=80" },
-  { id: "2", name: "Villa Horizon", type: "VILLA", lat: 36.76, lng: 3.04, status: "RESERVED", price: 35000000, area: 220, rooms: 6, project: "horizon-bay", block: "VILLAS", imageUrl: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=500&q=80" },
-  { id: "3", name: "Studio Les Palmiers", type: "STUDIO", lat: 36.74, lng: 3.06, status: "SOLD", price: 6500000, area: 35, rooms: 1, project: "les-palmiers", block: "C", imageUrl: "https://images.unsplash.com/photo-1502672260266-1c1e525091ff?w=500&q=80" },
-  { id: "4", name: "F4 Riviera vue mer", type: "APPARTEMENT", lat: 36.755, lng: 3.055, status: "AVAILABLE", price: 18000000, area: 110, rooms: 4, project: "residence-riviera", block: "B", imageUrl: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=500&q=80" },
-  { id: "5", name: "Local Commercial", type: "LOCAL", lat: 36.752, lng: 3.052, status: "RENTED", price: 25000000, area: 90, rooms: 0, project: "horizon-bay", block: "RDC", imageUrl: "https://images.unsplash.com/photo-1588196749597-9ff0c29b71e1?w=500&q=80" },
-];
-
 interface MapContainerProps {
   filters: MapFiltersState;
   clientCriteria: Partial<MapFiltersState>;
@@ -65,6 +56,40 @@ export function MapContainer({ filters, clientCriteria, onMatchCountUpdate }: Ma
 
   const [, setMap] = useState<google.maps.Map | null>(null);
   const [selectedProp, setSelectedProp] = useState<MapProperty | null>(null);
+  const [properties, setProperties] = useState<MapProperty[]>([]);
+
+  useEffect(() => {
+    async function fetchProperties() {
+      try {
+        const res = await fetch("/api/v1/properties?limit=200");
+        if (!res.ok) return;
+        const json = await res.json();
+        if (!json.success) return;
+        const items = (json.data ?? json.properties ?? []) as Array<Record<string, unknown>>;
+        setProperties(
+          items
+            .filter((p) => p.latitude != null && p.longitude != null)
+            .map((p) => ({
+              id: p.id as string,
+              name: (p.name as string) || "Bien",
+              type: (p.type as string) || "APARTMENT",
+              lat: p.latitude as number,
+              lng: p.longitude as number,
+              status: (p.status as MapProperty["status"]) || "AVAILABLE",
+              price: Number(p.price) || 0,
+              area: (p.surface as number) || 0,
+              rooms: (p.rooms as number) || 0,
+              project: (p.projectId as string) || "",
+              block: "",
+              imageUrl: ((p.images as string[]) ?? [])[0] || "",
+            })),
+        );
+      } catch {
+        // Silently fail — map will be empty
+      }
+    }
+    fetchProperties();
+  }, []);
 
   const onLoad = useCallback(function callback(map: google.maps.Map) {
     setMap(map);
@@ -78,7 +103,7 @@ export function MapContainer({ filters, clientCriteria, onMatchCountUpdate }: Ma
   const propertiesWithMatch = useMemo(() => {
     let matchedItems = 0;
 
-    const result = MOCK_PROPERTIES.map((prop) => {
+    const result = properties.map((prop) => {
       let isVisible = true;
       let isDimmed = false;
 
@@ -125,7 +150,7 @@ export function MapContainer({ filters, clientCriteria, onMatchCountUpdate }: Ma
 
     onMatchCountUpdate(matchedItems);
     return result;
-  }, [filters, clientCriteria, onMatchCountUpdate]);
+  }, [properties, filters, clientCriteria, onMatchCountUpdate]);
 
   if (!isLoaded) {
     return (
