@@ -13,7 +13,7 @@ const DEMO_TENANT = {
   name: "Agence Immobiliere Demo",
   type: "AGENCY" as const,
   plan: "PRO" as const,
-  status: "DEMO" as const,
+  status: "ACTIVE" as const,
   settings: {
     whatsapp: { enabled: false },
     facebook: { enabled: false },
