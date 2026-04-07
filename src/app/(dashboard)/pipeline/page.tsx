@@ -280,30 +280,35 @@ export default function PipelinePage() {
 
   return (
     <div className="flex flex-col h-full gap-6">
-      {/* Page Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <div className="p-2.5 rounded-xl bg-primary/10 text-primary">
-            <Kanban className="h-6 w-6" />
+      {/* Premium Header */}
+      <div className="flex flex-col xl:flex-row xl:items-end justify-between gap-6 pb-4 border-b border-border/50">
+        <div className="space-y-3">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-[10px] font-black uppercase tracking-[0.3em]">
+            <Kanban className="h-3.5 w-3.5" /> Pipeline de Vente
           </div>
-          <div>
-            <h1 className="text-2xl font-black tracking-tight uppercase flex items-center gap-2">
-              Pipeline
-              <Badge variant="outline" className="ml-2 font-black border-primary/20 text-primary bg-primary/5">UNIFIÉ</Badge>
-            </h1>
-            <p className="text-sm text-muted-foreground font-medium">
-              {filteredClients.length} prospects filtrés · {PIPELINE_STAGES.length} étapes
-            </p>
-          </div>
+          <h1 className="text-4xl font-black tracking-tighter text-foreground flex items-center gap-3">
+            Pipeline 360°
+            <Badge variant="outline" className="font-black border-primary/20 text-primary bg-primary/5 text-xs">
+              {filteredClients.length} prospects
+            </Badge>
+          </h1>
+          <p className="text-sm text-muted-foreground font-medium">
+            Suivez vos prospects a travers les {PIPELINE_STAGES.length} etapes du tunnel de conversion
+          </p>
         </div>
 
-        <div className="flex items-center gap-2">
-          <Button 
-             variant="outline" 
-             size="icon" 
-             onClick={fetchClients} 
+        <div className="flex items-center gap-3">
+          {activeFiltersCount > 0 && (
+            <Button variant="ghost" onClick={resetFilters} className="text-xs font-bold text-muted-foreground rounded-xl">
+              Reinitialiser ({activeFiltersCount})
+            </Button>
+          )}
+          <Button
+             variant="outline"
+             size="icon"
+             onClick={fetchClients}
              disabled={loading}
-             className="rounded-xl border-2 hover:bg-neutral-50 dark:hover:bg-neutral-900"
+             className="h-12 w-12 rounded-2xl border-border bg-card shadow-stripe hover:shadow-stripe-lg active:scale-95 transition-all"
           >
             <RefreshCcw className={cn("h-4 w-4", loading && "animate-spin")} />
           </Button>
@@ -333,23 +338,29 @@ export default function PipelinePage() {
 
       {/* Loading */}
       {loading && (
-        <div className="flex items-center justify-center py-20">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <span className="ml-3 text-muted-foreground font-medium">Chargement du pipeline...</span>
+        <div className="space-y-4">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            {[...Array(4)].map((_, i) => <div key={i} className="h-28 rounded-[24px] bg-card border border-border animate-pulse" />)}
+          </div>
+          <div className="flex gap-4">
+            {[...Array(4)].map((_, i) => <div key={i} className="h-96 w-80 rounded-2xl bg-card border border-border animate-pulse shrink-0" />)}
+          </div>
         </div>
       )}
 
       {/* Error */}
       {error && !loading && (
-        <div className="flex flex-col items-center justify-center py-20 gap-3">
-          <AlertCircle className="h-10 w-10 text-red-500" />
-          <p className="text-red-600 font-medium">{error}</p>
+        <div className="flex flex-col items-center justify-center py-20 gap-6">
+          <div className="p-8 rounded-[32px] bg-rose-50 dark:bg-rose-500/5 border border-rose-100 dark:border-rose-500/10 shadow-stripe text-center">
+            <AlertCircle className="h-12 w-12 text-rose-500 mx-auto mb-4" />
+            <p className="text-lg font-black text-foreground tracking-tight">{error}</p>
+          </div>
           <Button
             variant="outline"
             onClick={() => window.location.reload()}
-            className="mt-2"
+            className="h-12 px-8 rounded-full font-bold"
           >
-            Réessayer
+            Reessayer
           </Button>
         </div>
       )}

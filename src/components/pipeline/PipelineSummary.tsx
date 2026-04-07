@@ -77,41 +77,35 @@ export function PipelineSummary({ clients, className }: PipelineSummaryProps) {
   return (
     <div className={cn("grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4", className)}>
       {stats.map((stat, idx) => (
-        <Card 
-          key={idx} 
-          className="relative overflow-hidden border-none shadow-sm bg-white dark:bg-neutral-900 group"
+        <Card
+          key={idx}
+          className="relative overflow-hidden bg-card border-border shadow-stripe hover:shadow-stripe-lg hover:-translate-y-1 transition-all duration-500 rounded-[24px] group"
         >
           <div className="p-5">
             <div className="flex items-center justify-between mb-4">
-              <div className={cn("p-2.5 rounded-xl transition-transform group-hover:scale-110", stat.bg, stat.color)}>
+              <div className={cn("p-3 rounded-2xl border transition-all duration-500 group-hover:scale-110 group-hover:rotate-3 shadow-sm", stat.bg, stat.color)}>
                 <stat.icon className="h-5 w-5" />
               </div>
               <div className="flex items-center gap-1 text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
                 Direct <ArrowUpRight className="h-3 w-3" />
               </div>
             </div>
-            
+
             <div className="space-y-1">
-              <h3 className="text-2xl font-black tracking-tight text-foreground tabular-nums">
+              <h3 className="text-2xl font-black tracking-tighter text-foreground tabular-nums">
                 {stat.value}
               </h3>
-              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-tight">
+              <p className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em]">
                 {stat.label}
               </p>
             </div>
 
-            <div className="mt-4 pt-4 border-t border-neutral-50 dark:border-neutral-800">
-              <p className="text-[10px] text-muted-foreground/80 font-medium italic">
+            <div className="mt-4 pt-3 border-t border-border/50">
+              <p className="text-[10px] text-muted-foreground/60 font-medium">
                 {stat.description}
               </p>
             </div>
           </div>
-          
-          {/* Decorative element */}
-          <div className={cn(
-            "absolute -right-4 -bottom-4 h-24 w-24 rounded-full opacity-[0.03] group-hover:opacity-[0.06] transition-opacity",
-            stat.bg
-          )} />
         </Card>
       ))}
     </div>
