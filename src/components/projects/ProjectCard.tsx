@@ -1,8 +1,7 @@
-"use client";
-
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { Button } from "@/components/ui/button";
 import { MapPin, Building, Home, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
@@ -17,80 +16,101 @@ interface ProjectCardProps {
   progress: number;
   status: string;
   imageUrl: string;
+  code?: string;
+  avgPrice?: string;
+  deliveryDate?: string;
 }
 
 const STATUS_CONFIG: Record<string, { label: string; color: string }> = {
-  PLANNING: { label: "Planification", color: "bg-blue-100 text-blue-700 bg-opacity-90" },
-  IN_PROGRESS: { label: "En cours", color: "bg-amber-100 text-amber-700 bg-opacity-90" },
-  DELIVERED: { label: "Livré", color: "bg-green-100 text-green-700 bg-opacity-90" },
-  CANCELLED: { label: "Annulé", color: "bg-red-100 text-red-700 bg-opacity-90" },
+  PLANNING: { label: "Planification", color: "bg-blue-500 text-white" },
+  IN_PROGRESS: { label: "Active", color: "bg-emerald-500 text-white" },
+  DELIVERED: { label: "Livré", color: "bg-neutral-500 text-white" },
+  CANCELLED: { label: "Annulé", color: "bg-red-500 text-white" },
 };
 
-export function ProjectCard({ id, name, location, availableUnits, totalUnits, progress, status, imageUrl }: ProjectCardProps) {
+export function ProjectCard({ id, name, location, availableUnits, totalUnits, progress, status, imageUrl, code = "prj-001", avgPrice = "~5.7 M DA/unité", deliveryDate = "juin 2026" }: ProjectCardProps) {
   const sc = STATUS_CONFIG[status] || STATUS_CONFIG.IN_PROGRESS;
   const soldUnits = totalUnits - availableUnits;
-  const sellRatio = Math.round((soldUnits / totalUnits) * 100);
+  const sellRatio = totalUnits > 0 ? Math.round((soldUnits / totalUnits) * 100) : 0;
 
   return (
-    <Link href={`/projects/${id}`}>
-      <Card className="overflow-hidden cursor-pointer group hover:shadow-lg transition-all hover:-translate-y-1 border-neutral-100 dark:border-neutral-800">
-        {/* Cover */}
-        <div className="relative h-48 w-full">
-          <Image src={imageUrl} alt={name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" fill sizes="(max-width: 768px) 100vw, 400px" />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-          <div className="absolute top-3 right-3">
-            <Badge className={cn("text-[10px] font-black uppercase text-white shadow-sm border-none backdrop-blur-md", sc.color)}>
-              {sc.label}
-            </Badge>
+    <Card className="overflow-hidden border-neutral-100 dark:border-neutral-800 shadow-sm hover:shadow-md transition-all group rounded-2xl">
+      {/* Cover */}
+      <div className="relative h-40 w-full overflow-hidden">
+        <Image src={imageUrl} alt={name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" fill sizes="(max-width: 768px) 100vw, 400px" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+        
+        <div className="absolute top-3 left-3">
+          <Badge className={cn("text-[10px] font-black uppercase px-2 py-0.5 rounded-md border-none", sc.color)}>
+            {sc.label}
+          </Badge>
+        </div>
+
+        <div className="absolute top-3 right-3">
+           <button className="h-7 w-7 rounded-full bg-black/20 backdrop-blur-md flex items-center justify-center text-white hover:bg-black/40 transition-colors">
+              <span className="text-xs font-bold">i</span>
+           </button>
+        </div>
+
+        <div className="absolute bottom-3 left-3 right-3 text-white">
+          <h3 className="text-sm font-black leading-tight">{name}</h3>
+          <p className="text-[10px] opacity-80 font-bold uppercase tracking-wider">Code: {code}</p>
+        </div>
+      </div>
+
+      <CardContent className="p-4 space-y-4">
+        {/* Meta Info */}
+        <div className="flex items-center justify-between text-[10px] font-bold text-muted-foreground uppercase">
+          <div className="flex items-center gap-1">
+             <MapPin className="h-3 w-3 text-emerald-500" /> {location}
           </div>
-          <div className="absolute bottom-3 left-3 right-3 text-white">
-            <h3 className="text-lg font-black leading-tight shadow-black drop-shadow-md">{name}</h3>
-            <p className="text-white/80 text-xs font-medium flex items-center gap-1 mt-0.5 shadow-black drop-shadow-md">
-              <MapPin className="h-3 w-3" /> {location}
-            </p>
+          <div className="flex items-center gap-1">
+             <span className="text-emerald-500">📈</span> {avgPrice}
+          </div>
+          <div className="flex items-center gap-1">
+             <span className="text-emerald-500">📅</span> {deliveryDate}
           </div>
         </div>
 
-        {/* Info */}
-        <CardContent className="p-4 space-y-4 bg-card">
-          {/* Blocks / Units */}
-          <div className="grid grid-cols-2 gap-2 text-sm">
-            <div className="flex flex-col gap-1 p-2 rounded-lg bg-accent/30 border text-center">
-              <span className="text-xs text-muted-foreground font-bold uppercase"><Home className="h-3 w-3 inline mr-1" />Disponibles</span>
-              <span className="font-black text-primary text-xl">{availableUnits}</span>
-            </div>
-            <div className="flex flex-col gap-1 p-2 rounded-lg bg-accent/30 border text-center">
-              <span className="text-xs text-muted-foreground font-bold uppercase"><Building className="h-3 w-3 inline mr-1" />Total Biens</span>
-              <span className="font-black text-xl">{totalUnits}</span>
-            </div>
-          </div>
-
-          {/* Progress Section */}
-          <div className="space-y-3 pt-2 border-t">
-            {/* Commercialisation */}
-            <div>
-              <div className="flex justify-between text-xs font-bold mb-1.5">
-                <span className="text-muted-foreground uppercase text-[10px]">Commercialisation</span>
-                <span>{sellRatio}% vendu</span>
+        {/* Stats Grid */}
+        <div className="space-y-2">
+           <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Unités</p>
+           <div className="grid grid-cols-3 gap-2">
+              <div className="bg-neutral-50 dark:bg-neutral-800/50 p-2 rounded-xl border border-neutral-100 dark:border-neutral-800 text-center">
+                 <p className="text-emerald-600 font-black text-xs">{soldUnits}</p>
+                 <p className="text-[8px] text-muted-foreground font-black uppercase">Vendues</p>
               </div>
-              <Progress value={sellRatio} className="h-1.5 bg-neutral-200 dark:bg-neutral-800" />
-            </div>
-
-            {/* Chantier */}
-            <div>
-              <div className="flex justify-between text-xs font-bold mb-1.5">
-                <span className="text-muted-foreground uppercase text-[10px]">Chantier</span>
-                <span>{progress}%</span>
+              <div className="bg-neutral-50 dark:bg-neutral-800/50 p-2 rounded-xl border border-neutral-100 dark:border-neutral-800 text-center">
+                 <p className="font-black text-xs">{availableUnits}</p>
+                 <p className="text-[8px] text-muted-foreground font-black uppercase">Dispo</p>
               </div>
-              <Progress value={progress} className="h-1.5 bg-neutral-200 dark:bg-neutral-800 [&_[data-slot=progress-indicator]]:bg-amber-500" />
-            </div>
-          </div>
+              <div className="bg-neutral-50 dark:bg-neutral-800/50 p-2 rounded-xl border border-neutral-100 dark:border-neutral-800 text-center">
+                 <p className="font-black text-xs">{totalUnits}</p>
+                 <p className="text-[8px] text-muted-foreground font-black uppercase">Total</p>
+              </div>
+           </div>
+        </div>
 
-          <div className="pt-2 flex items-center text-xs font-bold text-primary group-hover:underline">
-            Voir les détails du projet <ArrowRight className="h-3 w-3 ml-1 group-hover:translate-x-1 transition-transform" />
-          </div>
-        </CardContent>
-      </Card>
-    </Link>
+        {/* Progress */}
+        <div className="space-y-1">
+           <div className="flex justify-between items-center text-[10px] font-black uppercase">
+              <span className="text-emerald-600">{sellRatio}% vendues</span>
+           </div>
+           <Progress value={sellRatio} className="h-1.5 bg-neutral-100 dark:bg-neutral-800" />
+        </div>
+
+        {/* Actions */}
+        <div className="flex items-center gap-2 pt-2">
+           <Link href={`/projects/${id}`} className="flex-1">
+              <Button variant="outline" className="w-full text-[10px] font-black uppercase h-8 border-neutral-200 dark:border-neutral-800">
+                 👁️ Voir les détails
+              </Button>
+           </Link>
+           <Button className="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white text-[10px] font-black uppercase h-8 shadow-sm">
+              🏢 Voir les unités
+           </Button>
+        </div>
+      </CardContent>
+    </Card>
   );
 }
