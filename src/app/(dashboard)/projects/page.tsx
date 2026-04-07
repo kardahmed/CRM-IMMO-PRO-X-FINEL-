@@ -103,7 +103,7 @@ const ListItemIcon = () => (
 
 export default function ProjectsPage() {
   const [projects, setProjects] = useState<Project[]>([]);
-  const [properties, setProperties] = useState<any[]>([]);
+  const [properties, setProperties] = useState<Array<{ id: string; status: string; type: string; name: string; price: number | null; surface: number | null; rooms: number | null; floor: number | null; projectId: string | null }>>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedProjectId, setSelectedProjectId] = useState<string>("all");

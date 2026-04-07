@@ -50,7 +50,8 @@ export const POST = apiHandler(
   async (ctx) => {
     const body = getBody<CreatePaymentInput>(ctx.req);
 
-    const payment = await (ctx.db.payment.create as unknown as (...a: unknown[]) => Promise<unknown>)({
+    // @ts-expect-error — Prisma $extends typing limitation on create()
+    const payment = await ctx.db.payment.create({
       data: body,
     });
 

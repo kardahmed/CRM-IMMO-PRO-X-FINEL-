@@ -80,7 +80,8 @@ export const POST = apiHandler(
       return jsonError("Conflit de planning : l'agent a déjà une visite programmée dans ce créneau.", 409);
     }
 
-    const visit = await (ctx.db.visit.create as unknown as (...a: unknown[]) => Promise<unknown>)({
+    // @ts-expect-error — Prisma $extends typing limitation on create()
+    const visit = await ctx.db.visit.create({
       data: {
         ...body,
         scheduledAt: scheduledTime,

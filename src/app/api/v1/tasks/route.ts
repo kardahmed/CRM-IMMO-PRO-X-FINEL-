@@ -71,7 +71,8 @@ export const POST = apiHandler(
   async (ctx) => {
     const body = getBody<CreateTaskInput>(ctx.req);
 
-    const task = await (ctx.db.task.create as unknown as (...a: unknown[]) => Promise<unknown>)({
+    // @ts-expect-error — Prisma $extends typing limitation on create()
+    const task = await ctx.db.task.create({
       data: {
         ...body,
         assignedToId: body.assignedToId ?? ctx.user.userId,

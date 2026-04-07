@@ -83,7 +83,8 @@ export async function createClient(
   // 3. Créer le client
   const db = createTenantPrisma(user.tenantId);
   // tenantId est auto-injecté par createTenantPrisma via $extends
-  const client = await (db.client.create as unknown as (...args: unknown[]) => Promise<unknown>)({
+  // @ts-expect-error — Prisma $extends typing limitation on create()
+  const client: Client = await db.client.create({
     data: {
       firstName: input.firstName,
       lastName: input.lastName,
@@ -99,7 +100,7 @@ export async function createClient(
       assignedAgentId,
       pipelineStage: "NEW",
     },
-  }) as Client;
+  });
 
   // 4. Log
   await db.activityLog.create({

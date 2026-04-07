@@ -74,7 +74,8 @@ export const POST = apiHandler(
   async (ctx) => {
     const body = getBody<CreatePropertyInput>(ctx.req);
 
-    const property = await (ctx.db.property.create as unknown as (...a: unknown[]) => Promise<unknown>)({
+    // @ts-expect-error — Prisma $extends typing limitation on create()
+    const property = await ctx.db.property.create({
       data: body,
     });
 

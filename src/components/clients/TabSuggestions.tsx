@@ -46,7 +46,7 @@ interface TabSuggestionsProps {
   };
 }
 
-export function TabSuggestions({ criteria }: TabSuggestionsProps) {
+export function TabSuggestions({ clientId, criteria }: TabSuggestionsProps) {
   const [properties, setProperties] = useState<SuggestedProperty[]>([]);
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState<Set<string>>(new Set());
@@ -147,10 +147,29 @@ export function TabSuggestions({ criteria }: TabSuggestionsProps) {
 
   const handleSend = async () => {
     setSending(true);
-    // TODO: API call to send selected properties to client
-    await new Promise((r) => setTimeout(r, 1000));
-    setSending(false);
-    setSelected(new Set());
+    try {
+      const selectedNames = properties
+        .filter((p) => selected.has(p.id))
+        .map((p) => p.name)
+        .join(", ");
+
+      await fetch("/api/v1/interactions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          clientId,
+          type: "NOTE",
+          direction: "OUT",
+          content: `Biens suggérés envoyés : ${selectedNames}`,
+        }),
+      });
+
+      setSelected(new Set());
+    } catch {
+      // Silently fail — interaction logging is non-critical
+    } finally {
+      setSending(false);
+    }
   };
 
   return (

@@ -83,7 +83,8 @@ export async function processFacebookLead(
 
   // 2. Créer le client — source FACEBOOK, non assigné
   const db = createTenantPrisma(tenantId);
-  const client = await (db.client.create as unknown as (...args: unknown[]) => Promise<unknown>)({
+  // @ts-expect-error — Prisma $extends typing limitation on create()
+  const client: Client = await db.client.create({
     data: {
       firstName: payload.firstName,
       lastName: payload.lastName,
@@ -93,7 +94,7 @@ export async function processFacebookLead(
       pipelineStage: "NEW",
       assignedAgentId: null, // Sera assigné par le Superviseur
     },
-  }) as Client;
+  });
 
   // 3. Notifier tous les Superviseurs + CEO
   const managers = await db.user.findMany({

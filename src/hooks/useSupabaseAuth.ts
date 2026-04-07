@@ -36,7 +36,7 @@ export function useSupabaseAuth() {
 
   useEffect(() => {
     // Get initial session
-    supabase.auth.getSession().then(({ data }: { data: { session: Session | null } | any }) => {
+    supabase.auth.getSession().then(({ data }) => {
       const session = data?.session ?? null;
       setState({
         user: session?.user ?? null,
@@ -65,7 +65,7 @@ export function useSupabaseAuth() {
 
 
   const metadata = (state.user?.user_metadata ?? {}) as IUserMetadata;
-  const isSuperAdmin = state.user?.email === "contact@sensium-x.com";
+  const isSuperAdmin = metadata.role === "SUPER_ADMIN";
 
   return {
     user: state.user,

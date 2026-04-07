@@ -66,7 +66,8 @@ export async function upsertAutomationConfig(
       },
     });
   } else {
-    config = await (db.automationConfig.create as unknown as (...a: unknown[]) => Promise<AutomationConfig>)({
+    // @ts-expect-error — Prisma $extends typing limitation on create()
+    config = await db.automationConfig.create({
       data: {
         pipelineStage: input.pipelineStage,
         isActive: input.isActive ?? true,

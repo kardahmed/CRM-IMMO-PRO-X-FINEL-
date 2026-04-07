@@ -464,7 +464,8 @@ export async function importClients(
         continue;
       }
 
-      await (db.client.create as unknown as (args: { data: Record<string, unknown> }) => Promise<unknown>)({
+      // @ts-expect-error — Prisma $extends typing limitation on create()
+      await db.client.create({
         data: {
           firstName: client.firstName,
           lastName: client.lastName,
@@ -527,7 +528,8 @@ export async function importProperties(
         }
       }
 
-      await (db.property.create as unknown as (args: { data: Record<string, unknown> }) => Promise<unknown>)({
+      // @ts-expect-error — Prisma $extends typing limitation on create()
+      await db.property.create({
         data: {
           name: prop.name,
           type: prop.type,

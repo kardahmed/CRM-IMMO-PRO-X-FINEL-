@@ -454,6 +454,7 @@ model Task {
   @@index([tenantId])
   @@index([tenantId, status])
   @@index([tenantId, assignedToId])
+  @@index([tenantId, clientId])
   @@index([tenantId, dueAt])
   @@index([tenantId, createdAt])
   @@map("tasks")
@@ -480,6 +481,7 @@ model Visit {
 
   @@index([tenantId])
   @@index([tenantId, agentId])
+  @@index([tenantId, clientId])
   @@index([tenantId, scheduledAt])
   @@index([tenantId, createdAt])
   @@map("visits")
@@ -503,6 +505,7 @@ model Interaction {
 
   @@index([tenantId])
   @@index([tenantId, clientId])
+  @@index([tenantId, userId])
   @@index([tenantId, createdAt])
   @@map("interactions")
 }
@@ -574,6 +577,7 @@ model ActivityLog {
   @@index([tenantId])
   @@index([tenantId, entity, entityId])
   @@index([tenantId, userId])
+  @@index([tenantId, createdAt])
   @@index([createdAt])
   @@map("activity_logs")
 }
@@ -627,7 +631,7 @@ model Mandate {
   ownerId    String        @map("owner_id")
   propertyId String        @map("property_id")
   type       MandateType   @map("type")
-  commission Decimal?      @map("commission") @db.Decimal(5, 2)
+  commission Decimal?      @map("commission") @db.Decimal(15, 2)
   startDate  DateTime      @map("start_date")
   endDate    DateTime      @map("end_date")
   status     MandateStatus @default(ACTIVE) @map("status")
@@ -641,6 +645,8 @@ model Mandate {
 
   @@index([tenantId])
   @@index([tenantId, status])
+  @@index([tenantId, ownerId])
+  @@index([tenantId, propertyId])
   @@map("mandates")
 }
 
@@ -664,8 +670,8 @@ model CadastralData {
   property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
   verifiedBy User?    @relation("CadastralVerifier", fields: [verifiedById], references: [id], onDelete: SetNull)
 
+  @@unique([tenantId, propertyId])
   @@index([tenantId])
-  @@index([tenantId, propertyId])
   @@map("cadastral_data")
 }
 

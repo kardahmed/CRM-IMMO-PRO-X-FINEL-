@@ -56,12 +56,12 @@ export async function middleware(req: NextRequest) {
         getAll() {
           return req.cookies.getAll();
         },
-        setAll(cookiesToSet: any[]) {
-          cookiesToSet.forEach(({ name, value }: { name: string; value: string }) =>
+        setAll(cookiesToSet: Array<{ name: string; value: string; options?: Record<string, unknown> }>) {
+          cookiesToSet.forEach(({ name, value }) =>
             req.cookies.set(name, value),
           );
           supabaseResponse = NextResponse.next({ request: req });
-          cookiesToSet.forEach(({ name, value, options }: { name: string; value: string; options: any }) =>
+          cookiesToSet.forEach(({ name, value, options }) =>
             supabaseResponse.cookies.set(name, value, options),
           );
         },
@@ -108,7 +108,7 @@ export async function middleware(req: NextRequest) {
 
   // Dashboard & Super Admin — require tenant (except super admin)
   if (isDashboardRoute(pathname) || isSuperAdminRoute(pathname)) {
-    const isSuperAdmin = user.user_metadata?.role === "SUPER_ADMIN" || user.email === "contact@sensium-x.com";
+    const isSuperAdmin = user.user_metadata?.role === "SUPER_ADMIN";
     const tenantId = user.user_metadata?.tenantId as string | undefined;
 
     // Force Super Admin to HQ if they try to access a dashboard route OR onboarding

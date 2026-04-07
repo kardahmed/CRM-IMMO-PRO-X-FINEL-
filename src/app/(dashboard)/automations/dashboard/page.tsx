@@ -186,7 +186,7 @@ function fullName(person: { firstName: string; lastName: string } | null): strin
 /*  Sub-components                                                     */
 /* ------------------------------------------------------------------ */
 
-function KpiCard({ label, value, icon: Icon, iconBg }: { label: string; value: number; icon: any; iconBg: string }) {
+function KpiCard({ label, value, icon: Icon, iconBg }: { label: string; value: number; icon: React.ComponentType<{ className?: string }>; iconBg: string }) {
   return (
     <Card className="border-none shadow-stripe hover:shadow-stripe-lg transition-all duration-500 rounded-[28px] bg-white group overflow-hidden">
       <CardContent className="flex items-center gap-5 p-7">
@@ -400,8 +400,8 @@ export default function AutomationsDashboardPage() {
         const json = await res.json();
         if (!json.success) throw new Error(json.error);
         setData(json.data);
-      } catch (e: any) {
-        setError(e.message ?? "Erreur de synchronisation");
+      } catch (e: unknown) {
+        setError(e instanceof Error ? e.message : "Erreur de synchronisation");
       } finally {
         setLoading(false);
       }

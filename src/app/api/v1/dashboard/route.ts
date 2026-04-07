@@ -70,7 +70,7 @@ export const GET = apiHandler(
     ]);
 
     // Helper to group by date string YYYY-MM-DD
-    const groupDaily = (items: any[], dateKey: string) => {
+    const groupDaily = (items: Array<Record<string, unknown>>, dateKey: string) => {
       const groups: Record<string, number> = {};
       items.forEach(item => {
         const d = new Date(item[dateKey]).toISOString().split("T")[0];

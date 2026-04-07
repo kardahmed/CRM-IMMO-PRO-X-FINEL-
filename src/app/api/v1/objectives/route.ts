@@ -42,7 +42,8 @@ export const POST = apiHandler(
   async (ctx) => {
     const body = getBody<CreateObjectiveInput>(ctx.req);
 
-    const objective = await (ctx.db.objective.create as unknown as (...a: unknown[]) => Promise<unknown>)({
+    // @ts-expect-error — Prisma $extends typing limitation on create()
+    const objective = await ctx.db.objective.create({
       data: {
         type: body.type,
         targetValue: body.targetValue,

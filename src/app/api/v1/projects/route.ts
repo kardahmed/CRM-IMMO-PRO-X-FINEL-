@@ -57,7 +57,8 @@ export const POST = apiHandler(
 
     const body = getBody<CreateProjectInput>(ctx.req);
 
-    const project = await (ctx.db.project.create as unknown as (...a: unknown[]) => Promise<unknown>)({
+    // @ts-expect-error — Prisma $extends typing limitation on create()
+    const project = await ctx.db.project.create({
       data: {
         ...body,
         deliveryDate: body.deliveryDate ? new Date(body.deliveryDate) : null,

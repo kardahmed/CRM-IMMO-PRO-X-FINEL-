@@ -9,7 +9,8 @@ export const POST = apiHandler(
   async (ctx) => {
     const body = getBody<CreateInteractionInput>(ctx.req);
 
-    const interaction = await (ctx.db.interaction.create as unknown as (...a: unknown[]) => Promise<unknown>)({
+    // @ts-expect-error — Prisma $extends typing limitation on create()
+    const interaction = await ctx.db.interaction.create({
       data: {
         ...body,
         userId: ctx.user.userId,
