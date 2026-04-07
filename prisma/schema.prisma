@@ -275,10 +275,10 @@ model Tenant {
   @@map("tenants")
 }
 
-/// Utilisateur lié à Clerk et à un tenant
+/// Utilisateur lié à Supabase Auth et à un tenant
 model User {
-  id        String   @id @default(uuid())
-  clerkId   String   @unique @map("clerk_id")
+  id          String   @id @default(uuid())
+  supabaseId  String   @unique @map("supabase_id")
   tenantId  String   @map("tenant_id")
   firstName String   @map("first_name")
   lastName  String   @map("last_name")
@@ -303,7 +303,7 @@ model User {
   verifiedCadastral  CadastralData[] @relation("CadastralVerifier")
 
   @@index([tenantId])
-  @@index([clerkId])
+  @@index([supabaseId])
   @@index([tenantId, role])
   @@map("users")
 }

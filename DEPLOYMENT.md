@@ -34,9 +34,8 @@ Aller dans **Settings > Environment Variables** et ajouter :
 | `DATABASE_URL` | Production, Preview | URL PostgreSQL Supabase |
 | `NEXT_PUBLIC_SUPABASE_URL` | All | URL Supabase |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | All | Cle publique Supabase |
-| `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` | All | Cle publique Clerk |
-| `CLERK_SECRET_KEY` | Production, Preview | Secret Clerk |
-| `CLERK_WEBHOOK_SECRET` | Production, Preview | Secret webhook Clerk (Svix) |
+| `SUPABASE_SERVICE_ROLE_KEY` | Production, Preview | Cle service Supabase |
+| `SUPABASE_WEBHOOK_SECRET` | Production, Preview | Secret webhook Supabase Auth |
 | `FACEBOOK_APP_SECRET` | Production | Secret Meta pour HMAC webhooks |
 | `FACEBOOK_WEBHOOK_VERIFY_TOKEN` | Production | Token challenge Facebook |
 | `WHATSAPP_WEBHOOK_VERIFY_TOKEN` | Production | Token challenge WhatsApp |
@@ -76,7 +75,7 @@ Aller dans **Settings > Environment Variables** et ajouter :
 Verifier dans le dashboard Supabase :
 
 1. **Project Settings > General** : le projet NE doit PAS etre en mode "Paused"
-2. **Authentication > Settings** : desactiver "Enable email confirmations" si gere par Clerk
+2. **Authentication > Settings** : configurer les parametres d'email selon vos besoins
 3. **Database > Extensions** : activer `uuid-ossp` (pour les UUID)
 4. **Database > Roles** : verifier que le role `postgres` a bien les permissions
 5. **API Settings** : noter que les cles anon/service ne sont utilisees que pour Realtime, pas pour les queries (on passe par Prisma + connection string directe)
@@ -112,11 +111,11 @@ Ajouter ces records :
 
 Le SSL est **automatique** via Vercel. Un certificat Let's Encrypt est provisionne des que le domaine est verifie. Aucune action necessaire.
 
-### Clerk
+### Supabase Auth
 
-Mettre a jour les URLs dans le dashboard Clerk :
-- **Application > Paths** : changer les URLs de callback vers `https://immoprox.io/...`
-- **Application > Domains** : ajouter `immoprox.io` comme domaine autorise
+Mettre a jour les URLs dans le dashboard Supabase :
+- **Authentication > URL Configuration** : changer le Site URL vers `https://immoprox.io`
+- **Authentication > URL Configuration** : ajouter `https://immoprox.io/**` dans les Redirect URLs
 
 ### Meta (Facebook / WhatsApp)
 
@@ -129,15 +128,15 @@ Mettre a jour l'URL du webhook dans le dashboard Meta Developers :
 Apres le premier deploiement, executer le seed :
 
 ```bash
-# Definir le clerk ID du super admin
-export SUPER_ADMIN_CLERK_ID="user_..."
+# Definir l'ID Supabase Auth du super admin
+export SUPER_ADMIN_SUPABASE_ID="uuid-from-supabase-auth"
 
 # Executer le seed
 npm run db:seed
 ```
 
 Cela cree :
-- 1 Super Admin (lie au compte Clerk specifie)
+- 1 Super Admin (lie au compte Supabase Auth specifie)
 - 1 Tenant demo "Agence Immobiliere Demo" avec :
   - 4 utilisateurs (CEO, Superviseur, 2 Agents)
   - 5 biens immobiliers (Alger)
@@ -152,7 +151,7 @@ Cela cree :
 - [ ] Connection pooling active (PgBouncer)
 - [ ] Domaine DNS configure et verifie
 - [ ] SSL actif (automatique Vercel)
-- [ ] Clerk URLs mises a jour pour le domaine custom
+- [ ] Supabase Auth URLs mises a jour pour le domaine custom
 - [ ] Meta webhook URLs mises a jour
 - [ ] Sentry DSN configure
 - [ ] CRON_SECRET et ENCRYPTION_SECRET generes (min 32 chars aleatoires)

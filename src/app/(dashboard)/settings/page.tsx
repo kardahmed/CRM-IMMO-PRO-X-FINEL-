@@ -200,7 +200,7 @@ export default function SettingsPage() {
     setSaving(true);
     try {
       // For now, show a toast that the invite was "sent"
-      // A full invite system would require Clerk invite API integration
+      // A full invite system would require Supabase invite API integration
       toast.success(`Invitation envoyee a ${inviteForm.email}`);
       setIsInviteOpen(false);
       setInviteForm({ email: "", firstName: "", lastName: "", role: "AGENT" });

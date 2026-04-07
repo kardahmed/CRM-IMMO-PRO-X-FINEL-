@@ -117,7 +117,7 @@ export default function WorkspaceDetailPanel() {
       if (!res.ok) throw new Error("Erreur");
       const json = await res.json();
       if (json.success) {
-        toast.success(`Workspace supprime (${json.data.usersCleared} utilisateurs nettoyes dans Clerk)`);
+        toast.success(`Workspace supprime (${json.data.usersCleared} utilisateurs nettoyes)`);
         // Redirect back to list
         window.location.href = "/super-admin/entreprises";
       } else {
@@ -142,7 +142,7 @@ export default function WorkspaceDetailPanel() {
       if (!res.ok) throw new Error("Erreur");
       const json = await res.json();
       if (json.success) {
-        toast.success(`Utilisateur ${isActive ? "reactive" : "desactive"} (Clerk synchronise)`);
+        toast.success(`Utilisateur ${isActive ? "reactive" : "desactive"}`);
         fetchTenant();
       } else {
         toast.error(json.error || "Erreur");
@@ -365,7 +365,7 @@ export default function WorkspaceDetailPanel() {
               <Trash2 className="h-5 w-5 text-rose-500" /> Supprimer le workspace
             </DialogTitle>
             <DialogDescription className="text-neutral-400">
-              Cette action est irreversible. Le workspace <strong className="text-white">{tenant.name}</strong> sera supprime avec toutes ses donnees (clients, biens, projets). Les comptes Clerk des {tenant.users.length} utilisateur(s) seront nettoyes.
+              Cette action est irreversible. Le workspace <strong className="text-white">{tenant.name}</strong> sera supprime avec toutes ses donnees (clients, biens, projets). Les comptes des {tenant.users.length} utilisateur(s) seront nettoyes.
             </DialogDescription>
           </DialogHeader>
           <div className="flex gap-3 mt-4">

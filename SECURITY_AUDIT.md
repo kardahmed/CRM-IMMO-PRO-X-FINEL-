@@ -28,7 +28,7 @@
 
 ### 1. Authentification sur toutes les routes API
 
-**Constat** : 30/32 routes API utilisent `apiHandler` qui impose auth Clerk + tenant check. Deux routes faisaient exception :
+**Constat** : 30/32 routes API utilisent `apiHandler` qui impose auth Supabase + tenant check. Deux routes faisaient exception :
 - `GET /api/v1/dashboard` — utilisait `currentUser()` directement, retournait des donnees mock sans isolation tenant.
 - `GET /api/v1` — route health-check publique (acceptable).
 
@@ -82,7 +82,7 @@ RATE_LIMITS = {
 
 ### 5. Protection CSRF
 
-**Constat** : Next.js App Router utilise `SameSite=Lax` par defaut sur les cookies de session Clerk. Les mutations API sont protegees par le token Clerk (header `Authorization`). Les webhooks sont proteges par signature HMAC.
+**Constat** : Next.js App Router utilise `SameSite=Lax` par defaut sur les cookies de session Supabase. Les mutations API sont protegees par le cookie de session Supabase Auth. Les webhooks sont proteges par signature HMAC.
 
 **Statut** : OK — protection CSRF inherente au stack.
 
@@ -178,7 +178,7 @@ RATE_LIMITS = {
 | `WHATSAPP_WEBHOOK_VERIFY_TOKEN` | Token de verification challenge WhatsApp | Oui |
 | `CRON_SECRET` | Secret pour l'endpoint CRON check-overdue | Oui |
 | `ENCRYPTION_SECRET` | Cle maitre pour chiffrement AES-256-GCM (min 32 chars) | Oui (prod) |
-| `CLERK_WEBHOOK_SECRET` | Secret Svix pour webhooks Clerk | Oui |
+| `SUPABASE_WEBHOOK_SECRET` | Secret pour webhooks Supabase Auth | Oui |
 
 ---
 
@@ -198,7 +198,7 @@ RATE_LIMITS = {
 | Domaine | Score | Commentaire |
 |---------|-------|-------------|
 | Isolation multi-tenant | 9/10 | Prisma $extends + RLS + tests |
-| Authentification | 9/10 | Clerk + apiHandler pattern |
+| Authentification | 9/10 | Supabase Auth + apiHandler pattern |
 | Autorisation | 9/10 | Matrice 6 roles x 15 modules x 7 actions |
 | Validation entrees | 9/10 | 15 schemas Zod couvrent tous les modules |
 | Encryption | 8/10 | AES-256-GCM pret, integration tokens a completer |

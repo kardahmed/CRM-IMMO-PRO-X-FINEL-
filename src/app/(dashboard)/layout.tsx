@@ -18,7 +18,7 @@ async function getTenantInfo(): Promise<ITenantInfo | null> {
     if (!userId) return null;
 
     const dbUser = await prisma.user.findFirst({
-      where: { clerkId: userId, isActive: true },
+      where: { supabaseId: userId, isActive: true },
       select: { tenantId: true },
     });
     const tenantIdToFetch = dbUser?.tenantId ?? null;

@@ -23,7 +23,7 @@ interface IUserMetadata {
 
 /**
  * Hook pour accéder à l'utilisateur Supabase côté client.
- * Remplace useUser() de Clerk.
+ * Fournit l'état d'authentification Supabase côté client.
  */
 export function useSupabaseAuth() {
   const [state, setState] = useState<IAuthState>({
@@ -72,7 +72,7 @@ export function useSupabaseAuth() {
     session: state.session,
     isLoaded: state.isLoaded,
     signOut,
-    // Convenience accessors matching what Clerk publicMetadata provided
+    // Convenience accessors from Supabase user_metadata
     tenantId: isSuperAdmin ? null : (metadata.tenantId ?? null),
     role: metadata.role ?? null,
     workspaceType: metadata.workspaceType ?? null,

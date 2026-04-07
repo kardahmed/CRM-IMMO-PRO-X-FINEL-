@@ -6,7 +6,7 @@ import * as Sentry from "@sentry/nextjs";
 /**
  * GET /api/v1/portal/[token]
  *
- * Route PUBLIQUE — pas de Clerk, pas de tenant check.
+ * Route PUBLIQUE — pas d'auth, pas de tenant check.
  * Le token portail est unique et sécurise l'accès.
  *
  * Retourne : bien réservé, avancement chantier, paiements, documents, contact agent.

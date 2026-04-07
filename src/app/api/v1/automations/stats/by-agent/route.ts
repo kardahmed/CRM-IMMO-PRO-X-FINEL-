@@ -23,7 +23,7 @@ export const GET = apiHandler(
 
     // If the current user is an AGENT, only return their own stats
     if (ctx.user.role === "AGENT") {
-      usersWhere.clerkId = ctx.user.userId;
+      usersWhere.id = ctx.user.userId;
     }
 
     const users = await ctx.db.user.findMany({

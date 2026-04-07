@@ -11,7 +11,7 @@ import * as Sentry from "@sentry/nextjs";
  * POST /api/v1/automations/check-overdue
  *
  * Endpoint CRON — vérifie les tâches en retard, rappels de visites, paiements en retard.
- * Protégé par un secret en header (pas par Clerk — appelé par un cron externe).
+ * Protégé par un secret en header (appelé par un cron externe).
  *
  * Vercel Cron / Supabase Edge Function appellent cette route toutes les heures.
  * Header requis : Authorization: Bearer <CRON_SECRET>

@@ -69,7 +69,7 @@ async function main() {
         lastName: "Admin",
         role: UserRole.SUPER_ADMIN,
         tenantId: masterTenant.id,
-        clerkId: "placeholder-admin-id", // À mettre à jour avec l'ID Supabase réel
+        supabaseId: "placeholder-admin-id", // À mettre à jour avec l'ID Supabase réel
         isActive: true
       }
     });
@@ -80,7 +80,7 @@ async function main() {
     console.log(`Super Admin : ${superAdmin.email}`);
     console.log("-----------------------------------");
     console.log("\n👉 NOTE : Connectez-vous avec cet email sur la plateforme.");
-    console.log("👉 Récupérez votre UUID dans Supabase Auth et mettez à jour le champ 'clerk_id' dans la table 'users'.");
+    console.log("👉 Récupérez votre UUID dans Supabase Auth et mettez à jour le champ 'supabase_id' dans la table 'users'.");
 
   } catch (error) {
     console.error("❌ Erreur lors de la réinitialisation :", error);

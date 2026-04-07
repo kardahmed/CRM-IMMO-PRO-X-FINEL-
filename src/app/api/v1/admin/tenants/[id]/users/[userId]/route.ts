@@ -8,7 +8,7 @@ import * as Sentry from "@sentry/nextjs";
 /**
  * PATCH /api/v1/admin/tenants/[id]/users/[userId]
  *
- * Deactivate or reactivate a user. Syncs with Clerk metadata.
+ * Deactivate or reactivate a user. Syncs with Supabase user_metadata.
  */
 export async function PATCH(
   req: NextRequest,
@@ -43,7 +43,7 @@ export async function PATCH(
 
     const dbUser = await prisma.user.findFirst({
       where: { id: userId, tenantId },
-      select: { id: true, clerkId: true, isActive: true },
+      select: { id: true, supabaseId: true, isActive: true },
     });
 
     if (!dbUser) {
@@ -61,7 +61,7 @@ export async function PATCH(
     const supabaseAdmin = createSupabaseAdminClient();
     if (!body.isActive) {
       // Deactivating — clear tenantId so user gets redirected to onboarding
-      await supabaseAdmin.auth.admin.updateUserById(dbUser.clerkId, {
+      await supabaseAdmin.auth.admin.updateUserById(dbUser.supabaseId, {
         user_metadata: {
           tenantId: null,
           role: null,
@@ -75,7 +75,7 @@ export async function PATCH(
         where: { id: tenantId },
         select: { type: true, plan: true },
       });
-      await supabaseAdmin.auth.admin.updateUserById(dbUser.clerkId, {
+      await supabaseAdmin.auth.admin.updateUserById(dbUser.supabaseId, {
         user_metadata: {
           tenantId,
           role: updated.role,
@@ -95,7 +95,7 @@ export async function PATCH(
 /**
  * DELETE /api/v1/admin/tenants/[id]/users/[userId]
  *
- * Hard-delete a user from DB and clear their Clerk metadata.
+ * Hard-delete a user from DB and clear their Supabase user_metadata.
  */
 export async function DELETE(
   req: NextRequest,
@@ -122,7 +122,7 @@ export async function DELETE(
   try {
     const dbUser = await prisma.user.findFirst({
       where: { id: userId, tenantId },
-      select: { id: true, clerkId: true },
+      select: { id: true, supabaseId: true },
     });
 
     if (!dbUser) {
@@ -131,7 +131,7 @@ export async function DELETE(
 
     // 1. Clear Supabase user_metadata
     const supabaseAdmin = createSupabaseAdminClient();
-    await supabaseAdmin.auth.admin.updateUserById(dbUser.clerkId, {
+    await supabaseAdmin.auth.admin.updateUserById(dbUser.supabaseId, {
       user_metadata: {
         tenantId: null,
         role: null,

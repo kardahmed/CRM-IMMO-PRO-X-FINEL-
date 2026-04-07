@@ -8,7 +8,7 @@ SaaS CRM immobilier multi-tenant pour promoteurs et agences immobilieres.
 - **UI** : React, Tailwind CSS, shadcn/ui
 - **ORM** : Prisma
 - **Base de donnees** : Supabase PostgreSQL
-- **Auth** : Clerk
+- **Auth** : Supabase Auth
 - **Temps reel** : Supabase Realtime
 - **Deploiement** : Vercel
 
